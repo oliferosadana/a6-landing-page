@@ -167,22 +167,25 @@
       const alertBox = document.getElementById('login-alert');
       const alertText = document.getElementById('login-alert-text');
 
+      // Handle redirection messages & clear stale sessions if unauthenticated
       if (reason === 'unauthenticated') {
+        localStorage.removeItem(AUTH_STORAGE_KEY);
         alertText.textContent = 'Silakan masuk terlebih dahulu untuk mengakses halaman tersebut.';
         alertBox.style.display = 'flex';
       } else if (msg === 'logged_out') {
+        localStorage.removeItem(AUTH_STORAGE_KEY);
         alertText.textContent = 'Anda telah berhasil keluar (Logged out).';
         alertBox.className = 'login-alert-box success';
         alertBox.style.display = 'flex';
-      }
-
-      // Check if already logged in -> auto redirect
-      const session = getAuthSession();
-      if (session && session.user) {
-        if (session.user.role === 'superadmin') {
-          window.location.replace('superadmin.html');
-        } else {
-          window.location.replace('admin.html');
+      } else {
+        // Auto redirect only if healthy session exists and no error flag was passed
+        const session = getAuthSession();
+        if (session && session.user && session.user.role) {
+          if (session.user.role === 'superadmin') {
+            window.location.replace('superadmin.html');
+          } else if (session.user.role === 'tenant_admin') {
+            window.location.replace('admin.html');
+          }
         }
       }
     });

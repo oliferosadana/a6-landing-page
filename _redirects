@@ -1,6 +1,0 @@
-# Cloudflare Pages Redirects
-/admin        /admin.html       301
-/superadmin   /superadmin.html  301
-/billing      /billing.html     301
-/invoice      /invoice.html     301
-/login        /login.html       301

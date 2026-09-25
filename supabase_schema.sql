@@ -69,6 +69,20 @@ CREATE TABLE IF NOT EXISTS public.outlets (
     created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
+-- 4B. TABEL KATEGORI / WILAYAH OUTLET (OUTLET_CATEGORIES)
+CREATE TABLE IF NOT EXISTS public.outlet_categories (
+    id TEXT PRIMARY KEY,
+    slug TEXT NOT NULL,
+    name TEXT NOT NULL,
+    region TEXT DEFAULT 'Kota Balikpapan',
+    icon TEXT DEFAULT 'fa-solid fa-location-dot',
+    badge_color TEXT DEFAULT 'olive',
+    description TEXT,
+    status TEXT DEFAULT 'active',
+    sort_order INT DEFAULT 1,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
 -- 5. TABEL RUNNING TICKER PENGUMUMAN (TICKER)
 CREATE TABLE IF NOT EXISTS public.ticker (
     id TEXT PRIMARY KEY,
@@ -114,6 +128,7 @@ ALTER TABLE public.tenants ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.products ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.promos ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.outlets ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.outlet_categories ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.ticker ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.invoices ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.platform_settings ENABLE ROW LEVEL SECURITY;
@@ -123,6 +138,7 @@ CREATE POLICY "Public full access to tenants" ON public.tenants FOR ALL USING (t
 CREATE POLICY "Public full access to products" ON public.products FOR ALL USING (true) WITH CHECK (true);
 CREATE POLICY "Public full access to promos" ON public.promos FOR ALL USING (true) WITH CHECK (true);
 CREATE POLICY "Public full access to outlets" ON public.outlets FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Public full access to outlet_categories" ON public.outlet_categories FOR ALL USING (true) WITH CHECK (true);
 CREATE POLICY "Public full access to ticker" ON public.ticker FOR ALL USING (true) WITH CHECK (true);
 CREATE POLICY "Public full access to invoices" ON public.invoices FOR ALL USING (true) WITH CHECK (true);
 CREATE POLICY "Public full access to settings" ON public.platform_settings FOR ALL USING (true) WITH CHECK (true);
@@ -132,5 +148,6 @@ ALTER PUBLICATION supabase_realtime ADD TABLE public.tenants;
 ALTER PUBLICATION supabase_realtime ADD TABLE public.products;
 ALTER PUBLICATION supabase_realtime ADD TABLE public.promos;
 ALTER PUBLICATION supabase_realtime ADD TABLE public.outlets;
+ALTER PUBLICATION supabase_realtime ADD TABLE public.outlet_categories;
 ALTER PUBLICATION supabase_realtime ADD TABLE public.ticker;
 ALTER PUBLICATION supabase_realtime ADD TABLE public.invoices;

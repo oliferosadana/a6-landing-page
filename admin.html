@@ -72,6 +72,13 @@
             </button>
           </li>
           <li>
+            <button class="nav-item" onclick="switchTab('outlet-categories', this)">
+              <i class="fa-solid fa-map-location-dot"></i>
+              <span>Kategori Wilayah</span>
+              <span class="badge-count" id="badge-outlet-cat-count">0</span>
+            </button>
+          </li>
+          <li>
             <button class="nav-item" onclick="switchTab('ticker', this)">
               <i class="fa-solid fa-bullhorn"></i>
               <span>Running Promo Ticker</span>
@@ -329,6 +336,68 @@
 
           <div class="outlets-management-grid" id="outlets-management-grid">
             <!-- Injected by admin.js -->
+          </div>
+
+        </section>
+
+        <!-- ==================== SECTION: OUTLET CATEGORIES / WILAYAH ==================== -->
+        <section id="section-outlet-categories" class="cms-section">
+
+          <div class="section-toolbar">
+            <div class="toolbar-left">
+              <h2>Manajemen Kategori & Wilayah Outlet</h2>
+              <p>Kelola zona wilayah cabang (Balikpapan Selatan, Kota, Utara, Barat, IKN) untuk filter landing page & pengelompokan outlet.</p>
+            </div>
+            <div class="toolbar-actions-row">
+              <div class="search-box-cms">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input type="text" id="search-outlet-cat-input" placeholder="Cari kategori wilayah..." oninput="filterOutletCategoriesList(this.value)">
+              </div>
+              <button class="btn-primary" onclick="openOutletCategoryModal()">
+                <i class="fa-solid fa-plus"></i> Tambah Kategori Wilayah
+              </button>
+            </div>
+          </div>
+
+          <!-- Stats Overview -->
+          <div class="stats-grid" style="margin-bottom: 24px;">
+            <div class="stat-card">
+              <div class="stat-icon olive"><i class="fa-solid fa-map-location-dot"></i></div>
+              <div>
+                <span class="stat-label">Total Kategori Wilayah</span>
+                <span class="stat-value" id="stat-total-outlet-cats">0</span>
+                <span class="stat-desc">Zona distribusi outlet</span>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon green"><i class="fa-solid fa-circle-check"></i></div>
+              <div>
+                <span class="stat-label">Wilayah Aktif</span>
+                <span class="stat-value" id="stat-active-outlet-cats">0</span>
+                <span class="stat-desc">Tampil di filter landing page</span>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon gold"><i class="fa-solid fa-store"></i></div>
+              <div>
+                <span class="stat-label">Total Outlet Terhubung</span>
+                <span class="stat-value" id="stat-cats-connected-outlets">0</span>
+                <span class="stat-desc">Cabang resmi teralokasi</span>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon sand"><i class="fa-solid fa-network-wired"></i></div>
+              <div>
+                <span class="stat-label">Sinkronisasi Cloud</span>
+                <span class="stat-value" style="font-size: 18px; color: #1b7a42;"><i class="fa-solid fa-bolt"></i> Realtime</span>
+                <span class="stat-desc">Supabase PostgreSQL</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Categories Grid / Cards -->
+          <div class="outlet-categories-grid" id="outlet-categories-grid">
+            <!-- Rendered by admin.js -->
           </div>
 
         </section>
@@ -919,6 +988,76 @@
         <div class="modal-actions">
           <button type="button" class="btn-secondary" onclick="closeModal('ticker-modal')">Batal</button>
           <button type="submit" class="btn-primary"><i class="fa-solid fa-floppy-disk"></i> Simpan Pengumuman</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL: KATEGORI WILAYAH OUTLET ==================== -->
+  <div class="cms-modal-overlay" id="outlet-category-modal" onclick="closeModalOnOverlay(event, 'outlet-category-modal')">
+    <div class="cms-modal-card">
+      <div class="modal-head">
+        <h3 id="outlet-category-modal-title">Tambah Kategori Wilayah Baru</h3>
+        <button class="modal-close-btn" onclick="closeModal('outlet-category-modal')"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <form id="outlet-category-form" onsubmit="saveOutletCategoryForm(event)">
+        <input type="hidden" id="category-form-id">
+
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label>Nama Kategori / Wilayah *</label>
+            <input type="text" id="category-form-name" required placeholder="Contoh: Balikpapan Selatan" oninput="autoGenerateCategorySlug(this.value)">
+          </div>
+          <div class="form-group">
+            <label>Wilayah Induk / Provinsi *</label>
+            <input type="text" id="category-form-region" required placeholder="Contoh: Kota Balikpapan / IKN Nusantara" value="Kota Balikpapan">
+          </div>
+        </div>
+
+        <div class="form-grid-3">
+          <div class="form-group">
+            <label>Kode Slug Unik *</label>
+            <input type="text" id="category-form-slug" required placeholder="balikpapan-selatan">
+          </div>
+          <div class="form-group">
+            <label>Ikon FontAwesome</label>
+            <input type="text" id="category-form-icon" placeholder="fa-solid fa-location-dot" value="fa-solid fa-location-dot">
+          </div>
+          <div class="form-group">
+            <label>Warna Tema Badge</label>
+            <select id="category-form-color">
+              <option value="olive">Olive (Hijau Khas)</option>
+              <option value="gold">Gold (Kuning Emas)</option>
+              <option value="green">Emerald Green</option>
+              <option value="sand">Sand (Cokelat Pasir)</option>
+              <option value="red">Red (Merah Bold)</option>
+              <option value="blue">Blue (Biru Modern)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label>Urutan Tampilan (Sort Order)</label>
+            <input type="number" id="category-form-sort" min="1" value="1" placeholder="1, 2, 3...">
+          </div>
+          <div class="form-group">
+            <label>Status Publikasi</label>
+            <select id="category-form-status">
+              <option value="active">Aktif (Tampil di Landing Page)</option>
+              <option value="inactive">Nonaktif (Disembunyikan)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Deskripsi & Area Cakupan Wilayah</label>
+          <textarea id="category-form-desc" rows="3" placeholder="Contoh: Mencakup area MT Haryono, Sepinggan, Damai, Ruhui Rahayu & Akses Bandara SAMS"></textarea>
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="btn-secondary" onclick="closeModal('outlet-category-modal')">Batal</button>
+          <button type="submit" class="btn-primary"><i class="fa-solid fa-floppy-disk"></i> Simpan Kategori Wilayah</button>
         </div>
       </form>
     </div>

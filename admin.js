@@ -8,6 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
   renderPromosManager();
   renderProductsManager();
   renderOutletsManager();
+  renderOutletCategoriesManager();
   renderTickerManager();
   renderSubscriptionManager();
 
@@ -19,6 +20,7 @@ document.addEventListener('DOMContentLoaded', () => {
       renderPromosManager();
       renderProductsManager();
       renderOutletsManager();
+      renderOutletCategoriesManager();
       renderTickerManager();
       renderSubscriptionManager();
     }
@@ -31,6 +33,7 @@ document.addEventListener('DOMContentLoaded', () => {
     renderPromosManager();
     renderProductsManager();
     renderOutletsManager();
+    renderOutletCategoriesManager();
     renderTickerManager();
     renderSubscriptionManager();
   });
@@ -53,6 +56,7 @@ function switchTab(tabName, btnElement) {
     'promos': 'Manajemen Flyer & Promo Resmi (4:5)',
     'products': 'Katalog Produk & Ketersediaan Stok',
     'outlets': 'Cabang Outlet Resmi Balikpapan',
+    'outlet-categories': 'Manajemen Kategori & Wilayah Outlet',
     'ticker': 'Pengumuman Running Promo Ticker',
     'subscription': 'Status Sewa & Tagihan Website',
     'settings': 'Cadangan, Impor & Reset Data'
@@ -71,6 +75,7 @@ function switchTab(tabName, btnElement) {
   if (tabName === 'promos') renderPromosManager();
   if (tabName === 'products') renderProductsManager();
   if (tabName === 'outlets') renderOutletsManager();
+  if (tabName === 'outlet-categories') renderOutletCategoriesManager();
   if (tabName === 'ticker') renderTickerManager();
   if (tabName === 'subscription') renderSubscriptionManager();
 }
@@ -91,6 +96,10 @@ function renderDashboard() {
   document.getElementById('badge-prod-count').textContent = AMANDA_PRODUCTS.length;
   document.getElementById('badge-promo-count').textContent = AMANDA_PROMOS.length;
   document.getElementById('badge-outlet-count').textContent = AMANDA_OUTLETS.length;
+  const badgeOutletCat = document.getElementById('badge-outlet-cat-count');
+  if (badgeOutletCat && typeof AMANDA_OUTLET_CATEGORIES !== 'undefined') {
+    badgeOutletCat.textContent = AMANDA_OUTLET_CATEGORIES.length;
+  }
 
   // Render Promo Mini Previews
   const promoContainer = document.getElementById('dash-promos-container');
@@ -676,7 +685,7 @@ function openOutletModal(outlet = null) {
     titleElem.textContent = 'Edit Data Cabang & Booth: ' + outlet.name;
     document.getElementById('outlet-form-id').value = outlet.id;
     document.getElementById('outlet-form-name').value = outlet.name;
-    document.getElementById('outlet-form-city').value = outlet.city;
+    populateOutletFormCitySelect(outlet.city);
     document.getElementById('outlet-form-hours').value = outlet.hours;
     document.getElementById('outlet-form-wa').value = outlet.wa;
     document.getElementById('outlet-form-phone').value = outlet.phone || '';
@@ -688,6 +697,7 @@ function openOutletModal(outlet = null) {
   } else {
     titleElem.textContent = 'Tambah Cabang Outlet & Booth Baru';
     document.getElementById('outlet-form-id').value = '';
+    populateOutletFormCitySelect(AMANDA_OUTLET_CATEGORIES[0]?.name || 'Balikpapan Selatan');
     document.getElementById('outlet-form-image').value = 'assets/outlet_mt_haryono.jpg';
     document.getElementById('outlet-form-hours').value = '07.30 - 21.30 WITA';
     document.getElementById('outlet-form-wa').value = '6281322119988';
@@ -889,8 +899,255 @@ function saveOutletForm(e) {
   saveStoredData('amanda_outlets', AMANDA_OUTLETS);
   closeModal('outlet-modal');
   renderOutletsManager();
+  renderOutletCategoriesManager();
   renderDashboard();
   showCmsToast('Data cabang & nomor WA serta link Maps booth berhasil disimpan!');
+}
+
+function populateOutletFormCitySelect(selectedCity = '') {
+  const select = document.getElementById('outlet-form-city');
+  if (!select) return;
+
+  const categories = (typeof AMANDA_OUTLET_CATEGORIES !== 'undefined' && AMANDA_OUTLET_CATEGORIES.length > 0)
+    ? AMANDA_OUTLET_CATEGORIES
+    : DEFAULT_OUTLET_CATEGORIES;
+
+  select.innerHTML = categories.map(c => `
+    <option value="${c.name}" ${selectedCity === c.name ? 'selected' : ''}>${c.name} (${c.region || 'Kota Balikpapan'})</option>
+  `).join('');
+}
+
+// ===================================================================
+// 3B. OUTLET CATEGORIES / WILAYAH MANAGEMENT
+// ===================================================================
+function renderOutletCategoriesManager(filterQuery = '') {
+  const grid = document.getElementById('outlet-categories-grid');
+  if (!grid || typeof AMANDA_OUTLET_CATEGORIES === 'undefined') return;
+
+  const query = filterQuery.toLowerCase().trim();
+  let categories = AMANDA_OUTLET_CATEGORIES;
+  if (query) {
+    categories = categories.filter(c => 
+      c.name.toLowerCase().includes(query) || 
+      (c.region && c.region.toLowerCase().includes(query)) ||
+      (c.description && c.description.toLowerCase().includes(query)) ||
+      (c.slug && c.slug.toLowerCase().includes(query))
+    );
+  }
+
+  // Update Stats
+  const totalCats = AMANDA_OUTLET_CATEGORIES.length;
+  const activeCats = AMANDA_OUTLET_CATEGORIES.filter(c => c.status !== 'inactive').length;
+  const connectedOutletsCount = AMANDA_OUTLETS.length;
+
+  const statTotal = document.getElementById('stat-total-outlet-cats');
+  const statActive = document.getElementById('stat-active-outlet-cats');
+  const statOutlets = document.getElementById('stat-cats-connected-outlets');
+  if (statTotal) statTotal.textContent = totalCats;
+  if (statActive) statActive.textContent = activeCats;
+  if (statOutlets) statOutlets.textContent = connectedOutletsCount;
+
+  const badgeOutletCat = document.getElementById('badge-outlet-cat-count');
+  if (badgeOutletCat) badgeOutletCat.textContent = totalCats;
+
+  if (categories.length === 0) {
+    grid.innerHTML = `
+      <div style="grid-column: 1 / -1; text-align: center; padding: 40px 20px; background: #fff; border: 1px dashed var(--ch-sand-border); border-radius: var(--radius-lg);">
+        <i class="fa-solid fa-map-location-dot" style="font-size: 36px; color: var(--ch-gold); margin-bottom: 12px; display: block;"></i>
+        <h4 style="font-size: 16px; margin-bottom: 6px;">Tidak ada kategori wilayah yang cocok</h4>
+        <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 16px;">Klik tombol "+ Tambah Kategori Wilayah" di atas untuk menambahkan zona wilayah baru.</p>
+        <button class="btn-primary" onclick="openOutletCategoryModal()"><i class="fa-solid fa-plus"></i> Tambah Kategori Wilayah</button>
+      </div>
+    `;
+    return;
+  }
+
+  grid.innerHTML = categories.map(cat => {
+    // Find connected outlets
+    const connected = AMANDA_OUTLETS.filter(o => o.city === cat.name || o.region === cat.name);
+    const colorClass = cat.badgeColor || 'olive';
+    const isActive = cat.status !== 'inactive';
+
+    const connectedPills = connected.length > 0 ? `
+      <div class="cat-connected-outlets">
+        <span class="cat-connected-title"><i class="fa-solid fa-store"></i> ${connected.length} Cabang Terhubung:</span>
+        <div class="cat-connected-tags">
+          ${connected.map(o => `
+            <span class="cat-outlet-tag" title="${o.address}">
+              <i class="fa-solid fa-circle-check" style="color: #25d366; font-size: 8px;"></i> ${o.name}
+            </span>
+          `).join('')}
+        </div>
+      </div>
+    ` : `
+      <div class="cat-connected-outlets empty">
+        <span style="font-size: 11.5px; color: var(--text-dim); font-style: italic;"><i class="fa-regular fa-circle-dot"></i> Belum ada cabang terdaftar di wilayah ini.</span>
+      </div>
+    `;
+
+    return `
+      <div class="cms-category-card ${isActive ? '' : 'inactive'}">
+        <div class="cat-card-header">
+          <div class="cat-icon-badge ${colorClass}">
+            <i class="${cat.icon || 'fa-solid fa-location-dot'}"></i>
+          </div>
+          <div class="cat-title-wrap">
+            <div class="cat-name-row">
+              <h4 class="cat-name font-serif">${cat.name}</h4>
+              <span class="cat-status-pill ${isActive ? 'active' : 'inactive'}">
+                ${isActive ? '<i class="fa-solid fa-circle"></i> Aktif' : '<i class="fa-regular fa-circle"></i> Nonaktif'}
+              </span>
+            </div>
+            <span class="cat-region"><i class="fa-solid fa-map"></i> ${cat.region || 'Kota Balikpapan'}</span>
+          </div>
+        </div>
+
+        <div class="cat-card-body">
+          <div class="cat-slug-badge">
+            <i class="fa-solid fa-tag"></i> <code>slug: ${cat.slug || cat.id}</code>
+            <span class="cat-order-tag" title="Urutan Tampilan">Urutan #${cat.sortOrder || 1}</span>
+          </div>
+
+          <p class="cat-description">${cat.description || 'Tidak ada deskripsi wilayah tambahan.'}</p>
+
+          ${connectedPills}
+        </div>
+
+        <div class="cat-card-footer">
+          <button class="btn-edit-sm" onclick="editOutletCategory('${cat.id}')">
+            <i class="fa-solid fa-pen-to-square"></i> Edit Wilayah
+          </button>
+          <button class="btn-del-sm" onclick="deleteOutletCategory('${cat.id}')" title="Hapus Kategori Wilayah">
+            <i class="fa-solid fa-trash"></i>
+          </button>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function filterOutletCategoriesList(query) {
+  renderOutletCategoriesManager(query);
+}
+
+function openOutletCategoryModal(category = null) {
+  const modal = document.getElementById('outlet-category-modal');
+  const titleElem = document.getElementById('outlet-category-modal-title');
+  const form = document.getElementById('outlet-category-form');
+  if (!modal || !form) return;
+
+  form.reset();
+  if (category) {
+    titleElem.textContent = 'Edit Kategori Wilayah: ' + category.name;
+    document.getElementById('category-form-id').value = category.id;
+    document.getElementById('category-form-name').value = category.name;
+    document.getElementById('category-form-region').value = category.region || 'Kota Balikpapan';
+    document.getElementById('category-form-slug').value = category.slug || category.id;
+    document.getElementById('category-form-icon').value = category.icon || 'fa-solid fa-location-dot';
+    document.getElementById('category-form-color').value = category.badgeColor || 'olive';
+    document.getElementById('category-form-sort').value = category.sortOrder || 1;
+    document.getElementById('category-form-status').value = category.status || 'active';
+    document.getElementById('category-form-desc').value = category.description || '';
+  } else {
+    titleElem.textContent = 'Tambah Kategori Wilayah Baru';
+    document.getElementById('category-form-id').value = '';
+    document.getElementById('category-form-region').value = 'Kota Balikpapan';
+    document.getElementById('category-form-icon').value = 'fa-solid fa-location-dot';
+    document.getElementById('category-form-color').value = 'olive';
+    document.getElementById('category-form-sort').value = (AMANDA_OUTLET_CATEGORIES.length + 1);
+    document.getElementById('category-form-status').value = 'active';
+    document.getElementById('category-form-desc').value = '';
+  }
+
+  modal.classList.add('active');
+}
+
+function autoGenerateCategorySlug(val) {
+  const slugInput = document.getElementById('category-form-slug');
+  const idInput = document.getElementById('category-form-id');
+  if (!slugInput || (idInput && idInput.value)) return;
+  const slug = val.toLowerCase()
+    .trim()
+    .replace(/[^\w\s-]/g, '')
+    .replace(/[\s_-]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+  slugInput.value = slug;
+}
+
+function editOutletCategory(id) {
+  const cat = AMANDA_OUTLET_CATEGORIES.find(c => c.id === id);
+  if (cat) openOutletCategoryModal(cat);
+}
+
+function deleteOutletCategory(id) {
+  const cat = AMANDA_OUTLET_CATEGORIES.find(c => c.id === id);
+  if (!cat) return;
+
+  const connectedOutlets = AMANDA_OUTLETS.filter(o => o.city === cat.name || o.region === cat.name);
+  if (connectedOutlets.length > 0) {
+    const outletNames = connectedOutlets.map(o => o.name).join(', ');
+    if (!confirm(`Peringatan: Terdapat ${connectedOutlets.length} outlet cabang (${outletNames}) yang terhubung dengan wilayah "${cat.name}".\n\nApakah Anda tetap yakin ingin menghapus kategori wilayah ini?`)) {
+      return;
+    }
+  } else {
+    if (!confirm(`Hapus kategori wilayah "${cat.name}"?`)) {
+      return;
+    }
+  }
+
+  AMANDA_OUTLET_CATEGORIES = AMANDA_OUTLET_CATEGORIES.filter(c => c.id !== id);
+  saveStoredData('amanda_outlet_categories', AMANDA_OUTLET_CATEGORIES);
+  if (typeof pushToSupabase === 'function' && typeof isSupabaseActive === 'function' && isSupabaseActive()) {
+    pushToSupabase('outlet_categories', { id: id }, 'delete');
+  }
+  renderOutletCategoriesManager();
+  renderDashboard();
+  showCmsToast(`Kategori wilayah "${cat.name}" berhasil dihapus!`);
+}
+
+function saveOutletCategoryForm(e) {
+  e.preventDefault();
+  const id = document.getElementById('category-form-id').value;
+  const name = document.getElementById('category-form-name').value.trim();
+  const region = document.getElementById('category-form-region').value.trim() || 'Kota Balikpapan';
+  const slug = document.getElementById('category-form-slug').value.trim() || (name.toLowerCase().replace(/\s+/g, '-'));
+  const icon = document.getElementById('category-form-icon').value.trim() || 'fa-solid fa-location-dot';
+  const badgeColor = document.getElementById('category-form-color').value || 'olive';
+  const sortOrder = parseInt(document.getElementById('category-form-sort').value, 10) || 1;
+  const status = document.getElementById('category-form-status').value || 'active';
+  const desc = document.getElementById('category-form-desc').value.trim();
+
+  if (id) {
+    const idx = AMANDA_OUTLET_CATEGORIES.findIndex(c => c.id === id);
+    if (idx !== -1) {
+      AMANDA_OUTLET_CATEGORIES[idx] = {
+        ...AMANDA_OUTLET_CATEGORIES[idx],
+        name, region, slug, icon, badgeColor, sortOrder, status, description: desc
+      };
+    }
+  } else {
+    const newCat = {
+      id: 'cat-' + (slug || Date.now()),
+      slug: slug || ('cat-' + Date.now()),
+      name,
+      region,
+      icon,
+      badgeColor,
+      sortOrder,
+      status,
+      description: desc
+    };
+    AMANDA_OUTLET_CATEGORIES.push(newCat);
+  }
+
+  // Sort by sortOrder
+  AMANDA_OUTLET_CATEGORIES.sort((a, b) => (a.sortOrder || 1) - (b.sortOrder || 1));
+
+  saveStoredData('amanda_outlet_categories', AMANDA_OUTLET_CATEGORIES);
+  closeModal('outlet-category-modal');
+  renderOutletCategoriesManager();
+  renderDashboard();
+  showCmsToast('Kategori wilayah outlet berhasil disimpan & tersinkronisasi!');
 }
 
 // ===================================================================

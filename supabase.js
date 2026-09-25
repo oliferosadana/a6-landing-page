@@ -178,6 +178,31 @@ async function pullAllDataFromSupabase() {
       }
     }
 
+    // 1B. Fetch Outlet Categories / Wilayah
+    const { data: dbOutletCats, error: errOutletCat } = await supabaseClient
+      .from('outlet_categories')
+      .select('*')
+      .order('sort_order', { ascending: true });
+
+    if (!errOutletCat && dbOutletCats) {
+      if (dbOutletCats.length > 0) {
+        AMANDA_OUTLET_CATEGORIES = dbOutletCats.map(c => ({
+          id: c.id,
+          slug: c.slug || c.id,
+          name: c.name,
+          region: c.region || 'Kota Balikpapan',
+          icon: c.icon || 'fa-solid fa-location-dot',
+          badgeColor: c.badge_color || c.badgeColor || 'olive',
+          description: c.description || '',
+          status: c.status || 'active',
+          sortOrder: Number(c.sort_order) || 1
+        }));
+        saveStoredData('amanda_outlet_categories', AMANDA_OUTLET_CATEGORIES, false);
+      } else {
+        await seedDefaultDataToSupabase('outlet_categories');
+      }
+    }
+
     // 2. Fetch Products & Stocks
     const { data: dbProducts, error: errProd } = await supabaseClient
       .from('products')
@@ -385,6 +410,19 @@ async function pushToSupabase(tableName, payload, operation = 'upsert') {
         description: pr.description || '',
         wa_msg: pr.waMessage || pr.wa_msg || ''
       }));
+    } else if (tableName === 'outlet_categories') {
+      const list = Array.isArray(payload) ? payload : [payload];
+      dbPayload = list.map((c, idx) => ({
+        id: c.id || ('cat-' + Date.now() + '-' + idx),
+        slug: c.slug || c.id || ('cat-' + idx),
+        name: c.name,
+        region: c.region || 'Kota Balikpapan',
+        icon: c.icon || 'fa-solid fa-location-dot',
+        badge_color: c.badgeColor || c.badge_color || 'olive',
+        description: c.description || '',
+        status: c.status || 'active',
+        sort_order: Number(c.sortOrder || c.sort_order) || (idx + 1)
+      }));
     } else if (tableName === 'ticker') {
       const list = Array.isArray(payload) ? payload : [payload];
       dbPayload = list.map((t, idx) => ({
@@ -461,6 +499,11 @@ async function seedDefaultDataToSupabase(specificTable = null) {
     if (!specificTable || specificTable === 'outlets') {
       if (typeof DEFAULT_OUTLETS !== 'undefined' && DEFAULT_OUTLETS.length > 0) {
         await pushToSupabase('outlets', DEFAULT_OUTLETS);
+      }
+    }
+    if (!specificTable || specificTable === 'outlet_categories') {
+      if (typeof DEFAULT_OUTLET_CATEGORIES !== 'undefined' && DEFAULT_OUTLET_CATEGORIES.length > 0) {
+        await pushToSupabase('outlet_categories', DEFAULT_OUTLET_CATEGORIES);
       }
     }
     if (!specificTable || specificTable === 'products') {

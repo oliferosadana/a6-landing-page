@@ -15,6 +15,7 @@ function refreshAllLandingPageViews() {
   renderProductGrid();
   renderPromoFlyers();
   renderPriceListCards();
+  renderOutletCategoryFilterPills();
   renderOutletLocatorList(selectedCityForOutlet || 'all');
 }
 
@@ -308,7 +309,40 @@ function renderOutletLocatorList(filterCity = 'all') {
   }).join('');
 }
 
+function renderOutletCategoryFilterPills() {
+  const pillList = document.querySelector('.city-pill-list');
+  if (!pillList || typeof AMANDA_OUTLETS === 'undefined') return;
+
+  const totalOutlets = AMANDA_OUTLETS.length;
+  const categories = (typeof AMANDA_OUTLET_CATEGORIES !== 'undefined' && AMANDA_OUTLET_CATEGORIES.length > 0)
+    ? AMANDA_OUTLET_CATEGORIES.filter(c => c.status !== 'inactive')
+    : [
+      { name: "Balikpapan Selatan", icon: "fa-solid fa-map-pin" },
+      { name: "Balikpapan Kota", icon: "fa-solid fa-map-pin" },
+      { name: "Balikpapan Utara", icon: "fa-solid fa-map-pin" }
+    ];
+
+  let pillsHTML = `
+    <button class="city-pill ${selectedCityForOutlet === 'all' ? 'active' : ''}" onclick="filterLocatorCity('all', this)">
+      <i class="fa-solid fa-city"></i> Semua Cabang (${totalOutlets})
+    </button>
+  `;
+
+  pillsHTML += categories.map(cat => {
+    const count = AMANDA_OUTLETS.filter(o => o.city === cat.name).length;
+    const isActive = selectedCityForOutlet === cat.name;
+    return `
+      <button class="city-pill ${isActive ? 'active' : ''}" onclick="filterLocatorCity('${cat.name}', this)">
+        <i class="${cat.icon || 'fa-solid fa-map-pin'}"></i> ${cat.name} (${count})
+      </button>
+    `;
+  }).join('');
+
+  pillList.innerHTML = pillsHTML;
+}
+
 function filterLocatorCity(city, btn) {
+  selectedCityForOutlet = city;
   document.querySelectorAll('.city-pill').forEach(el => el.classList.remove('active'));
   if (btn) btn.classList.add('active');
   renderOutletLocatorList(city);

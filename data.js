@@ -216,6 +216,86 @@ const DEFAULT_OUTLETS = [
   }
 ];
 
+const DEFAULT_OUTLET_CATEGORIES = [
+  {
+    id: "cat-bpn-selatan",
+    slug: "balikpapan-selatan",
+    name: "Balikpapan Selatan",
+    region: "Kota Balikpapan",
+    icon: "fa-solid fa-location-dot",
+    badgeColor: "olive",
+    description: "Wilayah MT Haryono, Sepinggan, Ruhui Rahayu, Damai & Akses Bandara SAMS",
+    status: "active",
+    sortOrder: 1
+  },
+  {
+    id: "cat-bpn-kota",
+    slug: "balikpapan-kota",
+    name: "Balikpapan Kota",
+    region: "Kota Balikpapan",
+    icon: "fa-solid fa-city",
+    badgeColor: "gold",
+    description: "Pusat Kota, Jl. Jend. Ahmad Yani, Klandasan & Sentra Eropa Balikpapan Baru",
+    status: "active",
+    sortOrder: 2
+  },
+  {
+    id: "cat-bpn-utara",
+    slug: "balikpapan-utara",
+    name: "Balikpapan Utara",
+    region: "Kota Balikpapan",
+    icon: "fa-solid fa-map-pin",
+    badgeColor: "green",
+    description: "Area KM 4.5, Batu Ampar, Soekarno Hatta & Karang Joang",
+    status: "active",
+    sortOrder: 3
+  },
+  {
+    id: "cat-bpn-barat",
+    slug: "balikpapan-barat",
+    name: "Balikpapan Barat",
+    region: "Kota Balikpapan",
+    icon: "fa-solid fa-anchor",
+    badgeColor: "sand",
+    description: "Wilayah Kampung Baru, Pelabuhan Semayang & Kawasan Industri Kariangau",
+    status: "active",
+    sortOrder: 4
+  },
+  {
+    id: "cat-bpn-tengah",
+    slug: "balikpapan-tengah",
+    name: "Balikpapan Tengah",
+    region: "Kota Balikpapan",
+    icon: "fa-solid fa-building",
+    badgeColor: "olive",
+    description: "Gunung Sari, Mekar Sari, Sumber Rejo & Karang Rejo",
+    status: "active",
+    sortOrder: 5
+  },
+  {
+    id: "cat-bpn-timur",
+    slug: "balikpapan-timur",
+    name: "Balikpapan Timur",
+    region: "Kota Balikpapan",
+    icon: "fa-solid fa-umbrella-beach",
+    badgeColor: "gold",
+    description: "Manggar, Lamaru, Teritip & Kawasan Pantai Balikpapan",
+    status: "active",
+    sortOrder: 6
+  },
+  {
+    id: "cat-ikn",
+    slug: "ikn-penajam",
+    name: "IKN & Penajam",
+    region: "Kawasan IKN Nusantara",
+    icon: "fa-solid fa-tree",
+    badgeColor: "green",
+    description: "Kawasan Ibu Kota Nusantara (IKN), Sepaku & Penajam Paser Utara",
+    status: "active",
+    sortOrder: 7
+  }
+];
+
 const DEFAULT_PROMOS = [
   {
     id: "promo-01",
@@ -435,6 +515,7 @@ function saveStoredData(key, data, syncCloud = true) {
         'amanda_products': 'products',
         'amanda_promos': 'promos',
         'amanda_outlets': 'outlets',
+        'amanda_outlet_categories': 'outlet_categories',
         'amanda_ticker': 'ticker',
         'amanda_platform_tenants': 'tenants',
         'amanda_invoices': 'invoices'
@@ -458,12 +539,14 @@ function notifyAmandaDataChanged() {
 
 // Global active datasets loaded from localStorage or defaults
 let AMANDA_OUTLETS = [];
+let AMANDA_OUTLET_CATEGORIES = [];
 let AMANDA_PROMOS = [];
 let AMANDA_PRICELISTS = [];
 let AMANDA_PRODUCTS = [];
 let AMANDA_TICKER = [];
 
 function reloadAmandaData() {
+  AMANDA_OUTLET_CATEGORIES = getStoredData('amanda_outlet_categories', DEFAULT_OUTLET_CATEGORIES);
   AMANDA_OUTLETS = getStoredData('amanda_outlets', DEFAULT_OUTLETS).map(out => {
     return {
       ...out,
@@ -482,6 +565,7 @@ reloadAmandaData();
 // Reset helper
 function resetAmandaDataToDefault() {
   localStorage.removeItem('amanda_outlets');
+  localStorage.removeItem('amanda_outlet_categories');
   localStorage.removeItem('amanda_promos');
   localStorage.removeItem('amanda_pricelists');
   localStorage.removeItem('amanda_products');

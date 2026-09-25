@@ -465,11 +465,10 @@ let AMANDA_TICKER = [];
 
 function reloadAmandaData() {
   AMANDA_OUTLETS = getStoredData('amanda_outlets', DEFAULT_OUTLETS).map(out => {
-    const def = DEFAULT_OUTLETS.find(d => d.id === out.id);
-    const booths = (out.booths && Array.isArray(out.booths) && out.booths.length > 0)
-      ? out.booths
-      : ((def && def.booths) ? def.booths : []);
-    return { ...out, booths: booths };
+    return {
+      ...out,
+      booths: Array.isArray(out.booths) ? out.booths : []
+    };
   });
   AMANDA_PROMOS = getStoredData('amanda_promos', DEFAULT_PROMOS);
   AMANDA_PRICELISTS = getStoredData('amanda_pricelists', DEFAULT_PRICELISTS);

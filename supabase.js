@@ -330,6 +330,18 @@ async function pushToSupabase(tableName, payload, operation = 'upsert') {
   if (!isSupabaseActive()) return null;
 
   try {
+    if (operation === 'delete') {
+      const deleteId = typeof payload === 'object' ? payload.id : payload;
+      if (!deleteId) return null;
+      const { data, error } = await supabaseClient.from(tableName).delete().eq('id', deleteId);
+      if (error) {
+        console.warn(`Supabase delete [${tableName}] error:`, error.message);
+      } else {
+        console.log(`🗑️ Supabase item [${deleteId}] berhasil dihapus dari tabel [${tableName}]`);
+      }
+      return data;
+    }
+
     let dbPayload = payload;
 
     // Transform Javascript models to PostgreSQL columns
@@ -421,19 +433,18 @@ async function pushToSupabase(tableName, payload, operation = 'upsert') {
       }));
     }
 
-    if (operation === 'upsert') {
-      const { data, error } = await supabaseClient.from(tableName).upsert(dbPayload);
-      if (error) {
-        console.warn(`Supabase upsert [${tableName}] warning:`, error.message);
-      } else {
-        console.log(`☁️ Supabase [${tableName}] berhasil di-update secara realtime!`);
-      }
-      return data;
-    } else if (operation === 'delete') {
-      const { data, error } = await supabaseClient.from(tableName).delete().match(payload);
-      if (error) console.warn(`Supabase delete [${tableName}] error:`, error.message);
-      return data;
+    const { data, error } = await supabaseClient.from(tableName).upsert(dbPayload);
+    if (error) {
+      console.warn(`Supabase upsert [${tableName}] warning:`, error.message);
+    } else {
+      console.log(`☁️ Supabase [${tableName}] berhasil di-update secara realtime!`);
     }
+    return data;
+  } catch (e) {
+    console.warn(`Supabase sync failed for ${tableName}:`, e);
+  }
+  return null;
+}
   } catch (e) {
     console.warn(`Supabase sync failed for ${tableName}:`, e);
   }

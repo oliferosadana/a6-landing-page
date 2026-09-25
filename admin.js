@@ -626,6 +626,7 @@ function renderOutletsManager() {
               <div class="cms-booth-badge-links">
                 <a href="https://wa.me/${b.wa || o.wa}" target="_blank" title="WhatsApp: ${b.wa || o.wa}"><i class="fa-brands fa-whatsapp" style="color: #25d366;"></i></a>
                 <a href="${b.mapsUrl || o.mapsUrl || '#'}" target="_blank" title="Buka Rute Maps"><i class="fa-solid fa-map-location-dot" style="color: #3498db;"></i></a>
+                <button type="button" class="btn-del-mini-booth" onclick="deleteSingleBooth('${o.id}', '${b.id}')" title="Hapus Booth Ini"><i class="fa-solid fa-xmark"></i></button>
               </div>
             </div>
           `).join('')}
@@ -809,6 +810,22 @@ function deleteOutlet(id) {
     renderOutletsManager();
     renderDashboard();
     showCmsToast('Data outlet berhasil dihapus!');
+  }
+}
+
+function deleteSingleBooth(outletId, boothId) {
+  const outlet = AMANDA_OUTLETS.find(o => o.id === outletId);
+  if (!outlet) return;
+  const booth = (outlet.booths || []).find(b => b.id === boothId);
+  const bName = booth ? booth.name : 'booth ini';
+  if (confirm(`Apakah Anda yakin ingin menghapus "${bName}" dari cabang ${outlet.name}?`)) {
+    outlet.booths = (outlet.booths || []).filter(b => b.id !== boothId);
+    saveStoredData('amanda_outlets', AMANDA_OUTLETS);
+    if (typeof pushToSupabase === 'function' && typeof isSupabaseActive === 'function' && isSupabaseActive()) {
+      pushToSupabase('outlets', AMANDA_OUTLETS);
+    }
+    renderOutletsManager();
+    showCmsToast(`Titik booth "${bName}" berhasil dihapus!`);
   }
 }
 

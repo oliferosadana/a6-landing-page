@@ -172,6 +172,19 @@ h1, h2, h3, h4, .font-serif {
   color: var(--text-main);
 }
 
+.official-brand-logo {
+  width: 44px;
+  height: 44px;
+  object-fit: contain;
+  border-radius: 50%;
+  filter: drop-shadow(0 3px 8px rgba(79, 91, 42, 0.22));
+  transition: transform var(--transition-fast);
+}
+
+.brand-logo:hover .official-brand-logo {
+  transform: scale(1.05);
+}
+
 .logo-badge {
   width: 42px;
   height: 42px;

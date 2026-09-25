@@ -33,7 +33,8 @@
     <!-- ==================== SUPERADMIN SIDEBAR ==================== -->
     <aside class="sa-sidebar" id="sa-sidebar">
       <div class="sa-brand">
-        <img src="assets/amanda_logo.svg" alt="Amanda Brownies Official Logo" style="height: 38px; width: auto; max-width: 76px; object-fit: contain; filter: drop-shadow(0 2px 6px rgba(0,0,0,0.3));">
+        <img src="assets/logo.png" alt="Amanda Brownies Official Logo"
+          style="height: 38px; width: auto; max-width: 76px; object-fit: contain; filter: drop-shadow(0 2px 6px rgba(0,0,0,0.3));">
         <div class="brand-text">
           <h2>AMANDA ROOT</h2>
           <span>SUPERADMIN PORTAL</span>
@@ -105,7 +106,8 @@
         </div>
 
         <div class="topbar-right">
-          <button class="supabase-status-pill local" id="topbar-db-pill" onclick="openSupabaseModal()" title="Pengaturan Database Supabase Cloud">
+          <button class="supabase-status-pill local" id="topbar-db-pill" onclick="openSupabaseModal()"
+            title="Pengaturan Database Supabase Cloud">
             <span class="db-dot orange"></span>
             <span>Database: Lokal</span>
           </button>
@@ -124,7 +126,7 @@
 
         <!-- ==================== TAB 1: OVERVIEW ==================== -->
         <section id="sa-sec-overview" class="sa-section active">
-          
+
           <!-- Key Metrics Grid -->
           <div class="metrics-grid">
             <div class="metric-card">
@@ -134,7 +136,8 @@
               <div class="metric-data">
                 <span class="metric-title">Total Pendapatan Sewa</span>
                 <h3 class="metric-num" id="sa-stat-revenue">Rp 0</h3>
-                <span class="metric-desc text-green"><i class="fa-solid fa-arrow-trend-up"></i> Realtime dari invoice lunas</span>
+                <span class="metric-desc text-green"><i class="fa-solid fa-arrow-trend-up"></i> Realtime dari invoice
+                  lunas</span>
               </div>
             </div>
 
@@ -181,7 +184,8 @@
                   <i class="fa-solid fa-triangle-exclamation text-orange"></i>
                   <h3>Penyewa Mendekati Jatuh Tempo / Kadaluarsa</h3>
                 </div>
-                <button class="btn-sm" onclick="switchSaTab('tenants', document.querySelectorAll('.sa-nav-item')[1])">Lihat Semua</button>
+                <button class="btn-sm"
+                  onclick="switchSaTab('tenants', document.querySelectorAll('.sa-nav-item')[1])">Lihat Semua</button>
               </div>
               <div class="sa-card-body" id="sa-overview-expiring-list">
                 <!-- Injected by superadmin.js -->
@@ -195,7 +199,8 @@
                   <i class="fa-solid fa-receipt text-olive"></i>
                   <h3>Transaksi Invoice Terbaru</h3>
                 </div>
-                <button class="btn-sm" onclick="switchSaTab('invoices', document.querySelectorAll('.sa-nav-item')[2])">Pusat Invoice</button>
+                <button class="btn-sm"
+                  onclick="switchSaTab('invoices', document.querySelectorAll('.sa-nav-item')[2])">Pusat Invoice</button>
               </div>
               <div class="sa-card-body" id="sa-overview-recent-invoices">
                 <!-- Injected by superadmin.js -->
@@ -207,7 +212,7 @@
 
         <!-- ==================== TAB 2: TENANTS MANAGEMENT ==================== -->
         <section id="sa-sec-tenants" class="sa-section">
-          
+
           <div class="section-toolbar">
             <div class="toolbar-left">
               <h2>Manajemen Penyewa Sistem (Tenants)</h2>
@@ -222,12 +227,16 @@
           <div class="filter-bar">
             <div class="search-input-wrap">
               <i class="fa-solid fa-magnifying-glass"></i>
-              <input type="text" id="tenant-search-input" placeholder="Cari nama cabang, kontak, domain, atau kota..." oninput="filterTenantsTable()">
+              <input type="text" id="tenant-search-input" placeholder="Cari nama cabang, kontak, domain, atau kota..."
+                oninput="filterTenantsTable()">
             </div>
             <div class="filter-tabs">
-              <button class="filter-btn active" data-filter="all" onclick="setTenantFilter('all', this)">Semua (<span id="count-tenant-all">0</span>)</button>
-              <button class="filter-btn" data-filter="active" onclick="setTenantFilter('active', this)">Aktif (<span id="count-tenant-active">0</span>)</button>
-              <button class="filter-btn" data-filter="expired" onclick="setTenantFilter('expired', this)">Kadaluarsa (<span id="count-tenant-expired">0</span>)</button>
+              <button class="filter-btn active" data-filter="all" onclick="setTenantFilter('all', this)">Semua (<span
+                  id="count-tenant-all">0</span>)</button>
+              <button class="filter-btn" data-filter="active" onclick="setTenantFilter('active', this)">Aktif (<span
+                  id="count-tenant-active">0</span>)</button>
+              <button class="filter-btn" data-filter="expired" onclick="setTenantFilter('expired', this)">Kadaluarsa
+                (<span id="count-tenant-expired">0</span>)</button>
             </div>
           </div>
 
@@ -257,7 +266,7 @@
 
         <!-- ==================== TAB 3: INVOICES & VERIFICATION ==================== -->
         <section id="sa-sec-invoices" class="sa-section">
-          
+
           <div class="section-toolbar">
             <div class="toolbar-left">
               <h2>Pusat Verifikasi Invoice & Tagihan</h2>
@@ -269,12 +278,16 @@
           <div class="filter-bar">
             <div class="search-input-wrap">
               <i class="fa-solid fa-magnifying-glass"></i>
-              <input type="text" id="invoice-search-input" placeholder="Cari nomor invoice, nama penyewa..." oninput="filterInvoicesTable()">
+              <input type="text" id="invoice-search-input" placeholder="Cari nomor invoice, nama penyewa..."
+                oninput="filterInvoicesTable()">
             </div>
             <div class="filter-tabs">
-              <button class="filter-btn active" data-inv-filter="all" onclick="setInvoiceFilter('all', this)">Semua (<span id="count-inv-all">0</span>)</button>
-              <button class="filter-btn" data-inv-filter="PENDING" onclick="setInvoiceFilter('PENDING', this)">Menunggu Bayar (<span id="count-inv-pending">0</span>)</button>
-              <button class="filter-btn" data-inv-filter="PAID" onclick="setInvoiceFilter('PAID', this)">Lunas (<span id="count-inv-paid">0</span>)</button>
+              <button class="filter-btn active" data-inv-filter="all" onclick="setInvoiceFilter('all', this)">Semua
+                (<span id="count-inv-all">0</span>)</button>
+              <button class="filter-btn" data-inv-filter="PENDING" onclick="setInvoiceFilter('PENDING', this)">Menunggu
+                Bayar (<span id="count-inv-pending">0</span>)</button>
+              <button class="filter-btn" data-inv-filter="PAID" onclick="setInvoiceFilter('PAID', this)">Lunas (<span
+                  id="count-inv-paid">0</span>)</button>
             </div>
           </div>
 
@@ -305,7 +318,7 @@
 
         <!-- ==================== TAB 4: MASTER PRICING PLANS ==================== -->
         <section id="sa-sec-plans" class="sa-section">
-          
+
           <div class="section-toolbar">
             <div class="toolbar-left">
               <h2>Master Paket Sewa & Tarif Sistem</h2>
@@ -321,7 +334,7 @@
 
         <!-- ==================== TAB 5: GATEWAY & BANK ACCOUNTS ==================== -->
         <section id="sa-sec-gateway" class="sa-section">
-          
+
           <div class="section-toolbar">
             <div class="toolbar-left">
               <h2>Pengaturan Rekening & QRIS Platform</h2>
@@ -345,7 +358,8 @@
     <div class="sa-modal-card">
       <div class="sa-modal-head">
         <h3 id="sa-tenant-modal-title">Tambah Cabang / Penyewa Baru</h3>
-        <button class="sa-modal-close" onclick="closeSaModal('sa-tenant-modal')"><i class="fa-solid fa-xmark"></i></button>
+        <button class="sa-modal-close" onclick="closeSaModal('sa-tenant-modal')"><i
+            class="fa-solid fa-xmark"></i></button>
       </div>
       <form id="sa-tenant-form" onsubmit="saveTenantForm(event)">
         <input type="hidden" id="tenant-form-id">
@@ -417,7 +431,8 @@
     <div class="sa-modal-card">
       <div class="sa-modal-head">
         <h3>Perpanjang Masa Sewa Cabang</h3>
-        <button class="sa-modal-close" onclick="closeSaModal('sa-extend-modal')"><i class="fa-solid fa-xmark"></i></button>
+        <button class="sa-modal-close" onclick="closeSaModal('sa-extend-modal')"><i
+            class="fa-solid fa-xmark"></i></button>
       </div>
       <div class="extend-modal-body">
         <p style="font-size: 13.5px; color: var(--text-muted); margin-bottom: 16px;">
@@ -451,32 +466,38 @@
           <i class="fa-solid fa-database" style="color: #3ecf8e; font-size: 20px;"></i>
           <h3>Koneksi Database Supabase Cloud</h3>
         </div>
-        <button class="sa-modal-close" onclick="closeSaModal('sa-supabase-modal')"><i class="fa-solid fa-xmark"></i></button>
+        <button class="sa-modal-close" onclick="closeSaModal('sa-supabase-modal')"><i
+            class="fa-solid fa-xmark"></i></button>
       </div>
       <form id="sa-supabase-form" onsubmit="saveSupabaseSettingsFromForm(event)">
         <div class="form-group">
           <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 12px; line-height: 1.5;">
-            Hubungkan aplikasi dengan database <strong>Supabase (PostgreSQL Cloud)</strong> agar seluruh produk, cabang, invoice, dan data penyewa tersimpan secara terpusat dan tersinkronisasi realtime.
+            Hubungkan aplikasi dengan database <strong>Supabase (PostgreSQL Cloud)</strong> agar seluruh produk, cabang,
+            invoice, dan data penyewa tersimpan secara terpusat dan tersinkronisasi realtime.
           </p>
         </div>
 
         <div class="form-group">
           <label>Supabase Project URL *</label>
           <input type="url" id="sb-form-url" required placeholder="https://xyzcompany.supabase.co">
-          <small style="color: var(--text-dim); font-size: 11px;">Dapat ditemukan di Supabase Dashboard -> Project Settings -> API</small>
+          <small style="color: var(--text-dim); font-size: 11px;">Dapat ditemukan di Supabase Dashboard -> Project
+            Settings -> API</small>
         </div>
 
         <div class="form-group">
           <label>Supabase Anon Public API Key *</label>
           <input type="text" id="sb-form-key" required placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...">
-          <small style="color: var(--text-dim); font-size: 11px;">Gunakan <code>anon</code> public key, aman untuk frontend.</small>
+          <small style="color: var(--text-dim); font-size: 11px;">Gunakan <code>anon</code> public key, aman untuk
+            frontend.</small>
         </div>
 
-        <div class="form-group" style="background: var(--bg-elevated); border-radius: var(--radius-md); padding: 12px; border: 1px solid var(--ch-sand-border); margin: 0 24px 14px;">
+        <div class="form-group"
+          style="background: var(--bg-elevated); border-radius: var(--radius-md); padding: 12px; border: 1px solid var(--ch-sand-border); margin: 0 24px 14px;">
           <div style="display: flex; align-items: center; justify-content: space-between;">
             <div>
               <strong style="font-size: 12.5px; color: var(--text-main);">Gunakan Skema SQL</strong>
-              <div style="font-size: 11.5px; color: var(--text-dim);">Jalankan query di <code>supabase_schema.sql</code> di Supabase SQL Editor.</div>
+              <div style="font-size: 11.5px; color: var(--text-dim);">Jalankan query di <code>supabase_schema.sql</code>
+                di Supabase SQL Editor.</div>
             </div>
             <button type="button" class="btn-sm" onclick="testSupabaseFromForm()">
               <i class="fa-solid fa-plug"></i> Tes Koneksi
@@ -486,7 +507,8 @@
 
         <div class="sa-modal-actions">
           <button type="button" class="sa-btn-sec" onclick="closeSaModal('sa-supabase-modal')">Tutup</button>
-          <button type="submit" class="btn-primary"><i class="fa-solid fa-floppy-disk"></i> Simpan & Hubungkan Database</button>
+          <button type="submit" class="btn-primary"><i class="fa-solid fa-floppy-disk"></i> Simpan & Hubungkan
+            Database</button>
         </div>
       </form>
     </div>

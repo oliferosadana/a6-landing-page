@@ -34,7 +34,8 @@
     <!-- ==================== SIDEBAR ==================== -->
     <aside class="cms-sidebar" id="cms-sidebar">
       <div class="sidebar-brand">
-        <img src="assets/amanda_logo.svg" alt="Amanda Brownies Official Logo" style="height: 38px; width: auto; max-width: 76px; object-fit: contain; filter: drop-shadow(0 2px 6px rgba(0,0,0,0.2));">
+        <img src="assets/logo.png" alt="Amanda Brownies Official Logo"
+          style="height: 38px; width: auto; max-width: 76px; object-fit: contain; filter: drop-shadow(0 2px 6px rgba(0,0,0,0.2));">
         <div class="brand-info">
           <h2>AMANDA CMS</h2>
           <span>KOTA BALIKPAPAN</span>
@@ -93,11 +94,13 @@
       </nav>
 
       <div class="sidebar-footer">
-        <a href="superadmin.html" class="btn-view-site" style="margin-bottom: 6px; background: rgba(30, 38, 14, 0.85); border-color: var(--ch-gold); color: #fff;">
+        <a href="superadmin.html" class="btn-view-site"
+          style="margin-bottom: 6px; background: rgba(30, 38, 14, 0.85); border-color: var(--ch-gold); color: #fff;">
           <i class="fa-solid fa-crown" style="color: var(--ch-gold);"></i>
           <span>Superadmin Platform</span>
         </a>
-        <a href="billing.html" class="btn-view-site" style="margin-bottom: 6px; background: rgba(184, 137, 45, 0.25); border-color: var(--ch-gold);">
+        <a href="billing.html" class="btn-view-site"
+          style="margin-bottom: 6px; background: rgba(184, 137, 45, 0.25); border-color: var(--ch-gold);">
           <i class="fa-solid fa-cart-shopping"></i>
           <span>Portal Sewa Sistem</span>
         </a>
@@ -143,7 +146,7 @@
 
         <!-- ==================== SECTION 1: DASHBOARD ==================== -->
         <section id="section-dashboard" class="cms-section active">
-          
+
           <!-- Stat Cards -->
           <div class="stats-grid">
             <div class="stat-card">
@@ -193,7 +196,7 @@
 
           <!-- Quick Actions & Overview -->
           <div class="dash-grid-split">
-            
+
             <!-- Quick Promo Overview -->
             <div class="panel-card">
               <div class="panel-head">
@@ -201,7 +204,8 @@
                   <i class="fa-solid fa-images" style="color: var(--primary-olive);"></i>
                   <h3>Flyer Promo Berjalan Saat Ini</h3>
                 </div>
-                <button class="btn-secondary-sm" onclick="switchTab('promos', document.querySelectorAll('.nav-item')[1])">
+                <button class="btn-secondary-sm"
+                  onclick="switchTab('promos', document.querySelectorAll('.nav-item')[1])">
                   Kelola Promo
                 </button>
               </div>
@@ -219,7 +223,8 @@
                   <i class="fa-solid fa-map-location-dot" style="color: var(--primary-olive);"></i>
                   <h3>Status 6 Outlet Balikpapan</h3>
                 </div>
-                <button class="btn-secondary-sm" onclick="switchTab('outlets', document.querySelectorAll('.nav-item')[3])">
+                <button class="btn-secondary-sm"
+                  onclick="switchTab('outlets', document.querySelectorAll('.nav-item')[3])">
                   Kelola Outlet
                 </button>
               </div>
@@ -236,7 +241,7 @@
 
         <!-- ==================== SECTION 2: PROMOS (4:5 FLYER) ==================== -->
         <section id="section-promos" class="cms-section">
-          
+
           <div class="section-toolbar">
             <div class="toolbar-left">
               <h2>Manajemen Flyer & Banner Promosi (Rasio 4:5)</h2>
@@ -255,7 +260,8 @@
           <div class="section-toolbar" style="margin-top: 36px;">
             <div class="toolbar-left">
               <h2>Poster Daftar Harga & Menu Resmi (Fitur Zoom Lightbox)</h2>
-              <p>Kelola file poster brosur/price list resmi yang dapat diperbesar dengan navigasi zoom in/out di halaman utama.</p>
+              <p>Kelola file poster brosur/price list resmi yang dapat diperbesar dengan navigasi zoom in/out di halaman
+                utama.</p>
             </div>
           </div>
 
@@ -267,7 +273,7 @@
 
         <!-- ==================== SECTION 3: PRODUCTS & STOCKS ==================== -->
         <section id="section-products" class="cms-section">
-          
+
           <div class="section-toolbar">
             <div class="toolbar-left">
               <h2>Katalog Menu & Ketersediaan Stok Realtime</h2>
@@ -276,7 +282,8 @@
             <div class="toolbar-actions-row">
               <div class="search-box-cms">
                 <i class="fa-solid fa-magnifying-glass"></i>
-                <input type="text" id="product-search-input" placeholder="Cari varian menu..." oninput="filterProductsTable(this.value)">
+                <input type="text" id="product-search-input" placeholder="Cari varian menu..."
+                  oninput="filterProductsTable(this.value)">
               </div>
               <button class="btn-primary" onclick="openProductModal()">
                 <i class="fa-solid fa-plus"></i> Tambah Menu Baru
@@ -309,7 +316,7 @@
 
         <!-- ==================== SECTION 4: OUTLETS ==================== -->
         <section id="section-outlets" class="cms-section">
-          
+
           <div class="section-toolbar">
             <div class="toolbar-left">
               <h2>Jaringan Outlet Resmi Kota Balikpapan</h2>
@@ -328,7 +335,7 @@
 
         <!-- ==================== SECTION 5: RUNNING TICKER ==================== -->
         <section id="section-ticker" class="cms-section">
-          
+
           <div class="section-toolbar">
             <div class="toolbar-left">
               <h2>Running Promo Ticker (Marquee Balikpapan)</h2>
@@ -349,7 +356,7 @@
 
         <!-- ==================== SECTION 6: SETTINGS & BACKUP ==================== -->
         <section id="section-settings" class="cms-section">
-          
+
           <div class="section-toolbar">
             <div class="toolbar-left">
               <h2>Pencadangan, Pemulihan & Reset Data</h2>
@@ -367,7 +374,8 @@
               </div>
               <div class="panel-body">
                 <p style="font-size: 13.5px; color: var(--text-muted); margin-bottom: 16px;">
-                  Unduh seluruh database (produk, stok outlet, flyer 4:5, cabang, dan ticker) dalam satu file JSON untuk dicadangkan.
+                  Unduh seluruh database (produk, stok outlet, flyer 4:5, cabang, dan ticker) dalam satu file JSON untuk
+                  dicadangkan.
                 </p>
                 <button class="btn-primary" onclick="exportDataJSON()">
                   <i class="fa-solid fa-file-arrow-down"></i> Unduh File Backup JSON
@@ -386,7 +394,8 @@
                 <p style="font-size: 13.5px; color: var(--text-muted); margin-bottom: 16px;">
                   Pulihkan data dari file JSON yang telah dicadangkan sebelumnya.
                 </p>
-                <input type="file" id="import-json-input" accept=".json" style="display: none;" onchange="importDataJSON(event)">
+                <input type="file" id="import-json-input" accept=".json" style="display: none;"
+                  onchange="importDataJSON(event)">
                 <button class="btn-secondary" onclick="document.getElementById('import-json-input').click()">
                   <i class="fa-solid fa-file-arrow-up"></i> Pilih File JSON & Impor
                 </button>
@@ -415,11 +424,12 @@
 
         <!-- ==================== SECTION 7: STATUS SEWA & TAGIHAN ==================== -->
         <section id="section-subscription" class="cms-section">
-          
+
           <div class="section-toolbar">
             <div class="toolbar-left">
               <h2>Status Sewa & Tagihan Website</h2>
-              <p>Pantau masa aktif sewa platform, histori invoice, dan lakukan perpanjangan layanan website cabang Anda.</p>
+              <p>Pantau masa aktif sewa platform, histori invoice, dan lakukan perpanjangan layanan website cabang Anda.
+              </p>
             </div>
             <a href="billing.html" class="btn-primary">
               <i class="fa-solid fa-cart-plus"></i> Perpanjang Masa Sewa
@@ -519,9 +529,13 @@
               </div>
               <div class="panel-body">
                 <p style="font-size: 13.5px; color: var(--text-muted); line-height: 1.6;">
-                  Layanan sewa website Amanda Platform mencakup hosting ultra-cepat 99.9% uptime, backup database harian, domain kustom, serta pembaruan fitur katalog & promo berkala. Jika butuh konsultasi teknis atau konfirmasi pembayaran manual, hubungi tim support melalui WhatsApp.
+                  Layanan sewa website Amanda Platform mencakup hosting ultra-cepat 99.9% uptime, backup database
+                  harian, domain kustom, serta pembaruan fitur katalog & promo berkala. Jika butuh konsultasi teknis
+                  atau konfirmasi pembayaran manual, hubungi tim support melalui WhatsApp.
                 </p>
-                <a href="https://wa.me/6281234567890?text=Halo%20Admin%20Amanda,%20saya%20ingin%20konsultasi%20mengenai%20sewa%20sistem%20website" target="_blank" class="btn-secondary" style="margin-top: 12px; display: inline-flex; align-items: center; gap: 8px;">
+                <a href="https://wa.me/6281234567890?text=Halo%20Admin%20Amanda,%20saya%20ingin%20konsultasi%20mengenai%20sewa%20sistem%20website"
+                  target="_blank" class="btn-secondary"
+                  style="margin-top: 12px; display: inline-flex; align-items: center; gap: 8px;">
                   <i class="fa-brands fa-whatsapp" style="color: #25d366;"></i> Hubungi Customer Care Sewa
                 </a>
               </div>
@@ -544,7 +558,7 @@
       </div>
       <form id="promo-form" onsubmit="savePromoForm(event)">
         <input type="hidden" id="promo-form-id">
-        
+
         <div class="form-grid-2">
           <div class="form-group">
             <label>Judul Promo *</label>
@@ -568,7 +582,8 @@
         <div class="form-group">
           <label>Upload Foto Poster Flyer (Rasio 4:5) *</label>
           <div class="file-upload-wrapper">
-            <input type="file" id="promo-form-file" accept="image/*" class="file-upload-input" onchange="handleImageFileUpload(event, 'promo-form-image', 'promo-img-preview')">
+            <input type="file" id="promo-form-file" accept="image/*" class="file-upload-input"
+              onchange="handleImageFileUpload(event, 'promo-form-image', 'promo-img-preview')">
             <label for="promo-form-file" class="file-upload-dropzone">
               <i class="fa-solid fa-cloud-arrow-up"></i>
               <span class="dropzone-main-text">Pilih Foto dari Perangkat / HP</span>
@@ -578,7 +593,8 @@
 
           <div class="image-url-toggle-wrap">
             <span style="font-size: 11.5px; color: var(--text-dim);">Atau gunakan path / link gambar:</span>
-            <input type="text" id="promo-form-image" required placeholder="assets/promo_flyer_1.jpg atau data image" oninput="previewPromoImage(this.value)">
+            <input type="text" id="promo-form-image" required placeholder="assets/promo_flyer_1.jpg atau data image"
+              oninput="previewPromoImage(this.value)">
           </div>
 
           <div class="image-preview-box" id="promo-img-preview-box">
@@ -588,7 +604,8 @@
 
         <div class="form-group">
           <label>Periode Masa Berlaku *</label>
-          <input type="text" id="promo-form-period" required placeholder="Contoh: Berlaku Hari Ini s/d Pukul 21:30 WITA">
+          <input type="text" id="promo-form-period" required
+            placeholder="Contoh: Berlaku Hari Ini s/d Pukul 21:30 WITA">
         </div>
 
         <div class="form-group">
@@ -598,7 +615,8 @@
 
         <div class="form-group">
           <label>Pesan Default WhatsApp</label>
-          <input type="text" id="promo-form-waMsg" placeholder="Contoh: Halo Amanda Brownies Balikpapan, saya ingin klaim promo ini...">
+          <input type="text" id="promo-form-waMsg"
+            placeholder="Contoh: Halo Amanda Brownies Balikpapan, saya ingin klaim promo ini...">
         </div>
 
         <div class="modal-actions">
@@ -656,7 +674,8 @@
         <div class="form-group">
           <label>Upload Foto Produk *</label>
           <div class="file-upload-wrapper">
-            <input type="file" id="prod-form-file" accept="image/*" class="file-upload-input" onchange="handleImageFileUpload(event, 'prod-form-image', 'prod-img-preview')">
+            <input type="file" id="prod-form-file" accept="image/*" class="file-upload-input"
+              onchange="handleImageFileUpload(event, 'prod-form-image', 'prod-img-preview')">
             <label for="prod-form-file" class="file-upload-dropzone">
               <i class="fa-solid fa-cloud-arrow-up"></i>
               <span class="dropzone-main-text">Pilih Foto Produk dari Perangkat / HP</span>
@@ -666,7 +685,8 @@
 
           <div class="image-url-toggle-wrap">
             <span style="font-size: 11.5px; color: var(--text-dim);">Atau path / link gambar:</span>
-            <input type="text" id="prod-form-image" required placeholder="assets/amanda_brownies_hero_1790255505694.jpg" oninput="previewProductImage(this.value)">
+            <input type="text" id="prod-form-image" required placeholder="assets/amanda_brownies_hero_1790255505694.jpg"
+              oninput="previewProductImage(this.value)">
           </div>
 
           <div class="image-preview-box" id="prod-img-preview-box" style="aspect-ratio: 16/10; width: 140px;">
@@ -681,9 +701,11 @@
 
         <!-- STOCKS PER 6 BALIKPAPAN OUTLETS -->
         <div class="stocks-manager-section">
-          <h4><i class="fa-solid fa-boxes-stacked" style="color: var(--primary-olive);"></i> Status Ketersediaan di 6 Cabang Balikpapan</h4>
-          <p style="font-size: 12.5px; color: var(--text-muted); margin-bottom: 12px;">Atur ketersediaan stok untuk masing-masing outlet saat ini.</p>
-          
+          <h4><i class="fa-solid fa-boxes-stacked" style="color: var(--primary-olive);"></i> Status Ketersediaan di 6
+            Cabang Balikpapan</h4>
+          <p style="font-size: 12.5px; color: var(--text-muted); margin-bottom: 12px;">Atur ketersediaan stok untuk
+            masing-masing outlet saat ini.</p>
+
           <div class="stocks-table-wrap">
             <table class="stocks-mini-table">
               <thead>
@@ -759,7 +781,8 @@
         <div class="form-group">
           <label>Upload Foto Storefront Fasad Toko *</label>
           <div class="file-upload-wrapper">
-            <input type="file" id="outlet-form-file" accept="image/*" class="file-upload-input" onchange="handleImageFileUpload(event, 'outlet-form-image', 'outlet-img-preview')">
+            <input type="file" id="outlet-form-file" accept="image/*" class="file-upload-input"
+              onchange="handleImageFileUpload(event, 'outlet-form-image', 'outlet-img-preview')">
             <label for="outlet-form-file" class="file-upload-dropzone">
               <i class="fa-solid fa-cloud-arrow-up"></i>
               <span class="dropzone-main-text">Pilih Foto Toko dari Perangkat / HP</span>
@@ -769,7 +792,8 @@
 
           <div class="image-url-toggle-wrap">
             <span style="font-size: 11.5px; color: var(--text-dim);">Atau path / link gambar:</span>
-            <input type="text" id="outlet-form-image" required placeholder="assets/outlet_mt_haryono.jpg" oninput="previewOutletImage(this.value)">
+            <input type="text" id="outlet-form-image" required placeholder="assets/outlet_mt_haryono.jpg"
+              oninput="previewOutletImage(this.value)">
           </div>
 
           <div class="image-preview-box" id="outlet-img-preview-box" style="aspect-ratio: 16/10; width: 140px;">
@@ -785,12 +809,14 @@
         <!-- BOOTHS MANAGER SECTION -->
         <div class="stocks-manager-section" style="margin-top: 14px;">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-            <h4 style="margin: 0; font-size: 13.5px;"><i class="fa-solid fa-store" style="color: var(--ch-olive);"></i> Titik Booth Counter Cabang</h4>
+            <h4 style="margin: 0; font-size: 13.5px;"><i class="fa-solid fa-store" style="color: var(--ch-olive);"></i>
+              Titik Booth Counter Cabang</h4>
             <button type="button" class="btn-secondary-sm" onclick="addNewBoothRow()">
               <i class="fa-solid fa-plus"></i> Tambah Booth
             </button>
           </div>
-          <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 10px;">Booth counter ini akan otomatis tampil di menu dropdown navbar dan kartu outlet di halaman depan.</p>
+          <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 10px;">Booth counter ini akan otomatis
+            tampil di menu dropdown navbar dan kartu outlet di halaman depan.</p>
           <div id="outlet-booths-editor-container" class="outlet-booths-editor-list">
             <!-- Injected by openOutletModal() -->
           </div>
@@ -809,7 +835,8 @@
     <div class="cms-modal-card">
       <div class="modal-head">
         <h3 id="pricelist-modal-title">Edit Poster Price List</h3>
-        <button class="modal-close-btn" onclick="closeModal('pricelist-modal')"><i class="fa-solid fa-xmark"></i></button>
+        <button class="modal-close-btn" onclick="closeModal('pricelist-modal')"><i
+            class="fa-solid fa-xmark"></i></button>
       </div>
       <form id="pricelist-form" onsubmit="savePriceListForm(event)">
         <input type="hidden" id="pricelist-form-id">
@@ -827,7 +854,8 @@
         <div class="form-group">
           <label>Upload Gambar Poster Price List *</label>
           <div class="file-upload-wrapper">
-            <input type="file" id="pricelist-form-file" accept="image/*" class="file-upload-input" onchange="handleImageFileUpload(event, 'pricelist-form-image', 'pricelist-img-preview')">
+            <input type="file" id="pricelist-form-file" accept="image/*" class="file-upload-input"
+              onchange="handleImageFileUpload(event, 'pricelist-form-image', 'pricelist-img-preview')">
             <label for="pricelist-form-file" class="file-upload-dropzone">
               <i class="fa-solid fa-cloud-arrow-up"></i>
               <span class="dropzone-main-text">Pilih Poster dari Perangkat / HP</span>
@@ -837,22 +865,26 @@
 
           <div class="image-url-toggle-wrap">
             <span style="font-size: 11.5px; color: var(--text-dim);">Atau path / link gambar:</span>
-            <input type="text" id="pricelist-form-image" required placeholder="assets/amanda_pricelist_poster.jpg" oninput="previewPriceListImage(this.value)">
+            <input type="text" id="pricelist-form-image" required placeholder="assets/amanda_pricelist_poster.jpg"
+              oninput="previewPriceListImage(this.value)">
           </div>
 
           <div class="image-preview-box" style="margin-top: 8px; width: 140px; aspect-ratio: 4/5;">
-            <img id="pricelist-img-preview" src="assets/amanda_pricelist_poster.jpg" alt="Preview Price List" style="max-height: 200px; object-fit: contain;">
+            <img id="pricelist-img-preview" src="assets/amanda_pricelist_poster.jpg" alt="Preview Price List"
+              style="max-height: 200px; object-fit: contain;">
           </div>
         </div>
 
         <div class="form-group">
           <label>Keterangan / Subtitle</label>
-          <input type="text" id="pricelist-form-caption" placeholder="Daftar Harga Resmi Amanda Brownies Kalimantan - Outlet Balikpapan">
+          <input type="text" id="pricelist-form-caption"
+            placeholder="Daftar Harga Resmi Amanda Brownies Kalimantan - Outlet Balikpapan">
         </div>
 
         <div class="modal-actions">
           <button type="button" class="btn-secondary" onclick="closeModal('pricelist-modal')">Batal</button>
-          <button type="submit" class="btn-primary"><i class="fa-solid fa-floppy-disk"></i> Simpan Poster Price List</button>
+          <button type="submit" class="btn-primary"><i class="fa-solid fa-floppy-disk"></i> Simpan Poster Price
+            List</button>
         </div>
       </form>
     </div>
@@ -880,7 +912,8 @@
 
         <div class="form-group">
           <label>Teks Pengumuman *</label>
-          <input type="text" id="ticker-form-text" required placeholder="Diskon 20% Brownies Cheese Cream & Tiramisu Marble">
+          <input type="text" id="ticker-form-text" required
+            placeholder="Diskon 20% Brownies Cheese Cream & Tiramisu Marble">
         </div>
 
         <div class="modal-actions">

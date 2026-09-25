@@ -23,16 +23,18 @@
 <body>
 
   <div class="login-page-wrap">
-    
+
     <!-- Left Visual Panel (Desktop) -->
     <div class="login-visual-panel">
       <div class="visual-overlay"></div>
       <div class="visual-content">
         <div class="visual-logo-badge" style="background: none; box-shadow: none; width: auto; height: auto;">
-          <img src="assets/amanda_logo.svg" alt="Amanda Brownies Official Logo" style="height: 64px; width: auto; max-width: 140px; object-fit: contain; filter: drop-shadow(0 4px 14px rgba(0,0,0,0.35));">
+          <img src="assets/logo.png" alt="Amanda Brownies Official Logo"
+            style="height: 64px; width: auto; max-width: 140px; object-fit: contain; filter: drop-shadow(0 4px 14px rgba(0,0,0,0.35));">
         </div>
         <h1 class="font-serif">AMANDA PLATFORM</h1>
-        <p class="visual-tagline">Sistem Manajemen Terpadu Landing Page, Katalog Menu, Multi-Cabang Outlet, & Portal WaaS Kalimantan.</p>
+        <p class="visual-tagline">Sistem Manajemen Terpadu Landing Page, Katalog Menu, Multi-Cabang Outlet, & Portal
+          WaaS Kalimantan.</p>
 
         <div class="visual-highlights">
           <div class="vh-item">
@@ -57,7 +59,7 @@
 
     <!-- Right Form Panel -->
     <div class="login-form-panel">
-      
+
       <div class="login-card-container">
 
         <!-- Top Navigation / Back -->
@@ -76,7 +78,8 @@
 
         <!-- Role Switcher Tabs -->
         <div class="role-switcher">
-          <button type="button" class="role-tab active" id="tab-role-superadmin" onclick="switchLoginRole('superadmin')">
+          <button type="button" class="role-tab active" id="tab-role-superadmin"
+            onclick="switchLoginRole('superadmin')">
             <i class="fa-solid fa-crown"></i>
             <span>Superadmin</span>
           </button>
@@ -110,7 +113,8 @@
             </div>
             <div class="input-with-icon">
               <i class="fa-solid fa-key"></i>
-              <input type="password" id="login-password" required placeholder="••••••••••••" autocomplete="current-password">
+              <input type="password" id="login-password" required placeholder="••••••••••••"
+                autocomplete="current-password">
               <button type="button" class="btn-toggle-eye" onclick="togglePasswordVisibility('login-password', this)">
                 <i class="fa-regular fa-eye"></i>
               </button>
@@ -137,11 +141,13 @@
             <strong>Akun Login Pengujian (1-Klik Isi):</strong>
           </div>
           <div class="demo-buttons-grid">
-            <button type="button" class="btn-demo-autofill" onclick="fillDemoCreds('superadmin@amanda.id', 'superadmin2026', 'superadmin')">
+            <button type="button" class="btn-demo-autofill"
+              onclick="fillDemoCreds('superadmin@amanda.id', 'superadmin2026', 'superadmin')">
               👑 <strong>Superadmin</strong>
               <small>superadmin@amanda.id</small>
             </button>
-            <button type="button" class="btn-demo-autofill" onclick="fillDemoCreds('admin.balikpapan@amandabrownies.id', 'amanda123', 'tenant_admin')">
+            <button type="button" class="btn-demo-autofill"
+              onclick="fillDemoCreds('admin.balikpapan@amandabrownies.id', 'amanda123', 'tenant_admin')">
               🍰 <strong>Admin Balikpapan</strong>
               <small>admin.balikpapan@...</small>
             </button>

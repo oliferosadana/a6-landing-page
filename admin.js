@@ -327,6 +327,9 @@ function deletePromo(id) {
   if (confirm('Apakah Anda yakin ingin menghapus promo flyer ini?')) {
     AMANDA_PROMOS = AMANDA_PROMOS.filter(p => p.id !== id);
     saveStoredData('amanda_promos', AMANDA_PROMOS);
+    if (typeof pushToSupabase === 'function' && typeof isSupabaseActive === 'function' && isSupabaseActive()) {
+      pushToSupabase('promos', { id: id }, 'delete');
+    }
     renderPromosManager();
     renderDashboard();
     showCmsToast('Promo flyer berhasil dihapus!');
@@ -511,6 +514,9 @@ function deleteProduct(id) {
   if (confirm('Apakah Anda yakin ingin menghapus produk ini dari katalog?')) {
     AMANDA_PRODUCTS = AMANDA_PRODUCTS.filter(p => p.id !== id);
     saveStoredData('amanda_products', AMANDA_PRODUCTS);
+    if (typeof pushToSupabase === 'function' && typeof isSupabaseActive === 'function' && isSupabaseActive()) {
+      pushToSupabase('products', { id: id }, 'delete');
+    }
     renderProductsManager();
     renderDashboard();
     showCmsToast('Produk berhasil dihapus!');
@@ -797,6 +803,9 @@ function deleteOutlet(id) {
   if (confirm('Apakah Anda yakin ingin menghapus data cabang outlet ini beserta semua booth-nya?')) {
     AMANDA_OUTLETS = AMANDA_OUTLETS.filter(o => o.id !== id);
     saveStoredData('amanda_outlets', AMANDA_OUTLETS);
+    if (typeof pushToSupabase === 'function' && typeof isSupabaseActive === 'function' && isSupabaseActive()) {
+      pushToSupabase('outlets', { id: id }, 'delete');
+    }
     renderOutletsManager();
     renderDashboard();
     showCmsToast('Data outlet berhasil dihapus!');
@@ -918,8 +927,12 @@ function editTicker(index) {
 
 function deleteTicker(index) {
   if (confirm('Hapus item pengumuman ticker ini?')) {
+    const deletedItem = AMANDA_TICKER[index];
     AMANDA_TICKER.splice(index, 1);
     saveStoredData('amanda_ticker', AMANDA_TICKER);
+    if (deletedItem && deletedItem.id && typeof pushToSupabase === 'function' && typeof isSupabaseActive === 'function' && isSupabaseActive()) {
+      pushToSupabase('ticker', { id: deletedItem.id }, 'delete');
+    }
     renderTickerManager();
     renderDashboard();
     showCmsToast('Item ticker berhasil dihapus!');

@@ -362,12 +362,20 @@ body {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  transition: var(--transition-fast);
+  transition: background-color var(--transition-fast), box-shadow var(--transition-fast), transform var(--transition-fast);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  transform: translateZ(0);
 }
 
 .btn-primary:hover {
   background: var(--ch-olive-dark);
   box-shadow: 0 4px 12px rgba(79, 91, 42, 0.25);
+  transform: translateY(-1px);
+}
+
+.btn-primary:active {
+  transform: translateY(0);
 }
 
 .btn-secondary {
@@ -382,13 +390,21 @@ body {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  transition: var(--transition-fast);
+  transition: background-color var(--transition-fast), color var(--transition-fast), border-color var(--transition-fast), transform var(--transition-fast);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  transform: translateZ(0);
 }
 
 .btn-secondary:hover {
   background: #ffffff;
   border-color: var(--ch-olive);
   color: var(--ch-olive);
+  transform: translateY(-1px);
+}
+
+.btn-secondary:active {
+  transform: translateY(0);
 }
 
 .btn-secondary-sm {
@@ -400,13 +416,21 @@ body {
   font-size: 12px;
   font-weight: 700;
   cursor: pointer;
-  transition: var(--transition-fast);
+  transition: background-color var(--transition-fast), color var(--transition-fast), border-color var(--transition-fast), transform var(--transition-fast);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  transform: translateZ(0);
 }
 
 .btn-secondary-sm:hover {
   background: var(--ch-olive);
   color: #ffffff;
   border-color: var(--ch-olive);
+  transform: translateY(-1px);
+}
+
+.btn-secondary-sm:active {
+  transform: translateY(0);
 }
 
 .btn-danger {
@@ -421,11 +445,19 @@ body {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  transition: var(--transition-fast);
+  transition: background-color var(--transition-fast), transform var(--transition-fast);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  transform: translateZ(0);
 }
 
 .btn-danger:hover {
   background: #a93226;
+  transform: translateY(-1px);
+}
+
+.btn-danger:active {
+  transform: translateY(0);
 }
 
 .search-box-cms {

@@ -598,31 +598,62 @@ function saveProductForm(e) {
 // ===================================================================
 // 3. OUTLETS MANAGEMENT
 // ===================================================================
+// 3. OUTLETS & BOOTH COUNTERS MANAGEMENT
+// ===================================================================
 function renderOutletsManager() {
   const grid = document.getElementById('outlets-management-grid');
   if (!grid) return;
 
-  grid.innerHTML = AMANDA_OUTLETS.map(o => `
-    <div class="cms-outlet-card">
-      <div class="cms-outlet-media">
-        <img src="${o.image}" alt="${o.name}" />
-        <span class="cms-outlet-city-badge">${o.city}</span>
-      </div>
-      <div class="cms-outlet-body">
-        <h4 class="cms-outlet-name font-serif">${o.name}</h4>
-        <p class="cms-outlet-addr"><i class="fa-solid fa-location-dot" style="color: var(--ch-olive);"></i> ${o.address}</p>
-        <div class="cms-outlet-meta">
-          <span><i class="fa-regular fa-clock"></i> ${o.hours}</span>
-          <span><i class="fa-brands fa-whatsapp" style="color: var(--accent-green);"></i> +${o.wa}</span>
-          <span><i class="fa-solid fa-phone"></i> ${o.phone}</span>
+  grid.innerHTML = AMANDA_OUTLETS.map(o => {
+    const boothsList = o.booths || [];
+    const boothsPillsHTML = boothsList.length > 0 ? `
+      <div class="cms-outlet-booths-box">
+        <div class="cms-booths-header">
+          <span><i class="fa-solid fa-store" style="color: var(--ch-gold-dark);"></i> ${boothsList.length} Titik Booth Counter:</span>
         </div>
-        <div class="cms-promo-actions">
-          <button class="btn-edit-sm" onclick="editOutlet('${o.id}')"><i class="fa-solid fa-pen-to-square"></i> Edit Cabang</button>
-          <button class="btn-del-sm" onclick="deleteOutlet('${o.id}')" title="Hapus"><i class="fa-solid fa-trash"></i></button>
+        <div class="cms-booths-tags">
+          ${boothsList.map(b => `
+            <div class="cms-booth-badge" title="Lokasi: ${b.location || '-'}\nWA: ${b.wa || o.wa}\nMaps: ${b.mapsUrl || '-'}">
+              <span class="booth-dot"></span>
+              <strong>${b.name}</strong>
+              <small>${b.hours || o.hours}</small>
+              <div class="cms-booth-badge-links">
+                <a href="https://wa.me/${b.wa || o.wa}" target="_blank" title="WhatsApp: ${b.wa || o.wa}"><i class="fa-brands fa-whatsapp" style="color: #25d366;"></i></a>
+                <a href="${b.mapsUrl || o.mapsUrl || '#'}" target="_blank" title="Buka Rute Maps"><i class="fa-solid fa-map-location-dot" style="color: #3498db;"></i></a>
+              </div>
+            </div>
+          `).join('')}
         </div>
       </div>
-    </div>
-  `).join('');
+    ` : '<div style="font-size: 11.5px; color: var(--text-dim); margin-top: 6px; font-style: italic;">Belum ada booth counter cabang.</div>';
+
+    return `
+      <div class="cms-outlet-card">
+        <div class="cms-outlet-media">
+          <img src="${o.image}" alt="${o.name}" />
+          <span class="cms-outlet-city-badge">${o.city}</span>
+        </div>
+        <div class="cms-outlet-body">
+          <h4 class="cms-outlet-name font-serif">${o.name}</h4>
+          <p class="cms-outlet-addr"><i class="fa-solid fa-location-dot" style="color: var(--ch-olive);"></i> ${o.address}</p>
+          
+          <div class="cms-outlet-meta">
+            <span><i class="fa-regular fa-clock"></i> <strong>Jam Buka:</strong> ${o.hours}</span>
+            <span><i class="fa-brands fa-whatsapp" style="color: var(--accent-green);"></i> <strong>WA Cabang:</strong> +${o.wa}</span>
+            <span><i class="fa-solid fa-phone"></i> <strong>Telepon Toko:</strong> ${o.phone || '-'}</span>
+            <span><i class="fa-solid fa-map-pin" style="color: #e74c3c;"></i> <strong>Google Maps:</strong> <a href="${o.mapsUrl}" target="_blank" style="color: var(--ch-olive); text-decoration: underline; font-size: 11px;">Buka Peta Cabang <i class="fa-solid fa-arrow-up-right-from-square" style="font-size: 9px;"></i></a></span>
+          </div>
+
+          ${boothsPillsHTML}
+
+          <div class="cms-promo-actions">
+            <button class="btn-edit-sm" onclick="editOutlet('${o.id}')"><i class="fa-solid fa-pen-to-square"></i> Edit Cabang & Booth</button>
+            <button class="btn-del-sm" onclick="deleteOutlet('${o.id}')" title="Hapus"><i class="fa-solid fa-trash"></i></button>
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
 }
 
 function openOutletModal(outlet = null) {
@@ -635,7 +666,7 @@ function openOutletModal(outlet = null) {
 
   form.reset();
   if (outlet) {
-    titleElem.textContent = 'Edit Data Cabang: ' + outlet.name;
+    titleElem.textContent = 'Edit Data Cabang & Booth: ' + outlet.name;
     document.getElementById('outlet-form-id').value = outlet.id;
     document.getElementById('outlet-form-name').value = outlet.name;
     document.getElementById('outlet-form-city').value = outlet.city;
@@ -646,34 +677,59 @@ function openOutletModal(outlet = null) {
     document.getElementById('outlet-form-image').value = outlet.image;
     document.getElementById('outlet-form-maps').value = outlet.mapsUrl || '';
     previewOutletImage(outlet.image);
-    renderBoothEditorRows(outlet.booths || []);
+    renderBoothEditorRows(outlet.booths || [], outlet.wa);
   } else {
-    titleElem.textContent = 'Tambah Cabang Outlet Baru';
+    titleElem.textContent = 'Tambah Cabang Outlet & Booth Baru';
     document.getElementById('outlet-form-id').value = '';
     document.getElementById('outlet-form-image').value = 'assets/outlet_mt_haryono.jpg';
     document.getElementById('outlet-form-hours').value = '07.30 - 21.30 WITA';
+    document.getElementById('outlet-form-wa').value = '6281322119988';
     previewOutletImage('assets/outlet_mt_haryono.jpg');
-    renderBoothEditorRows([]);
+    renderBoothEditorRows([], '6281322119988');
   }
 
   modal.classList.add('active');
 }
 
-function renderBoothEditorRows(booths = []) {
+function renderBoothEditorRows(booths = [], defaultWa = '6281322119988') {
   const container = document.getElementById('outlet-booths-editor-container');
   if (!container) return;
 
   if (booths.length === 0) {
-    container.innerHTML = '<div style="font-size: 12px; color: var(--text-dim); text-align: center; padding: 12px; background: #fff; border: 1px dashed var(--ch-sand-border); border-radius: var(--radius-sm);">Belum ada booth counter cabang. Klik "+ Tambah Booth" di atas untuk menambahkan.</div>';
+    container.innerHTML = '<div style="font-size: 12px; color: var(--text-dim); text-align: center; padding: 14px; background: #fff; border: 1px dashed var(--ch-sand-border); border-radius: var(--radius-sm);"><i class="fa-solid fa-store" style="font-size: 18px; color: var(--ch-gold); display: block; margin-bottom: 6px;"></i>Belum ada booth counter cabang. Klik <strong>"+ Tambah Booth"</strong> di atas untuk menambahkan titik counter baru beserta nomor WhatsApp & link Google Maps.</div>';
     return;
   }
 
   container.innerHTML = booths.map((b, idx) => `
     <div class="booth-editor-card" data-booth-id="${b.id || ('bth-' + idx)}">
-      <input type="text" class="booth-name-input" value="${b.name || ''}" placeholder="Nama Booth (contoh: Booth Living Plaza)" required>
-      <input type="text" class="booth-loc-input" value="${b.location || ''}" placeholder="Lokasi (contoh: Lantai Dasar)">
-      <input type="text" class="booth-hours-input" value="${b.hours || '10.00 - 22.00 WITA'}" placeholder="Jam Operasional">
-      <button type="button" class="btn-del-sm" onclick="removeBoothRow(this)" title="Hapus Booth"><i class="fa-solid fa-trash"></i></button>
+      <div class="booth-editor-top">
+        <div class="booth-input-group flex-2">
+          <label><i class="fa-solid fa-store"></i> Nama Titik Booth Counter *</label>
+          <input type="text" class="booth-name-input" value="${b.name || ''}" placeholder="Contoh: Booth BSCC Dome / Booth Living Plaza" required>
+        </div>
+        <div class="booth-input-group flex-2">
+          <label><i class="fa-solid fa-location-dot"></i> Lokasi Detail / Mall</label>
+          <input type="text" class="booth-loc-input" value="${b.location || ''}" placeholder="Contoh: Lantai Dasar Depan Informa">
+        </div>
+        <div class="booth-input-group flex-1">
+          <label><i class="fa-regular fa-clock"></i> Jam Operasional</label>
+          <input type="text" class="booth-hours-input" value="${b.hours || '10.00 - 22.00 WITA'}" placeholder="10.00 - 22.00 WITA">
+        </div>
+        <button type="button" class="btn-del-booth" onclick="removeBoothRow(this)" title="Hapus Titik Booth">
+          <i class="fa-solid fa-trash"></i>
+        </button>
+      </div>
+
+      <div class="booth-editor-bottom">
+        <div class="booth-input-group flex-1">
+          <label><i class="fa-brands fa-whatsapp" style="color: #25d366;"></i> Nomor WhatsApp Khusus Booth (Format 62xxx)</label>
+          <input type="text" class="booth-wa-input" value="${b.wa || defaultWa || ''}" placeholder="Contoh: 6281255443322">
+        </div>
+        <div class="booth-input-group flex-2">
+          <label><i class="fa-solid fa-map-location-dot" style="color: #e74c3c;"></i> Tautan Google Maps Titik Booth</label>
+          <input type="text" class="booth-maps-input" value="${b.mapsUrl || ''}" placeholder="https://maps.google.com/?q=Living+Plaza+Balikpapan">
+        </div>
+      </div>
     </div>
   `).join('');
 }
@@ -686,14 +742,39 @@ function addNewBoothRow() {
     container.innerHTML = '';
   }
 
+  const currentWa = document.getElementById('outlet-form-wa')?.value || '6281322119988';
   const newCard = document.createElement('div');
   newCard.className = 'booth-editor-card';
   newCard.setAttribute('data-booth-id', 'bth-custom-' + Date.now());
   newCard.innerHTML = `
-    <input type="text" class="booth-name-input" value="" placeholder="Nama Booth Counter" required>
-    <input type="text" class="booth-loc-input" value="" placeholder="Lokasi / Mall / SPBU">
-    <input type="text" class="booth-hours-input" value="10.00 - 22.00 WITA" placeholder="Jam Operasional">
-    <button type="button" class="btn-del-sm" onclick="removeBoothRow(this)" title="Hapus Booth"><i class="fa-solid fa-trash"></i></button>
+    <div class="booth-editor-top">
+      <div class="booth-input-group flex-2">
+        <label><i class="fa-solid fa-store"></i> Nama Titik Booth Counter *</label>
+        <input type="text" class="booth-name-input" value="" placeholder="Contoh: Booth Baru Mall / SPBU" required>
+      </div>
+      <div class="booth-input-group flex-2">
+        <label><i class="fa-solid fa-location-dot"></i> Lokasi Detail / Mall</label>
+        <input type="text" class="booth-loc-input" value="" placeholder="Contoh: Lantai 1 Dekat Pintu Utama">
+      </div>
+      <div class="booth-input-group flex-1">
+        <label><i class="fa-regular fa-clock"></i> Jam Operasional</label>
+        <input type="text" class="booth-hours-input" value="10.00 - 22.00 WITA" placeholder="10.00 - 22.00 WITA">
+      </div>
+      <button type="button" class="btn-del-booth" onclick="removeBoothRow(this)" title="Hapus Titik Booth">
+        <i class="fa-solid fa-trash"></i>
+      </button>
+    </div>
+
+    <div class="booth-editor-bottom">
+      <div class="booth-input-group flex-1">
+        <label><i class="fa-brands fa-whatsapp" style="color: #25d366;"></i> Nomor WhatsApp Khusus Booth (Format 62xxx)</label>
+        <input type="text" class="booth-wa-input" value="${currentWa}" placeholder="Contoh: 6281255443322">
+      </div>
+      <div class="booth-input-group flex-2">
+        <label><i class="fa-solid fa-map-location-dot" style="color: #e74c3c;"></i> Tautan Google Maps Titik Booth</label>
+        <input type="text" class="booth-maps-input" value="" placeholder="https://maps.google.com/?q=Lokasi+Booth+Balikpapan">
+      </div>
+    </div>
   `;
   container.appendChild(newCard);
 }
@@ -703,7 +784,7 @@ function removeBoothRow(btn) {
   if (card) card.remove();
   const container = document.getElementById('outlet-booths-editor-container');
   if (container && container.children.length === 0) {
-    container.innerHTML = '<div style="font-size: 12px; color: var(--text-dim); text-align: center; padding: 12px; background: #fff; border: 1px dashed var(--ch-sand-border); border-radius: var(--radius-sm);">Belum ada booth counter cabang. Klik "+ Tambah Booth" di atas untuk menambahkan.</div>';
+    container.innerHTML = '<div style="font-size: 12px; color: var(--text-dim); text-align: center; padding: 14px; background: #fff; border: 1px dashed var(--ch-sand-border); border-radius: var(--radius-sm);"><i class="fa-solid fa-store" style="font-size: 18px; color: var(--ch-gold); display: block; margin-bottom: 6px;"></i>Belum ada booth counter cabang. Klik <strong>"+ Tambah Booth"</strong> di atas untuk menambahkan titik counter baru beserta nomor WhatsApp & link Google Maps.</div>';
   }
 }
 
@@ -713,7 +794,7 @@ function editOutlet(id) {
 }
 
 function deleteOutlet(id) {
-  if (confirm('Apakah Anda yakin ingin menghapus data cabang outlet ini?')) {
+  if (confirm('Apakah Anda yakin ingin menghapus data cabang outlet ini beserta semua booth-nya?')) {
     AMANDA_OUTLETS = AMANDA_OUTLETS.filter(o => o.id !== id);
     saveStoredData('amanda_outlets', AMANDA_OUTLETS);
     renderOutletsManager();
@@ -740,13 +821,22 @@ function saveOutletForm(e) {
     const nameInput = row.querySelector('.booth-name-input');
     const locInput = row.querySelector('.booth-loc-input');
     const hoursInput = row.querySelector('.booth-hours-input');
+    const waInput = row.querySelector('.booth-wa-input');
+    const mapsInput = row.querySelector('.booth-maps-input');
+    
+    const bName = nameInput ? nameInput.value.trim() : `Booth ${idx + 1}`;
+    const rawWa = waInput ? waInput.value.trim().replace(/[^0-9]/g, '') : '';
+    const bWa = rawWa || wa;
+    const bMaps = mapsInput && mapsInput.value.trim() ? mapsInput.value.trim() : `https://maps.google.com/?q=${encodeURIComponent(bName + ' ' + city + ' Balikpapan')}`;
+
     return {
       id: row.getAttribute('data-booth-id') || ('bth-' + idx),
-      name: nameInput ? nameInput.value.trim() : `Booth Cabang ${idx + 1}`,
+      name: bName,
       location: locInput ? locInput.value.trim() : '',
-      hours: hoursInput ? hoursInput.value.trim() : '10.00 - 22.00 WITA',
+      hours: hoursInput && hoursInput.value.trim() ? hoursInput.value.trim() : '10.00 - 22.00 WITA',
       status: 'Tersedia',
-      wa: wa
+      wa: bWa,
+      mapsUrl: bMaps
     };
   }).filter(b => b.name !== '');
 
@@ -774,7 +864,7 @@ function saveOutletForm(e) {
   closeModal('outlet-modal');
   renderOutletsManager();
   renderDashboard();
-  showCmsToast('Data cabang & booth counter berhasil disimpan!');
+  showCmsToast('Data cabang & nomor WA serta link Maps booth berhasil disimpan!');
 }
 
 // ===================================================================

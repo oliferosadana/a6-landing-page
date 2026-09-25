@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Portal Sewa & Pembayaran Sistem | Amanda Brownies Kalimantan</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;0,800;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+    rel="stylesheet">
+
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+  <!-- Billing Stylesheet -->
+  <link rel="stylesheet" href="billing.css?v=2.3">
+</head>
+
+<body>
+
+  <!-- Top Navbar -->
+  <header class="billing-header">
+    <div class="billing-container header-flex">
+      <a href="index.html" class="billing-brand">
+        <div class="brand-badge-icon">
+          <i class="fa-solid fa-cake-candles"></i>
+        </div>
+        <div class="brand-text-col">
+          <h2>AMANDA PLATFORM</h2>
+          <span>PORTAL SEWA WEBSITE & CMS</span>
+        </div>
+      </a>
+
+      <div class="header-nav-right">
+        <a href="admin.html" class="btn-ghost-nav">
+          <i class="fa-solid fa-gauge"></i> Ke Panel CMS
+        </a>
+        <a href="index.html" class="btn-ghost-nav">
+          <i class="fa-solid fa-eye"></i> Lihat Website
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="billing-main-wrap">
+    <div class="billing-container">
+
+      <!-- Hero Title -->
+      <div class="billing-hero-head">
+        <span class="badge-plan-hero"><i class="fa-solid fa-shield-halved"></i> Layanan Sewa Resmi Siap Pakai</span>
+        <h1 class="font-serif">Langganan & Sewa Sistem Landing Page</h1>
+        <p>Pilih durasi paket sewa untuk mengaktifkan atau memperpanjang landing page, katalog online, dan panel CMS cabang Anda.</p>
+      </div>
+
+      <!-- Current Subscription Status Bar -->
+      <div class="current-status-banner" id="current-status-banner">
+        <!-- Rendered by billing.js -->
+      </div>
+
+      <!-- Checkout Grid (Left: Plans & Form, Right: Summary) -->
+      <div class="checkout-layout-grid">
+
+        <!-- LEFT COLUMN: PLANS, TENANT FORM, PAYMENT -->
+        <div class="checkout-form-col">
+
+          <!-- 1. SELECT RENTAL PLAN -->
+          <div class="billing-step-card">
+            <div class="step-head">
+              <div class="step-number">1</div>
+              <div>
+                <h3>Pilih Durasi Paket Sewa</h3>
+                <p>Pilih periode sewa yang sesuai dengan kebutuhan operasional cabang Anda.</p>
+              </div>
+            </div>
+
+            <!-- Cycle Switcher: Bulanan vs Tahunan -->
+            <div class="billing-cycle-switch-wrap">
+              <div class="billing-cycle-switch">
+                <button type="button" class="cycle-tab active" id="tab-cycle-monthly" onclick="switchBillingCycle('monthly')">
+                  <i class="fa-regular fa-calendar"></i>
+                  <span>Bayar Bulanan</span>
+                </button>
+                <button type="button" class="cycle-tab" id="tab-cycle-yearly" onclick="switchBillingCycle('yearly')">
+                  <i class="fa-solid fa-crown"></i>
+                  <span>Bayar Tahunan</span>
+                  <span class="cycle-save-badge">Hemat s/d 33%</span>
+                </button>
+              </div>
+            </div>
+
+            <div class="plans-selection-grid" id="plans-selection-grid">
+              <!-- Rendered by billing.js -->
+            </div>
+          </div>
+
+          <!-- 2. TENANT INFORMATION -->
+          <div class="billing-step-card">
+            <div class="step-head">
+              <div class="step-number">2</div>
+              <div>
+                <h3>Informasi Penyewa / Cabang</h3>
+                <p>Data identitas pemilik usaha untuk penerbitan Invoice resmi.</p>
+              </div>
+            </div>
+
+            <form id="billing-tenant-form" onsubmit="event.preventDefault()">
+              <div class="form-grid-2">
+                <div class="form-field-group">
+                  <label>Nama Bisnis / Cabang Toko *</label>
+                  <input type="text" id="tenant-name" required placeholder="Contoh: Amanda Brownies Kota Balikpapan">
+                </div>
+                <div class="form-field-group">
+                  <label>Nomor WhatsApp Aktif *</label>
+                  <input type="tel" id="tenant-phone" required placeholder="Contoh: 081322119988">
+                </div>
+              </div>
+
+              <div class="form-grid-2">
+                <div class="form-field-group">
+                  <label>Alamat Email Penanggung Jawab *</label>
+                  <input type="email" id="tenant-email" required placeholder="admin@amandabrownies.id">
+                </div>
+                <div class="form-field-group">
+                  <label>Subdomain / Domain Website</label>
+                  <input type="text" id="tenant-domain" placeholder="balikpapan.amandabrownies.id">
+                </div>
+              </div>
+
+              <div class="form-field-group">
+                <label>Catatan Tambahan (Opsional)</label>
+                <input type="text" id="tenant-notes" placeholder="Catatan khusus untuk invoice atau aktivasi...">
+              </div>
+            </form>
+          </div>
+
+          <!-- 3. PAYMENT METHOD SELECTION -->
+          <div class="billing-step-card">
+            <div class="step-head">
+              <div class="step-number">3</div>
+              <div>
+                <h3>Pilih Metode Pembayaran</h3>
+                <p>Bayar instan via QRIS semua bank/e-wallet atau transfer rekening resmi.</p>
+              </div>
+            </div>
+
+            <div class="payment-methods-list" id="payment-methods-list">
+              <!-- Rendered by billing.js -->
+            </div>
+
+            <!-- Payment Details Preview Box -->
+            <div class="payment-details-box" id="payment-details-box">
+              <!-- Rendered by billing.js -->
+            </div>
+          </div>
+
+        </div>
+
+        <!-- RIGHT COLUMN: ORDER SUMMARY & ACTION -->
+        <aside class="checkout-summary-col">
+          <div class="sticky-summary-card">
+            <div class="summary-head">
+              <h4><i class="fa-solid fa-receipt" style="color: var(--ch-olive);"></i> Ringkasan Tagihan</h4>
+            </div>
+
+            <div class="summary-body">
+              <div class="summary-row">
+                <span class="summary-label">Paket Terpilih</span>
+                <span class="summary-val font-bold" id="sum-plan-name">Paket Bisnis (6 Bulan)</span>
+              </div>
+              <div class="summary-row">
+                <span class="summary-label">Durasi Masa Aktif</span>
+                <span class="summary-val" id="sum-plan-duration">+6 Bulan (180 Hari)</span>
+              </div>
+              <div class="summary-row">
+                <span class="summary-label">Biaya Sewa Sistem</span>
+                <span class="summary-val" id="sum-plan-subtotal">Rp 499.000</span>
+              </div>
+              <div class="summary-row">
+                <span class="summary-label">Kode Unik Verifikasi</span>
+                <span class="summary-val text-olive" id="sum-unique-code">+Rp 124</span>
+              </div>
+              <div class="summary-divider"></div>
+              <div class="summary-total-row">
+                <div>
+                  <span class="total-title">Total Pembayaran</span>
+                  <small class="total-note">Sudah termasuk PPN & kode verifikasi</small>
+                </div>
+                <span class="total-amount font-serif" id="sum-total-amount">Rp 499.124</span>
+              </div>
+            </div>
+
+            <div class="summary-footer">
+              <button type="button" class="btn-checkout-submit" id="btn-submit-order" onclick="processBillingOrder()">
+                <span>Bayar Sekarang & Buat Invoice</span>
+                <i class="fa-solid fa-arrow-right"></i>
+              </button>
+
+              <div class="security-guarantee-badge">
+                <i class="fa-solid fa-lock"></i> Transaksi Aman & Terverifikasi Langsung
+              </div>
+            </div>
+          </div>
+        </aside>
+
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="billing-footer">
+    <div class="billing-container">
+      <p>&copy; 2026 Amanda Platform WaaS. Sistem Manajemen Sewa Website & CMS Mandiri.</p>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase.js?v=1.0"></script>
+  <script src="data.js?v=2.5"></script>
+  <script src="billing.js?v=2.5"></script>
+</body>
+
+</html>

@@ -1,0 +1,676 @@
+/* ===================================================================
+   AMANDA BROWNIES - MINIMALIST DIGITAL INVOICE STYLESHEET
+   Aesthetic: Ultra-clean, modern minimalist luxury receipt (Color Hunt Palette)
+   =================================================================== */
+
+:root {
+  --ch-cream: #f5efe3;
+  --ch-olive: #4f5b2a;
+  --ch-olive-dark: #373f1c;
+  --ch-olive-light: #647336;
+  --ch-gold: #b8892d;
+  --ch-gold-dark: #916c22;
+  --ch-sand: #d8c9a8;
+  --ch-sand-light: #f2ebe0;
+  --ch-sand-border: #ded3be;
+
+  --text-main: #231b14;
+  --text-muted: #665a4e;
+  --text-dim: #948677;
+
+  --bg-main: #f5efe3;
+  --bg-card: #ffffff;
+  --bg-subtle: #faf6ef;
+
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-pill: 9999px;
+
+  --shadow-subtle: 0 4px 20px rgba(35, 27, 20, 0.05);
+  --transition: 0.18s ease;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+}
+
+body {
+  background-color: var(--bg-main);
+  color: var(--text-main);
+  line-height: 1.5;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+.font-serif {
+  font-family: 'Playfair Display', Georgia, serif;
+}
+
+.text-olive {
+  color: var(--ch-olive);
+}
+
+.text-gold {
+  color: var(--ch-gold-dark);
+}
+
+.text-center {
+  text-align: center;
+}
+
+.text-right {
+  text-align: right;
+}
+
+/* ==================== MINIMAL TOPBAR ==================== */
+.min-nav {
+  background: rgba(245, 239, 227, 0.95);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--ch-sand-border);
+  padding: 12px 20px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.min-nav-inner {
+  max-width: 780px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.nav-back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-muted);
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 6px 12px;
+  border-radius: var(--radius-pill);
+  transition: var(--transition);
+}
+
+.nav-back-link:hover {
+  background: rgba(79, 91, 42, 0.1);
+  color: var(--ch-olive);
+}
+
+.nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.nav-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  font-size: 12.5px;
+  font-weight: 700;
+  border-radius: var(--radius-md);
+  border: none;
+  cursor: pointer;
+  transition: var(--transition);
+  text-decoration: none;
+}
+
+.btn-light {
+  background: #ffffff;
+  color: var(--text-main);
+  border: 1px solid var(--ch-sand-border);
+}
+
+.btn-light:hover {
+  background: var(--ch-sand-light);
+}
+
+.btn-wa {
+  background: #25d366;
+  color: #ffffff;
+}
+
+.btn-wa:hover {
+  background: #1eb956;
+}
+
+.btn-verify {
+  background: var(--ch-olive);
+  color: #ffffff;
+}
+
+.btn-verify:hover {
+  background: var(--ch-olive-dark);
+}
+
+.btn-verify.btn-disabled {
+  background: #e2dcd0;
+  color: #8c7d6e;
+  cursor: not-allowed;
+}
+
+/* ==================== INVOICE CARD WRAPPER ==================== */
+.min-inv-wrapper {
+  max-width: 780px;
+  margin: 28px auto 60px;
+  padding: 0 16px;
+}
+
+.min-inv-card {
+  background: var(--bg-card);
+  border: 1px solid var(--ch-sand-border);
+  border-radius: var(--radius-lg);
+  padding: 36px 40px;
+  box-shadow: var(--shadow-subtle);
+  position: relative;
+}
+
+/* ==================== HEADER ==================== */
+.min-inv-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.brand-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.brand-icon {
+  width: 38px;
+  height: 38px;
+  background: var(--ch-olive);
+  color: #ffffff;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+}
+
+.brand-title {
+  font-size: 15px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  color: var(--text-main);
+  line-height: 1.2;
+}
+
+.brand-sub {
+  font-size: 11px;
+  color: var(--text-dim);
+  font-weight: 600;
+}
+
+.inv-badge-group {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+}
+
+.inv-id-label {
+  font-family: monospace;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-main);
+  background: var(--bg-subtle);
+  padding: 3px 8px;
+  border-radius: 4px;
+  border: 1px solid var(--ch-sand-light);
+}
+
+.inv-status-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 800;
+  padding: 3px 10px;
+  border-radius: var(--radius-pill);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.inv-status-tag.status-pending {
+  background: rgba(230, 126, 34, 0.12);
+  color: #c25e00;
+  border: 1px solid rgba(230, 126, 34, 0.3);
+}
+
+.inv-status-tag.status-paid {
+  background: rgba(37, 211, 102, 0.15);
+  color: #15803d;
+  border: 1px solid rgba(37, 211, 102, 0.35);
+}
+
+.inv-status-tag .dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.min-divider {
+  height: 1px;
+  background: var(--ch-sand-light);
+  margin: 24px 0;
+}
+
+/* ==================== META GRID ==================== */
+.min-meta-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 28px;
+  background: var(--bg-subtle);
+  border: 1px solid var(--ch-sand-light);
+  border-radius: var(--radius-md);
+  padding: 16px 20px;
+}
+
+.meta-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.meta-label {
+  font-size: 10.5px;
+  font-weight: 700;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.meta-val {
+  font-size: 13.5px;
+  color: var(--text-main);
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.meta-sub {
+  font-size: 11.5px;
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ==================== ITEMS TABLE ==================== */
+.min-table-wrap {
+  border: 1px solid var(--ch-sand-light);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  margin-bottom: 20px;
+}
+
+.min-table-row {
+  display: grid;
+  grid-template-columns: 1fr 100px 140px;
+  padding: 12px 18px;
+  align-items: center;
+  font-size: 13px;
+}
+
+.min-table-row.header {
+  background: var(--bg-subtle);
+  border-bottom: 1px solid var(--ch-sand-light);
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.min-table-row.item {
+  border-bottom: 1px solid rgba(216, 201, 168, 0.25);
+}
+
+.min-table-row.item:last-child {
+  border-bottom: none;
+}
+
+.min-table-row.item.subtle {
+  background: #fafaf8;
+  color: var(--text-muted);
+}
+
+.item-name {
+  font-size: 13.5px;
+  color: var(--text-main);
+  display: block;
+}
+
+.item-desc {
+  font-size: 11px;
+  color: var(--text-dim);
+  display: block;
+}
+
+.item-duration {
+  font-weight: 600;
+  font-size: 12.5px;
+  color: var(--text-muted);
+}
+
+.item-price {
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+/* ==================== TOTAL HIGHLIGHT BAR ==================== */
+.min-total-bar {
+  background: #273012;
+  color: #ffffff;
+  border-radius: var(--radius-md);
+  padding: 16px 22px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+}
+
+.total-label {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  color: var(--ch-sand);
+  display: block;
+}
+
+.total-note {
+  font-size: 11.5px;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.total-amount {
+  font-size: 24px;
+  font-weight: 700;
+  color: #ffffff;
+  letter-spacing: 0.5px;
+}
+
+/* ==================== PAYMENT INSTRUCTIONS SECTION ==================== */
+.min-pay-section {
+  background: var(--bg-subtle);
+  border: 1px solid var(--ch-sand-light);
+  border-radius: var(--radius-md);
+  padding: 20px;
+  margin-bottom: 24px;
+}
+
+.pay-section-head {
+  font-size: 12.5px;
+  font-weight: 800;
+  color: var(--ch-olive);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 14px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* QRIS Layout */
+.min-qris-wrap {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.min-qris-box {
+  background: #ffffff;
+  padding: 10px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--ch-sand-border);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.qris-tag {
+  font-size: 10px;
+  font-family: monospace;
+  font-weight: 700;
+  color: var(--text-dim);
+}
+
+.min-qris-steps ol {
+  padding-left: 18px;
+  font-size: 12.5px;
+  color: var(--text-muted);
+  line-height: 1.6;
+}
+
+.min-qris-steps strong {
+  color: var(--text-main);
+}
+
+/* Bank Transfer Minimal Card */
+.min-bank-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #ffffff;
+  border: 1px solid var(--ch-sand-border);
+  border-radius: var(--radius-md);
+  padding: 14px 18px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.bank-meta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.bank-badge {
+  background: var(--ch-olive);
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: 800;
+  padding: 4px 10px;
+  border-radius: 4px;
+}
+
+.bank-acc-num {
+  font-family: monospace;
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--text-main);
+  display: block;
+}
+
+.bank-acc-holder {
+  font-size: 11px;
+  color: var(--text-dim);
+}
+
+.btn-copy {
+  background: var(--bg-subtle);
+  border: 1px solid var(--ch-sand-border);
+  color: var(--text-main);
+  font-size: 12px;
+  font-weight: 700;
+  padding: 6px 12px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: var(--transition);
+}
+
+.btn-copy:hover {
+  background: var(--ch-olive);
+  color: #ffffff;
+  border-color: var(--ch-olive);
+}
+
+/* Paid Confirmation Banner */
+.min-paid-banner {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: rgba(37, 211, 102, 0.1);
+  border: 1px solid rgba(37, 211, 102, 0.3);
+  padding: 16px 18px;
+  border-radius: var(--radius-md);
+  color: #15803d;
+}
+
+.min-paid-banner i {
+  font-size: 24px;
+  flex-shrink: 0;
+}
+
+.min-paid-banner strong {
+  font-size: 13.5px;
+  display: block;
+  margin-bottom: 2px;
+}
+
+.min-paid-banner p {
+  font-size: 12px;
+  color: #166534;
+  margin: 0;
+}
+
+/* ==================== FOOTER & STAMP ==================== */
+.min-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--ch-sand-light);
+}
+
+.footer-note {
+  font-size: 11.5px;
+  color: var(--text-dim);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  max-width: 520px;
+}
+
+.stamp-pill {
+  display: none;
+  align-items: center;
+  gap: 6px;
+  background: rgba(37, 211, 102, 0.15);
+  color: #15803d;
+  border: 1px solid rgba(37, 211, 102, 0.4);
+  font-size: 11.5px;
+  font-weight: 800;
+  padding: 6px 14px;
+  border-radius: var(--radius-pill);
+}
+
+.stamp-pill.visible {
+  display: inline-flex;
+}
+
+/* ==================== PRINT STYLES ==================== */
+@media print {
+  body {
+    background: #ffffff !important;
+    color: #000000 !important;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+
+  .min-inv-wrapper {
+    margin: 0 !important;
+    padding: 0 !important;
+    max-width: 100% !important;
+  }
+
+  .min-inv-card {
+    border: none !important;
+    box-shadow: none !important;
+    padding: 10px 0 !important;
+  }
+
+  .min-total-bar {
+    background: #273012 !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .min-meta-grid,
+  .min-table-row.header,
+  .min-pay-section {
+    background: #f8f8f8 !important;
+    border-color: #ddd !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+}
+
+/* ==================== RESPONSIVE ==================== */
+@media (max-width: 768px) {
+  .min-inv-card {
+    padding: 24px 18px;
+  }
+
+  .min-inv-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .inv-badge-group {
+    align-items: flex-start;
+    margin-top: 8px;
+  }
+
+  .min-meta-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+
+  .min-table-row {
+    grid-template-columns: 1fr 70px 100px;
+    font-size: 12px;
+  }
+
+  .min-total-bar {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .min-qris-wrap {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .min-footer {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

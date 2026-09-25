@@ -1,0 +1,914 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CMS Amanda Brownies Balikpapan | Panel Pengelolaan Konten & Stok</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+    rel="stylesheet">
+
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+  <!-- CMS Stylesheet -->
+  <link rel="stylesheet" href="admin.css?v=2.5">
+  <link rel="stylesheet" href="login.css?v=1.0">
+
+  <!-- Strict Auth Guard (Executes before page renders) -->
+  <script src="auth.js?v=1.0"></script>
+  <script>
+    enforceAuth(['tenant_admin', 'superadmin']);
+  </script>
+</head>
+
+<body>
+
+  <div class="cms-layout">
+
+    <!-- ==================== SIDEBAR ==================== -->
+    <aside class="cms-sidebar" id="cms-sidebar">
+      <div class="sidebar-brand">
+        <div class="brand-badge">
+          <i class="fa-solid fa-cake-candles"></i>
+        </div>
+        <div class="brand-info">
+          <h2>AMANDA CMS</h2>
+          <span>KOTA BALIKPAPAN</span>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <ul>
+          <li>
+            <button class="nav-item active" onclick="switchTab('dashboard', this)">
+              <i class="fa-solid fa-chart-pie"></i>
+              <span>Ringkasan Dashboard</span>
+            </button>
+          </li>
+          <li>
+            <button class="nav-item" onclick="switchTab('promos', this)">
+              <i class="fa-solid fa-fire"></i>
+              <span>Flyer & Promo (4:5)</span>
+              <span class="badge-count" id="badge-promo-count">0</span>
+            </button>
+          </li>
+          <li>
+            <button class="nav-item" onclick="switchTab('products', this)">
+              <i class="fa-solid fa-box-open"></i>
+              <span>Katalog & Stok Outlet</span>
+              <span class="badge-count" id="badge-prod-count">0</span>
+            </button>
+          </li>
+          <li>
+            <button class="nav-item" onclick="switchTab('outlets', this)">
+              <i class="fa-solid fa-store"></i>
+              <span>Cabang Balikpapan</span>
+              <span class="badge-count" id="badge-outlet-count">6</span>
+            </button>
+          </li>
+          <li>
+            <button class="nav-item" onclick="switchTab('ticker', this)">
+              <i class="fa-solid fa-bullhorn"></i>
+              <span>Running Promo Ticker</span>
+            </button>
+          </li>
+          <li>
+            <button class="nav-item" onclick="switchTab('subscription', this)">
+              <i class="fa-solid fa-file-invoice-dollar"></i>
+              <span>Status Sewa & Tagihan</span>
+              <span class="badge-count" id="badge-sub-days">30h</span>
+            </button>
+          </li>
+          <li>
+            <button class="nav-item" onclick="switchTab('settings', this)">
+              <i class="fa-solid fa-database"></i>
+              <span>Cadangan & Reset Data</span>
+            </button>
+          </li>
+        </ul>
+      </nav>
+
+      <div class="sidebar-footer">
+        <a href="superadmin.html" class="btn-view-site" style="margin-bottom: 6px; background: rgba(30, 38, 14, 0.85); border-color: var(--ch-gold); color: #fff;">
+          <i class="fa-solid fa-crown" style="color: var(--ch-gold);"></i>
+          <span>Superadmin Platform</span>
+        </a>
+        <a href="billing.html" class="btn-view-site" style="margin-bottom: 6px; background: rgba(184, 137, 45, 0.25); border-color: var(--ch-gold);">
+          <i class="fa-solid fa-cart-shopping"></i>
+          <span>Portal Sewa Sistem</span>
+        </a>
+        <a href="index.html" target="_blank" class="btn-view-site">
+          <i class="fa-solid fa-arrow-up-right-from-square"></i>
+          <span>Buka Landing Page</span>
+        </a>
+      </div>
+    </aside>
+
+    <!-- ==================== MAIN CONTENT AREA ==================== -->
+    <main class="cms-main">
+
+      <!-- Topbar Header -->
+      <header class="cms-topbar">
+        <div class="topbar-left">
+          <button class="btn-toggle-sidebar" onclick="toggleSidebar()" aria-label="Toggle Sidebar">
+            <i class="fa-solid fa-bars"></i>
+          </button>
+          <div class="topbar-title-wrap">
+            <h1 id="page-heading">Ringkasan Dashboard</h1>
+            <span class="topbar-subtitle">Pusat Pengelolaan Konten & Ketersediaan Stok Resmi Kota Balikpapan</span>
+          </div>
+        </div>
+
+        <div class="topbar-actions">
+          <a href="billing.html" class="topbar-sub-pill" id="topbar-sub-pill" title="Kelola masa sewa website">
+            <span class="sub-dot"></span>
+            <span id="topbar-sub-text">Sewa Aktif: 30 Hari</span>
+            <i class="fa-solid fa-chevron-right" style="font-size: 10px; opacity: 0.7;"></i>
+          </a>
+          <span class="sync-status-pill">
+            <i class="fa-solid fa-circle-check"></i> Tersinkronisasi Realtime
+          </span>
+          <a href="index.html" target="_blank" class="btn-preview-top">
+            <i class="fa-solid fa-eye"></i> Live Preview
+          </a>
+        </div>
+      </header>
+
+      <!-- Content Container -->
+      <div class="cms-content-wrapper">
+
+        <!-- ==================== SECTION 1: DASHBOARD ==================== -->
+        <section id="section-dashboard" class="cms-section active">
+          
+          <!-- Stat Cards -->
+          <div class="stats-grid">
+            <div class="stat-card">
+              <div class="stat-icon olive">
+                <i class="fa-solid fa-cake-candles"></i>
+              </div>
+              <div class="stat-info">
+                <span class="stat-label">Total Varian Produk</span>
+                <h3 class="stat-value" id="dash-total-products">0</h3>
+                <span class="stat-desc">Kukus, Bakar, & Marble</span>
+              </div>
+            </div>
+
+            <div class="stat-card">
+              <div class="stat-icon gold">
+                <i class="fa-solid fa-fire"></i>
+              </div>
+              <div class="stat-info">
+                <span class="stat-label">Flyer Promo Aktif</span>
+                <h3 class="stat-value" id="dash-total-promos">0</h3>
+                <span class="stat-desc">Rasio standar 4:5</span>
+              </div>
+            </div>
+
+            <div class="stat-card">
+              <div class="stat-icon sand">
+                <i class="fa-solid fa-store"></i>
+              </div>
+              <div class="stat-info">
+                <span class="stat-label">Cabang Balikpapan</span>
+                <h3 class="stat-value" id="dash-total-outlets">6</h3>
+                <span class="stat-desc">Selatan, Kota, & Utara</span>
+              </div>
+            </div>
+
+            <div class="stat-card">
+              <div class="stat-icon green">
+                <i class="fa-solid fa-bullhorn"></i>
+              </div>
+              <div class="stat-info">
+                <span class="stat-label">Item Running Ticker</span>
+                <h3 class="stat-value" id="dash-total-ticker">0</h3>
+                <span class="stat-desc">Marquee promosi live</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Quick Actions & Overview -->
+          <div class="dash-grid-split">
+            
+            <!-- Quick Promo Overview -->
+            <div class="panel-card">
+              <div class="panel-head">
+                <div class="panel-head-title">
+                  <i class="fa-solid fa-images" style="color: var(--primary-olive);"></i>
+                  <h3>Flyer Promo Berjalan Saat Ini</h3>
+                </div>
+                <button class="btn-secondary-sm" onclick="switchTab('promos', document.querySelectorAll('.nav-item')[1])">
+                  Kelola Promo
+                </button>
+              </div>
+              <div class="panel-body">
+                <div class="dash-promos-preview" id="dash-promos-container">
+                  <!-- Injected by admin.js -->
+                </div>
+              </div>
+            </div>
+
+            <!-- Outlets Stock Overview -->
+            <div class="panel-card">
+              <div class="panel-head">
+                <div class="panel-head-title">
+                  <i class="fa-solid fa-map-location-dot" style="color: var(--primary-olive);"></i>
+                  <h3>Status 6 Outlet Balikpapan</h3>
+                </div>
+                <button class="btn-secondary-sm" onclick="switchTab('outlets', document.querySelectorAll('.nav-item')[3])">
+                  Kelola Outlet
+                </button>
+              </div>
+              <div class="panel-body">
+                <div class="dash-outlets-list" id="dash-outlets-container">
+                  <!-- Injected by admin.js -->
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+        </section>
+
+        <!-- ==================== SECTION 2: PROMOS (4:5 FLYER) ==================== -->
+        <section id="section-promos" class="cms-section">
+          
+          <div class="section-toolbar">
+            <div class="toolbar-left">
+              <h2>Manajemen Flyer & Banner Promosi (Rasio 4:5)</h2>
+              <p>Tambah flyer resmi dari pusat berukuran standar 4:5 beserta kode promo & tautan pesanan outlet.</p>
+            </div>
+            <button class="btn-primary" onclick="openPromoModal()">
+              <i class="fa-solid fa-plus"></i> Tambah Flyer Promo Baru
+            </button>
+          </div>
+
+          <div class="promos-management-grid" id="promos-management-grid">
+            <!-- Injected by admin.js -->
+          </div>
+
+          <!-- Price List Posters Manager -->
+          <div class="section-toolbar" style="margin-top: 36px;">
+            <div class="toolbar-left">
+              <h2>Poster Daftar Harga & Menu Resmi (Fitur Zoom Lightbox)</h2>
+              <p>Kelola file poster brosur/price list resmi yang dapat diperbesar dengan navigasi zoom in/out di halaman utama.</p>
+            </div>
+          </div>
+
+          <div class="promos-management-grid" id="pricelists-management-grid">
+            <!-- Injected by admin.js -->
+          </div>
+
+        </section>
+
+        <!-- ==================== SECTION 3: PRODUCTS & STOCKS ==================== -->
+        <section id="section-products" class="cms-section">
+          
+          <div class="section-toolbar">
+            <div class="toolbar-left">
+              <h2>Katalog Menu & Ketersediaan Stok Realtime</h2>
+              <p>Kelola harga resmi, deskripsi, masa ketahanan, serta status stok per cabang outlet Balikpapan.</p>
+            </div>
+            <div class="toolbar-actions-row">
+              <div class="search-box-cms">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input type="text" id="product-search-input" placeholder="Cari varian menu..." oninput="filterProductsTable(this.value)">
+              </div>
+              <button class="btn-primary" onclick="openProductModal()">
+                <i class="fa-solid fa-plus"></i> Tambah Menu Baru
+              </button>
+            </div>
+          </div>
+
+          <!-- Products Table / Cards -->
+          <div class="panel-card" style="padding: 0; overflow: hidden;">
+            <div class="table-responsive">
+              <table class="cms-table">
+                <thead>
+                  <tr>
+                    <th>Foto Menu</th>
+                    <th>Nama Varian & Kategori</th>
+                    <th>Harga Resmi</th>
+                    <th>Berat & Ketahanan</th>
+                    <th>Status Stok di 6 Cabang</th>
+                    <th style="text-align: right;">Aksi</th>
+                  </tr>
+                </thead>
+                <tbody id="products-table-body">
+                  <!-- Injected by admin.js -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+        </section>
+
+        <!-- ==================== SECTION 4: OUTLETS ==================== -->
+        <section id="section-outlets" class="cms-section">
+          
+          <div class="section-toolbar">
+            <div class="toolbar-left">
+              <h2>Jaringan Outlet Resmi Kota Balikpapan</h2>
+              <p>Edit alamat cabang, nomor WhatsApp operasional, jam buka WITA, link rute peta, dan foto storefront.</p>
+            </div>
+            <button class="btn-primary" onclick="openOutletModal()">
+              <i class="fa-solid fa-plus"></i> Tambah Cabang Outlet
+            </button>
+          </div>
+
+          <div class="outlets-management-grid" id="outlets-management-grid">
+            <!-- Injected by admin.js -->
+          </div>
+
+        </section>
+
+        <!-- ==================== SECTION 5: RUNNING TICKER ==================== -->
+        <section id="section-ticker" class="cms-section">
+          
+          <div class="section-toolbar">
+            <div class="toolbar-left">
+              <h2>Running Promo Ticker (Marquee Balikpapan)</h2>
+              <p>Kelola teks pengumuman berjalan di bagian atas landing page.</p>
+            </div>
+            <button class="btn-primary" onclick="openTickerModal()">
+              <i class="fa-solid fa-plus"></i> Tambah Pengumuman Ticker
+            </button>
+          </div>
+
+          <div class="panel-card">
+            <div class="ticker-list" id="ticker-list-container">
+              <!-- Injected by admin.js -->
+            </div>
+          </div>
+
+        </section>
+
+        <!-- ==================== SECTION 6: SETTINGS & BACKUP ==================== -->
+        <section id="section-settings" class="cms-section">
+          
+          <div class="section-toolbar">
+            <div class="toolbar-left">
+              <h2>Pencadangan, Pemulihan & Reset Data</h2>
+              <p>Simpan data konfigurasi dalam format JSON atau reset kembali ke data default pabrik.</p>
+            </div>
+          </div>
+
+          <div class="settings-grid">
+            <div class="panel-card">
+              <div class="panel-head">
+                <div class="panel-head-title">
+                  <i class="fa-solid fa-download" style="color: var(--primary-olive);"></i>
+                  <h3>Ekspor Cadangan (Backup JSON)</h3>
+                </div>
+              </div>
+              <div class="panel-body">
+                <p style="font-size: 13.5px; color: var(--text-muted); margin-bottom: 16px;">
+                  Unduh seluruh database (produk, stok outlet, flyer 4:5, cabang, dan ticker) dalam satu file JSON untuk dicadangkan.
+                </p>
+                <button class="btn-primary" onclick="exportDataJSON()">
+                  <i class="fa-solid fa-file-arrow-down"></i> Unduh File Backup JSON
+                </button>
+              </div>
+            </div>
+
+            <div class="panel-card">
+              <div class="panel-head">
+                <div class="panel-head-title">
+                  <i class="fa-solid fa-upload" style="color: var(--primary-gold);"></i>
+                  <h3>Impor File Cadangan</h3>
+                </div>
+              </div>
+              <div class="panel-body">
+                <p style="font-size: 13.5px; color: var(--text-muted); margin-bottom: 16px;">
+                  Pulihkan data dari file JSON yang telah dicadangkan sebelumnya.
+                </p>
+                <input type="file" id="import-json-input" accept=".json" style="display: none;" onchange="importDataJSON(event)">
+                <button class="btn-secondary" onclick="document.getElementById('import-json-input').click()">
+                  <i class="fa-solid fa-file-arrow-up"></i> Pilih File JSON & Impor
+                </button>
+              </div>
+            </div>
+
+            <div class="panel-card" style="border-color: rgba(192, 57, 43, 0.4);">
+              <div class="panel-head">
+                <div class="panel-head-title">
+                  <i class="fa-solid fa-rotate-left" style="color: var(--accent-red);"></i>
+                  <h3>Reset ke Data Default Balikpapan</h3>
+                </div>
+              </div>
+              <div class="panel-body">
+                <p style="font-size: 13.5px; color: var(--text-muted); margin-bottom: 16px;">
+                  Kembalikan semua varian produk, promo flyer 4:5, dan 6 outlet resmi ke konfigurasi bawaan semula.
+                </p>
+                <button class="btn-danger" onclick="confirmResetDefault()">
+                  <i class="fa-solid fa-trash-can"></i> Reset Semua Data ke Default
+                </button>
+              </div>
+            </div>
+          </div>
+
+        </section>
+
+        <!-- ==================== SECTION 7: STATUS SEWA & TAGIHAN ==================== -->
+        <section id="section-subscription" class="cms-section">
+          
+          <div class="section-toolbar">
+            <div class="toolbar-left">
+              <h2>Status Sewa & Tagihan Website</h2>
+              <p>Pantau masa aktif sewa platform, histori invoice, dan lakukan perpanjangan layanan website cabang Anda.</p>
+            </div>
+            <a href="billing.html" class="btn-primary">
+              <i class="fa-solid fa-cart-plus"></i> Perpanjang Masa Sewa
+            </a>
+          </div>
+
+          <!-- Subscription Status Banner -->
+          <div class="sub-status-card">
+            <div class="sub-status-header">
+              <div class="sub-plan-badge-wrap">
+                <span class="sub-status-dot active" id="sub-card-dot"></span>
+                <div>
+                  <span class="sub-plan-tag" id="sub-card-plan-tag">PAKET BULANAN</span>
+                  <h3 class="sub-plan-title" id="sub-card-plan-name">Paket Usaha (6 Bulan)</h3>
+                </div>
+              </div>
+              <div class="sub-status-pill-wrap">
+                <span class="badge-status-active" id="sub-card-status-badge">
+                  <i class="fa-solid fa-shield-check"></i> AKTIF & BERJALAN
+                </span>
+              </div>
+            </div>
+
+            <div class="sub-status-metrics-grid">
+              <div class="sub-metric-item">
+                <span class="metric-lbl"><i class="fa-regular fa-calendar-check"></i> Tanggal Mulai</span>
+                <strong class="metric-val" id="sub-card-start-date">-</strong>
+              </div>
+              <div class="sub-metric-item">
+                <span class="metric-lbl"><i class="fa-regular fa-clock"></i> Jatuh Tempo / Berakhir</span>
+                <strong class="metric-val" id="sub-card-expiry-date">-</strong>
+              </div>
+              <div class="sub-metric-item">
+                <span class="metric-lbl"><i class="fa-solid fa-hourglass-half"></i> Sisa Masa Aktif</span>
+                <strong class="metric-val text-gold" id="sub-card-remaining-days">30 Hari</strong>
+              </div>
+              <div class="sub-metric-item">
+                <span class="metric-lbl"><i class="fa-solid fa-globe"></i> Domain Resmi</span>
+                <strong class="metric-val" id="sub-card-domain">amandaborneo.id</strong>
+              </div>
+            </div>
+
+            <!-- Visual Progress Bar for Remaining Days -->
+            <div class="sub-progress-wrap">
+              <div class="sub-progress-info">
+                <span>Persentase Masa Aktif Layanan</span>
+                <span id="sub-progress-percent">85% tersisa</span>
+              </div>
+              <div class="sub-progress-bar">
+                <div class="sub-progress-fill" id="sub-progress-fill" style="width: 85%;"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Invoices History Table -->
+          <div class="panel-card" style="margin-top: 24px;">
+            <div class="panel-head">
+              <div class="panel-head-title">
+                <i class="fa-solid fa-file-invoice" style="color: var(--primary-olive);"></i>
+                <h3>Riwayat Tagihan & Invoice Pembayaran</h3>
+              </div>
+              <a href="billing.html" class="btn-secondary" style="font-size: 12px; padding: 6px 12px;">
+                <i class="fa-solid fa-plus"></i> Buat Pesanan Baru
+              </a>
+            </div>
+
+            <div class="panel-body" style="padding: 0;">
+              <div class="table-responsive">
+                <table class="cms-data-table">
+                  <thead>
+                    <tr>
+                      <th>No. Invoice</th>
+                      <th>Tanggal Terbit</th>
+                      <th>Paket Layanan</th>
+                      <th>Total Bayar</th>
+                      <th>Metode</th>
+                      <th>Status</th>
+                      <th style="text-align: right;">Aksi</th>
+                    </tr>
+                  </thead>
+                  <tbody id="cms-invoices-tbody">
+                    <!-- Injected by admin.js -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- Help & Rental FAQ Notice -->
+          <div class="sub-help-grid" style="margin-top: 24px;">
+            <div class="panel-card">
+              <div class="panel-head">
+                <div class="panel-head-title">
+                  <i class="fa-solid fa-circle-question" style="color: var(--primary-gold);"></i>
+                  <h3>Bantuan & Layanan Sewa Website</h3>
+                </div>
+              </div>
+              <div class="panel-body">
+                <p style="font-size: 13.5px; color: var(--text-muted); line-height: 1.6;">
+                  Layanan sewa website Amanda Platform mencakup hosting ultra-cepat 99.9% uptime, backup database harian, domain kustom, serta pembaruan fitur katalog & promo berkala. Jika butuh konsultasi teknis atau konfirmasi pembayaran manual, hubungi tim support melalui WhatsApp.
+                </p>
+                <a href="https://wa.me/6281234567890?text=Halo%20Admin%20Amanda,%20saya%20ingin%20konsultasi%20mengenai%20sewa%20sistem%20website" target="_blank" class="btn-secondary" style="margin-top: 12px; display: inline-flex; align-items: center; gap: 8px;">
+                  <i class="fa-brands fa-whatsapp" style="color: #25d366;"></i> Hubungi Customer Care Sewa
+                </a>
+              </div>
+            </div>
+          </div>
+
+        </section>
+
+      </div>
+    </main>
+
+  </div>
+
+  <!-- ==================== MODAL: PROMO FLYER 4:5 ==================== -->
+  <div class="cms-modal-overlay" id="promo-modal" onclick="closeModalOnOverlay(event, 'promo-modal')">
+    <div class="cms-modal-card">
+      <div class="modal-head">
+        <h3 id="promo-modal-title">Tambah Flyer Promo Baru (4:5)</h3>
+        <button class="modal-close-btn" onclick="closeModal('promo-modal')"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <form id="promo-form" onsubmit="savePromoForm(event)">
+        <input type="hidden" id="promo-form-id">
+        
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label>Judul Promo *</label>
+            <input type="text" id="promo-form-title" required placeholder="Contoh: Diskon 20% Semua Varian">
+          </div>
+          <div class="form-group">
+            <label>Label Badge *</label>
+            <input type="text" id="promo-form-badge" required placeholder="Contoh: Flash Sale Balikpapan">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Warna Tema Badge</label>
+          <select id="promo-form-badgeColor">
+            <option value="gold">Gold / Kuning Emas</option>
+            <option value="red">Merah Spesial</option>
+            <option value="olive">Hijau Olive</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Upload Foto Poster Flyer (Rasio 4:5) *</label>
+          <div class="file-upload-wrapper">
+            <input type="file" id="promo-form-file" accept="image/*" class="file-upload-input" onchange="handleImageFileUpload(event, 'promo-form-image', 'promo-img-preview')">
+            <label for="promo-form-file" class="file-upload-dropzone">
+              <i class="fa-solid fa-cloud-arrow-up"></i>
+              <span class="dropzone-main-text">Pilih Foto dari Perangkat / HP</span>
+              <span class="dropzone-sub-text">Klik di sini untuk upload foto flyer (JPG, PNG, WEBP)</span>
+            </label>
+          </div>
+
+          <div class="image-url-toggle-wrap">
+            <span style="font-size: 11.5px; color: var(--text-dim);">Atau gunakan path / link gambar:</span>
+            <input type="text" id="promo-form-image" required placeholder="assets/promo_flyer_1.jpg atau data image" oninput="previewPromoImage(this.value)">
+          </div>
+
+          <div class="image-preview-box" id="promo-img-preview-box">
+            <img id="promo-img-preview" src="assets/promo_flyer_1.jpg" alt="Preview Flyer">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Periode Masa Berlaku *</label>
+          <input type="text" id="promo-form-period" required placeholder="Contoh: Berlaku Hari Ini s/d Pukul 21:30 WITA">
+        </div>
+
+        <div class="form-group">
+          <label>Deskripsi Singkat Promo</label>
+          <textarea id="promo-form-desc" rows="3" placeholder="Rincian keuntungan dan syarat promo..."></textarea>
+        </div>
+
+        <div class="form-group">
+          <label>Pesan Default WhatsApp</label>
+          <input type="text" id="promo-form-waMsg" placeholder="Contoh: Halo Amanda Brownies Balikpapan, saya ingin klaim promo ini...">
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="btn-secondary" onclick="closeModal('promo-modal')">Batal</button>
+          <button type="submit" class="btn-primary"><i class="fa-solid fa-floppy-disk"></i> Simpan Flyer Promo</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL: PRODUCT & OUTLET STOCKS ==================== -->
+  <div class="cms-modal-overlay" id="product-modal" onclick="closeModalOnOverlay(event, 'product-modal')">
+    <div class="cms-modal-card large">
+      <div class="modal-head">
+        <h3 id="product-modal-title">Tambah Menu Brownies Baru</h3>
+        <button class="modal-close-btn" onclick="closeModal('product-modal')"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <form id="product-form" onsubmit="saveProductForm(event)">
+        <input type="hidden" id="prod-form-id">
+
+        <div class="form-grid-3">
+          <div class="form-group">
+            <label>Nama Varian Menu *</label>
+            <input type="text" id="prod-form-name" required placeholder="Contoh: Brownies Kukus Original">
+          </div>
+          <div class="form-group">
+            <label>Kategori *</label>
+            <select id="prod-form-category" required>
+              <option value="kukus">Brownies Kukus</option>
+              <option value="bakar">Brownies Bakar</option>
+              <option value="marble">Premium & Marble</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Harga Resmi (Rp) *</label>
+            <input type="number" id="prod-form-price" required placeholder="48000">
+          </div>
+        </div>
+
+        <div class="form-grid-3">
+          <div class="form-group">
+            <label>Berat Bersih</label>
+            <input type="text" id="prod-form-weight" placeholder="Contoh: 700 gram">
+          </div>
+          <div class="form-group">
+            <label>Masa Ketahanan</label>
+            <input type="text" id="prod-form-shelfLife" placeholder="4 Hari (Suhu Ruang) / 7 Hari (Kulkas)">
+          </div>
+          <div class="form-group">
+            <label>Badge Sorotan</label>
+            <input type="text" id="prod-form-badge" placeholder="Contoh: Varian Ikonik / Lapis Keju">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Upload Foto Produk *</label>
+          <div class="file-upload-wrapper">
+            <input type="file" id="prod-form-file" accept="image/*" class="file-upload-input" onchange="handleImageFileUpload(event, 'prod-form-image', 'prod-img-preview')">
+            <label for="prod-form-file" class="file-upload-dropzone">
+              <i class="fa-solid fa-cloud-arrow-up"></i>
+              <span class="dropzone-main-text">Pilih Foto Produk dari Perangkat / HP</span>
+              <span class="dropzone-sub-text">Klik di sini untuk upload foto brownies</span>
+            </label>
+          </div>
+
+          <div class="image-url-toggle-wrap">
+            <span style="font-size: 11.5px; color: var(--text-dim);">Atau path / link gambar:</span>
+            <input type="text" id="prod-form-image" required placeholder="assets/amanda_brownies_hero_1790255505694.jpg" oninput="previewProductImage(this.value)">
+          </div>
+
+          <div class="image-preview-box" id="prod-img-preview-box" style="aspect-ratio: 16/10; width: 140px;">
+            <img id="prod-img-preview" src="assets/amanda_brownies_hero_1790255505694.jpg" alt="Preview Produk">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Deskripsi Rasa & Kelezatan</label>
+          <textarea id="prod-form-desc" rows="2" placeholder="Deskripsi cita rasa brownies..."></textarea>
+        </div>
+
+        <!-- STOCKS PER 6 BALIKPAPAN OUTLETS -->
+        <div class="stocks-manager-section">
+          <h4><i class="fa-solid fa-boxes-stacked" style="color: var(--primary-olive);"></i> Status Ketersediaan di 6 Cabang Balikpapan</h4>
+          <p style="font-size: 12.5px; color: var(--text-muted); margin-bottom: 12px;">Atur ketersediaan stok untuk masing-masing outlet saat ini.</p>
+          
+          <div class="stocks-table-wrap">
+            <table class="stocks-mini-table">
+              <thead>
+                <tr>
+                  <th>Cabang Outlet</th>
+                  <th>Status Stok</th>
+                  <th>Keterangan Stok</th>
+                </tr>
+              </thead>
+              <tbody id="prod-stocks-tbody">
+                <!-- Injected dynamically based on AMANDA_OUTLETS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="btn-secondary" onclick="closeModal('product-modal')">Batal</button>
+          <button type="submit" class="btn-primary"><i class="fa-solid fa-floppy-disk"></i> Simpan Menu Produk</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL: OUTLET ==================== -->
+  <div class="cms-modal-overlay" id="outlet-modal" onclick="closeModalOnOverlay(event, 'outlet-modal')">
+    <div class="cms-modal-card">
+      <div class="modal-head">
+        <h3 id="outlet-modal-title">Edit Data Cabang Outlet Balikpapan</h3>
+        <button class="modal-close-btn" onclick="closeModal('outlet-modal')"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <form id="outlet-form" onsubmit="saveOutletForm(event)">
+        <input type="hidden" id="outlet-form-id">
+
+        <div class="form-group">
+          <label>Nama Cabang Outlet *</label>
+          <input type="text" id="outlet-form-name" required placeholder="Contoh: Amanda Brownies Outlet MT Haryono">
+        </div>
+
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label>Wilayah Kecamatan *</label>
+            <select id="outlet-form-city" required>
+              <option value="Balikpapan Selatan">Balikpapan Selatan</option>
+              <option value="Balikpapan Kota">Balikpapan Kota</option>
+              <option value="Balikpapan Utara">Balikpapan Utara</option>
+              <option value="Balikpapan Barat">Balikpapan Barat</option>
+              <option value="Balikpapan Timur">Balikpapan Timur</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Jam Operasional (WITA) *</label>
+            <input type="text" id="outlet-form-hours" required placeholder="07.30 - 21.30 WITA">
+          </div>
+        </div>
+
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label>Nomor WhatsApp (Format 62xxx) *</label>
+            <input type="text" id="outlet-form-wa" required placeholder="6281322119988">
+          </div>
+          <div class="form-group">
+            <label>Nomor Telepon Toko</label>
+            <input type="text" id="outlet-form-phone" placeholder="(0542) 876-5432">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Alamat Lengkap Cabang *</label>
+          <textarea id="outlet-form-address" required rows="2" placeholder="Jl. MT Haryono No. 15, Damai..."></textarea>
+        </div>
+
+        <div class="form-group">
+          <label>Upload Foto Storefront Fasad Toko *</label>
+          <div class="file-upload-wrapper">
+            <input type="file" id="outlet-form-file" accept="image/*" class="file-upload-input" onchange="handleImageFileUpload(event, 'outlet-form-image', 'outlet-img-preview')">
+            <label for="outlet-form-file" class="file-upload-dropzone">
+              <i class="fa-solid fa-cloud-arrow-up"></i>
+              <span class="dropzone-main-text">Pilih Foto Toko dari Perangkat / HP</span>
+              <span class="dropzone-sub-text">Format: JPG, PNG, WEBP</span>
+            </label>
+          </div>
+
+          <div class="image-url-toggle-wrap">
+            <span style="font-size: 11.5px; color: var(--text-dim);">Atau path / link gambar:</span>
+            <input type="text" id="outlet-form-image" required placeholder="assets/outlet_mt_haryono.jpg" oninput="previewOutletImage(this.value)">
+          </div>
+
+          <div class="image-preview-box" id="outlet-img-preview-box" style="aspect-ratio: 16/10; width: 140px;">
+            <img id="outlet-img-preview" src="assets/outlet_mt_haryono.jpg" alt="Preview Toko">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Tautan Google Maps</label>
+          <input type="text" id="outlet-form-maps" placeholder="https://maps.google.com/?q=Amanda+Brownies+Balikpapan">
+        </div>
+
+        <!-- BOOTHS MANAGER SECTION -->
+        <div class="stocks-manager-section" style="margin-top: 14px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+            <h4 style="margin: 0; font-size: 13.5px;"><i class="fa-solid fa-store" style="color: var(--ch-olive);"></i> Titik Booth Counter Cabang</h4>
+            <button type="button" class="btn-secondary-sm" onclick="addNewBoothRow()">
+              <i class="fa-solid fa-plus"></i> Tambah Booth
+            </button>
+          </div>
+          <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 10px;">Booth counter ini akan otomatis tampil di menu dropdown navbar dan kartu outlet di halaman depan.</p>
+          <div id="outlet-booths-editor-container" class="outlet-booths-editor-list">
+            <!-- Injected by openOutletModal() -->
+          </div>
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="btn-secondary" onclick="closeModal('outlet-modal')">Batal</button>
+          <button type="submit" class="btn-primary"><i class="fa-solid fa-floppy-disk"></i> Simpan Data Cabang</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL: PRICELIST ==================== -->
+  <div class="cms-modal-overlay" id="pricelist-modal" onclick="closeModalOnOverlay(event, 'pricelist-modal')">
+    <div class="cms-modal-card">
+      <div class="modal-head">
+        <h3 id="pricelist-modal-title">Edit Poster Price List</h3>
+        <button class="modal-close-btn" onclick="closeModal('pricelist-modal')"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <form id="pricelist-form" onsubmit="savePriceListForm(event)">
+        <input type="hidden" id="pricelist-form-id">
+
+        <div class="form-group">
+          <label>Judul Poster Price List *</label>
+          <input type="text" id="pricelist-form-title" required placeholder="Daftar Harga Menu Resmi Amanda">
+        </div>
+
+        <div class="form-group">
+          <label>Badge / Kategori Singkat</label>
+          <input type="text" id="pricelist-form-badge" placeholder="Contoh: Price List Brownies">
+        </div>
+
+        <div class="form-group">
+          <label>Upload Gambar Poster Price List *</label>
+          <div class="file-upload-wrapper">
+            <input type="file" id="pricelist-form-file" accept="image/*" class="file-upload-input" onchange="handleImageFileUpload(event, 'pricelist-form-image', 'pricelist-img-preview')">
+            <label for="pricelist-form-file" class="file-upload-dropzone">
+              <i class="fa-solid fa-cloud-arrow-up"></i>
+              <span class="dropzone-main-text">Pilih Poster dari Perangkat / HP</span>
+              <span class="dropzone-sub-text">Bisa di-zoom in/out di halaman depan</span>
+            </label>
+          </div>
+
+          <div class="image-url-toggle-wrap">
+            <span style="font-size: 11.5px; color: var(--text-dim);">Atau path / link gambar:</span>
+            <input type="text" id="pricelist-form-image" required placeholder="assets/amanda_pricelist_poster.jpg" oninput="previewPriceListImage(this.value)">
+          </div>
+
+          <div class="image-preview-box" style="margin-top: 8px; width: 140px; aspect-ratio: 4/5;">
+            <img id="pricelist-img-preview" src="assets/amanda_pricelist_poster.jpg" alt="Preview Price List" style="max-height: 200px; object-fit: contain;">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Keterangan / Subtitle</label>
+          <input type="text" id="pricelist-form-caption" placeholder="Daftar Harga Resmi Amanda Brownies Kalimantan - Outlet Balikpapan">
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="btn-secondary" onclick="closeModal('pricelist-modal')">Batal</button>
+          <button type="submit" class="btn-primary"><i class="fa-solid fa-floppy-disk"></i> Simpan Poster Price List</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL: TICKER ==================== -->
+  <div class="cms-modal-overlay" id="ticker-modal" onclick="closeModalOnOverlay(event, 'ticker-modal')">
+    <div class="cms-modal-card">
+      <div class="modal-head">
+        <h3 id="ticker-modal-title">Tambah Pengumuman Ticker</h3>
+        <button class="modal-close-btn" onclick="closeModal('ticker-modal')"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <form id="ticker-form" onsubmit="saveTickerForm(event)">
+        <input type="hidden" id="ticker-form-id">
+
+        <div class="form-group">
+          <label>Ikon FontAwesome</label>
+          <input type="text" id="ticker-form-icon" placeholder="fa-solid fa-tag">
+        </div>
+
+        <div class="form-group">
+          <label>Judul Sorotan *</label>
+          <input type="text" id="ticker-form-title" required placeholder="FLASH SALE BPN:">
+        </div>
+
+        <div class="form-group">
+          <label>Teks Pengumuman *</label>
+          <input type="text" id="ticker-form-text" required placeholder="Diskon 20% Brownies Cheese Cream & Tiramisu Marble">
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="btn-secondary" onclick="closeModal('ticker-modal')">Batal</button>
+          <button type="submit" class="btn-primary"><i class="fa-solid fa-floppy-disk"></i> Simpan Pengumuman</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="cms-toast" class="cms-toast" role="alert">
+    <div class="toast-icon-wrap" id="cms-toast-icon">
+      <i class="fa-solid fa-circle-check"></i>
+    </div>
+    <div class="toast-content">
+      <span class="toast-title" id="cms-toast-title">Sukses</span>
+      <span class="toast-desc" id="cms-toast-msg">Data berhasil disimpan.</span>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase.js?v=1.0"></script>
+  <script src="data.js?v=2.5"></script>
+  <script src="admin.js?v=2.5"></script>
+</body>
+
+</html>

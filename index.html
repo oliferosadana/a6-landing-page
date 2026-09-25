@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#4F5B2A">
+  <meta name="description"
+    content="Official Landing Page Amanda Brownies Kota Balikpapan - Cek Ketersediaan Stok Realtime di Outlet MT Haryono, Ruhui Rahayu, Ahmad Yani, Sepinggan, KM 4.5 & Balikpapan Baru.">
+  <meta property="og:title" content="Amanda Brownies Balikpapan | Cek Menu & Stok Outlet Resmi">
+  <meta property="og:description" content="Pesan Amanda Brownies langsung ke cabang outlet terdekat di Balikpapan via WhatsApp.">
+  <meta property="og:type" content="website">
+  <link rel="manifest" href="manifest.json">
+  <title>Amanda Brownies Balikpapan | Cek Menu & Stok Outlet Resmi Balikpapan</title>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;0,800;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+    rel="stylesheet">
+
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+  <!-- Custom Stylesheet -->
+  <link rel="stylesheet" href="./style.css?v=3.0">
+</head>
+
+<body>
+
+  <!-- ==================== HEADER & NAVIGATION ==================== -->
+  <header class="navbar" id="navbar">
+    <div class="container nav-container">
+
+      <!-- Brand Logo -->
+      <a href="#katalog" class="brand-logo">
+        <div class="logo-badge">
+          <i class="fa-solid fa-cake-candles"></i>
+        </div>
+        <div class="brand-text">
+          <h1>AMANDA</h1>
+          <span>BROWNIES KALIMANTAN</span>
+        </div>
+      </a>
+
+      <!-- Nav Links -->
+      <nav>
+        <ul class="nav-links">
+          <li><a href="#promo">Promo</a></li>
+          <li><a href="#pricelist">Price List</a></li>
+          <li class="nav-item-dropdown" id="nav-outlet-dropdown">
+            <a href="#outlet" class="dropdown-toggle">
+              Outlet <i class="fa-solid fa-chevron-down dropdown-arrow"></i>
+            </a>
+            <ul class="nav-dropdown-menu" id="nav-outlet-list">
+              <!-- Injected dynamically as simple list by app.js -->
+            </ul>
+          </li>
+          <li><a href="#katalog1">Katalog Menu</a></li>
+        </ul>
+      </nav>
+
+      <!-- Nav Actions -->
+      <div class="nav-actions" style="display: flex; gap: 8px; align-items: center;">
+        <button class="btn-icon-badge"
+          onclick="document.getElementById('search-input').focus(); window.location.href='#katalog1';" title="Cari Menu">
+          <i class="fa-solid fa-magnifying-glass"></i>
+        </button>
+        <button class="btn-hamburger" id="mobile-menu-btn" onclick="toggleMobileMenu()" title="Buka Menu Navigasi" aria-label="Buka Menu">
+          <i class="fa-solid fa-bars"></i>
+        </button>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- Mobile Navigation Drawer & Backdrop -->
+  <div class="mobile-drawer-backdrop" id="mobile-drawer-backdrop" onclick="closeMobileMenu()"></div>
+  <aside class="mobile-drawer" id="mobile-drawer" aria-label="Menu Navigasi Mobile">
+    <div class="mobile-drawer-header">
+      <div class="brand-logo" style="gap: 8px;">
+        <div class="logo-badge" style="width: 32px; height: 32px; font-size: 14px;">
+          <i class="fa-solid fa-cake-candles"></i>
+        </div>
+        <div class="brand-text">
+          <h1 style="font-size: 15px; color: var(--primary-olive-dark);">AMANDA</h1>
+          <span style="font-size: 8px; color: var(--primary-gold);">BROWNIES BALIKPAPAN</span>
+        </div>
+      </div>
+      <button class="drawer-close-btn" onclick="closeMobileMenu()" aria-label="Tutup Menu">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+    </div>
+
+    <div class="mobile-drawer-body">
+      <ul class="mobile-drawer-links">
+        <li>
+          <a href="#promo" onclick="closeMobileMenu()" class="drawer-link">
+            <i class="fa-solid fa-tag"></i> <span>Promo Spesial</span>
+          </a>
+        </li>
+        <li>
+          <a href="#pricelist" onclick="closeMobileMenu()" class="drawer-link">
+            <i class="fa-solid fa-file-invoice-dollar"></i> <span>Daftar Harga (Price List)</span>
+          </a>
+        </li>
+        <li class="drawer-dropdown-item open" id="drawer-outlet-item">
+          <div class="drawer-dropdown-toggle" onclick="toggleDrawerOutletDropdown()">
+            <div class="drawer-link-title">
+              <i class="fa-solid fa-shop"></i> <span>Outlet Balikpapan</span>
+            </div>
+            <div class="drawer-dropdown-meta">
+              <span class="dropdown-count-pill">6 Cabang</span>
+              <i class="fa-solid fa-chevron-down drawer-chevron" id="drawer-outlet-chevron"></i>
+            </div>
+          </div>
+          <ul class="drawer-sub-outlets" id="drawer-outlet-list">
+            <!-- Dynamically populated with all 6 outlets by app.js -->
+          </ul>
+        </li>
+        <li>
+          <a href="#katalog1" onclick="closeMobileMenu()" class="drawer-link">
+            <i class="fa-solid fa-layer-group"></i> <span>Katalog Menu Produk</span>
+          </a>
+        </li>
+      </ul>
+    </div>
+
+    <div class="mobile-drawer-footer">
+      <a href="https://wa.me/6281322119988?text=Halo%20Amanda%20Brownies%20Balikpapan,%20saya%20ingin%20info%20pemesanan" target="_blank" class="btn-drawer-wa">
+        <i class="fa-brands fa-whatsapp"></i> Chat WhatsApp Pusat
+      </a>
+    </div>
+  </aside>
+
+  <!-- ==================== RUNNING PROMO TICKER (MARQUEE KHUSUS BALIKPAPAN) ==================== -->
+  <div class="promo-ticker-wrapper" id="promo-ticker">
+    <div class="promo-ticker-badge">
+      <i class="fa-solid fa-bolt"></i>
+      <span>PROMO</span>
+    </div>
+    <div class="promo-ticker-track-container">
+      <div class="promo-ticker-track">
+        <!-- Sequence 1 -->
+        <span class="ticker-item"><i class="fa-solid fa-tag"></i> <strong>FLASH SALE BPN:</strong> Diskon 20% Brownies
+          Cheese Cream & Tiramisu Marble</span>
+        <span class="ticker-dot">•</span>
+        <span class="ticker-item"><i class="fa-solid fa-gift"></i> <strong>PROMO SPESIAL:</strong> Potongan harga
+          langsung untuk seluruh varian pilihan di outlet Balikpapan</span>
+        <span class="ticker-dot">•</span>
+        <span class="ticker-item"><i class="fa-solid fa-truck-fast"></i> <strong>GRATIS ONGKIR:</strong> Pengiriman s/d
+          5 Km dari seluruh outlet resmi Balikpapan</span>
+        <span class="ticker-dot">•</span>
+        <span class="ticker-item"><i class="fa-solid fa-store"></i> <strong>CABANG RESMI BPN:</strong> MT Haryono •
+          Ruhui Rahayu • Sepinggan • Ahmad Yani • KM 4.5 • Balikpapan Baru</span>
+        <span class="ticker-dot">•</span>
+        <span class="ticker-item"><i class="fa-solid fa-clock"></i> <strong>PENAWARAN HARI INI:</strong> Khusus
+          pemesanan hari ini s/d pukul 21:30 WITA</span>
+        <span class="ticker-dot">•</span>
+
+        <!-- Sequence 2 (for seamless infinite loop) -->
+        <span class="ticker-item"><i class="fa-solid fa-tag"></i> <strong>FLASH SALE BPN:</strong> Diskon 20% Brownies
+          Cheese Cream & Tiramisu Marble</span>
+        <span class="ticker-dot">•</span>
+        <span class="ticker-item"><i class="fa-solid fa-gift"></i> <strong>PROMO SPESIAL:</strong> Potongan harga
+          langsung untuk seluruh varian pilihan di outlet Balikpapan</span>
+        <span class="ticker-dot">•</span>
+        <span class="ticker-item"><i class="fa-solid fa-truck-fast"></i> <strong>GRATIS ONGKIR:</strong> Pengiriman s/d
+          5 Km dari seluruh outlet resmi Balikpapan</span>
+        <span class="ticker-dot">•</span>
+        <span class="ticker-item"><i class="fa-solid fa-store"></i> <strong>CABANG RESMI BPN:</strong> MT Haryono •
+          Ruhui Rahayu • Sepinggan • Ahmad Yani • KM 4.5 • Balikpapan Baru</span>
+        <span class="ticker-dot">•</span>
+        <span class="ticker-item"><i class="fa-solid fa-clock"></i> <strong>PENAWARAN HARI INI:</strong> Khusus
+          pemesanan hari ini s/d pukul 21:30 WITA</span>
+        <span class="ticker-dot">•</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="promo-toast" class="promo-toast" role="alert" aria-live="assertive">
+    <div class="toast-icon-wrap">
+      <i class="fa-solid fa-circle-check" id="toast-icon"></i>
+    </div>
+    <div class="toast-body">
+      <span class="toast-headline">Info Amanda Kalimantan</span>
+      <span id="toast-message" class="toast-text">Kode voucher berhasil disalin!</span>
+    </div>
+    <button class="toast-close" onclick="hideToast()" aria-label="Tutup notifikasi">
+      <i class="fa-solid fa-xmark"></i>
+    </button>
+  </div>
+
+  <!-- ==================== PROMO FLYER SECTION (HANYA GAMBAR & BISA DIPERBESAR) ==================== -->
+  <section class="promo-showcase-section" id="promo">
+    <div class="container">
+
+      <div class="section-head promo-section-head">
+        <h2 class="font-serif">Promo Spesial Amanda</h2>
+      </div>
+
+      <!-- Flyer Gallery Wrapper -->
+      <div class="flyer-carousel-wrapper" id="flyer-carousel-wrapper">
+        <!-- Injected dynamically by app.js from AMANDA_PROMOS -->
+        <div class="flyer-slides-track" id="flyer-slides-track">
+          <!-- Dynamic Promo Flyer Cards -->
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ==================== PRICE LIST SECTION (GAMBAR & BISA DIPERBESAR) ==================== -->
+  <section class="pricelist-section" id="pricelist">
+    <div class="container">
+
+      <div class="section-head pricelist-section-head">
+        <h2 class="font-serif">Daftar Harga & Menu Amanda</h2>
+      </div>
+
+      <!-- Price List Cards Track -->
+      <div class="pricelist-grid-wrapper">
+        <div class="pricelist-cards-track" id="pricelist-cards-track">
+          <!-- Injected dynamically by app.js from AMANDA_PRICELISTS -->
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Image Lightbox Modal with Simple Zoom In/Out & Pan Controls -->
+  <div id="flyer-lightbox-modal" class="flyer-lightbox-modal" onclick="closeFlyerModal(event)">
+    <div class="lightbox-card" onclick="event.stopPropagation()">
+      
+      <!-- Top Action Bar: Clean Minimal Zoom Toolbar & Close Button -->
+      <div class="lightbox-header-actions">
+        <div class="lightbox-zoom-toolbar">
+          <button class="zoom-btn" onclick="zoomInFlyer()" title="Perbesar (+)" aria-label="Perbesar">+</button>
+          <span class="zoom-level-text" id="lightbox-zoom-level">100%</span>
+          <button class="zoom-btn" onclick="zoomOutFlyer()" title="Perkecil (-)" aria-label="Perkecil">&minus;</button>
+          <button class="zoom-btn" onclick="resetFlyerZoom()" title="Reset (0)" aria-label="Reset">1:1</button>
+        </div>
+
+        <button class="lightbox-close-btn" onclick="closeFlyerModal()" title="Tutup (Esc)" aria-label="Tutup">
+          &times;
+        </button>
+      </div>
+
+      <div class="lightbox-img-wrapper" id="lightbox-img-wrapper" title="Scroll / double click untuk zoom, drag untuk geser">
+        <img id="lightbox-img" src="" alt="Promo Amanda Brownies Balikpapan" draggable="false" />
+      </div>
+
+      <div class="lightbox-footer">
+        <div>
+          <h4 id="lightbox-title" style="font-size: 15px; margin-bottom: 2px;">Promo Amanda Brownies</h4>
+          <p id="lightbox-caption" style="font-size: 12.5px; color: var(--text-muted); margin: 0;">Flyer Resmi Amanda Kalimantan</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== OUTLET NETWORK SECTION (DIBAWAH PRICELIST) ==================== -->
+  <section class="locator-section" id="outlet">
+    <div class="container">
+
+      <!-- Section Header -->
+      <div class="section-head locator-section-head">
+        <span class="section-tag"><i class="fa-solid fa-store" style="margin-right: 4px;"></i> Jaringan Cabang Resmi Kalimantan</span>
+        <h2 class="font-serif">Outlet Amanda Brownies Kota Balikpapan</h2>
+        <p>Kunjungi cabang resmi terdekat untuk pembelian langsung (Take Away) atau pesan antar via WhatsApp resmi & kurir lokal.</p>
+      </div>
+
+      <!-- Filter Tabs Bar -->
+      <div class="locator-filter-bar">
+        <div class="city-pill-list">
+          <button class="city-pill active" onclick="filterLocatorCity('all', this)">
+            <i class="fa-solid fa-city"></i> Semua Cabang (6)
+          </button>
+          <button class="city-pill" onclick="filterLocatorCity('Balikpapan Selatan', this)">
+            <i class="fa-solid fa-map-pin"></i> Balikpapan Selatan (3)
+          </button>
+          <button class="city-pill" onclick="filterLocatorCity('Balikpapan Kota', this)">
+            <i class="fa-solid fa-map-pin"></i> Balikpapan Kota (2)
+          </button>
+          <button class="city-pill" onclick="filterLocatorCity('Balikpapan Utara', this)">
+            <i class="fa-solid fa-map-pin"></i> Balikpapan Utara (1)
+          </button>
+        </div>
+      </div>
+
+      <!-- Outlets Responsive Grid -->
+      <div class="outlets-network-grid" id="locator-outlets-list">
+        <!-- Rendered by app.js -->
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ==================== SEARCH & FILTERS BAR ==================== -->
+  <section class="finder-bar-section" id="katalog1">
+    <div class="container">
+      <div class="finder-box">
+
+        <div class="finder-header">
+          <div class="finder-title">
+            <h3 class="font-serif">Katalog Produk Amanda - Kota Balikpapan</h3>
+            <p>Pilihan varian brownies kukus, bakar, dan premium marmer dengan cita rasa legit dan kualitas terbaik.</p>
+          </div>
+
+          <!-- Live Search Bar -->
+          <div class="search-input-wrapper">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="text" id="search-input"
+              placeholder="Cari varian brownies (misal: Cheese, Original, Pandan)..." />
+          </div>
+        </div>
+
+        <!-- Category Buttons -->
+        <div class="category-chips-row">
+          <button class="cat-btn active" onclick="setCategory('all', this)">
+            <i class="fa-solid fa-layer-group"></i> Semua Menu
+          </button>
+          <button class="cat-btn" onclick="setCategory('kukus', this)">
+            <i class="fa-solid fa-cloud"></i> Brownies Kukus
+          </button>
+          <button class="cat-btn" onclick="setCategory('bakar', this)">
+            <i class="fa-solid fa-fire-burner"></i> Brownies Bakar
+          </button>
+          <button class="cat-btn" onclick="setCategory('marble', this)">
+            <i class="fa-solid fa-wand-magic-sparkles"></i> Premium & Marble
+          </button>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== PRODUCT CATALOG & DROPDOWN DISPLAY ==================== -->
+  <section class="catalog-section">
+    <div class="container">
+
+      <!-- <div class="section-head">
+        <span class="section-tag">Pilihan Terbaik Balikpapan</span>
+        <h2 class="font-serif">Varian Brownies & Ketersediaan Outlet</h2>
+        <p>Setiap varian dilengkapi rincian stok langsung di 6 cabang resmi Balikpapan dan tombol order cepat via
+          WhatsApp.</p>
+      </div> -->
+
+      <!-- Grid Cards with Interactive Dropdown (Rendered via JS) -->
+      <div class="products-grid" id="products-grid">
+        <!-- Injected dynamically by app.js -->
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ==================== INFORMASI LAYANAN & PANDUAN KONSUMSI BALIKPAPAN ==================== -->
+  <!-- <section class="info-guide-section" id="panduan">
+    <div class="container">
+      <div class="section-head" style="margin-bottom: 32px;">
+        <span class="section-tag"><i class="fa-solid fa-circle-info"
+            style="color: var(--primary-olive); margin-right: 4px;"></i> Panduan Konsumsi & Pemesanan</span>
+        <h2 class="font-serif">Informasi Penting Pelanggan Balikpapan</h2>
+        <p>Pedoman ketahanan brownies, opsi kurir lokal, dan rekomendasi pembelian oleh-oleh untuk kenyamanan Anda.</p>
+      </div>
+
+      <div class="info-guide-grid"> -->
+  <!-- Guide 1: Penyimpanan -->
+  <!-- <div class="guide-card">
+          <div class="guide-icon-box">
+            <i class="fa-solid fa-temperature-arrow-down"></i>
+          </div>
+          <h4 class="font-serif">Panduan Suhu & Penyimpanan</h4>
+          <p>
+            Brownies Kukus tahan <strong>3–4 hari</strong> pada suhu ruang sejuk, atau hingga <strong>7 hari</strong> di
+            dalam kulkas/chiller. Untuk Brownies Bakar Almond tahan hingga <strong>7–14 hari</strong>.
+          </p>
+          <span class="guide-badge">Tips: Sajikan dingin dari kulkas untuk sensasi cokelat lebih padat & legit.</span>
+        </div> -->
+
+  <!-- Guide 2: Layanan Delivery -->
+  <!-- <div class="guide-card">
+          <div class="guide-icon-box">
+            <i class="fa-solid fa-truck-fast"></i>
+          </div>
+          <h4 class="font-serif">Kurir Instant Balikpapan</h4>
+          <p>
+            Melayani pesan-antar langsung ke wilayah <strong>Balikpapan Selatan, Balikpapan Kota, Balikpapan Utara,
+              Balikpapan Barat, dan Balikpapan Timur</strong> melalui kurir outlet, GrabFood, GoFood, atau Maxim.
+          </p>
+          <span class="guide-badge">Gratis ongkir s/d 5 Km untuk outlet tertentu via promo berjalan.</span>
+        </div> -->
+
+  <!-- Guide 3: Titik Temu Bandara Sepinggan -->
+  <!-- <div class="guide-card">
+          <div class="guide-icon-box">
+            <i class="fa-solid fa-plane-departure"></i>
+          </div>
+          <h4 class="font-serif">Oleh-Oleh Akses Bandara SAMS</h4>
+          <p>
+            Bagi penumpang pesawat terbang, outlet <strong>Amanda Cabang Sepinggan (Jl. Marsma R. Iswahyudi)</strong>
+            buka mulai <strong>06.30 WITA</strong> — berjarak hanya 5 menit sebelum pintu masuk Bandara SAMS Sepinggan.
+          </p>
+          <span class="guide-badge">Kemasan box kuat dan aman untuk masuk bagasi/kabin pesawat.</span>
+        </div> -->
+
+  <!-- Guide 4: Keaslian & Jaminan Halal -->
+  <!-- <div class="guide-card">
+          <div class="guide-icon-box">
+            <i class="fa-solid fa-shield-halved"></i>
+          </div>
+          <h4 class="font-serif">100% Halal Resmi & Fresh Harian</h4>
+          <p>
+            Semua produk yang dijual di 6 outlet resmi Kota Balikpapan dipasok segar setiap hari tanpa bahan pengawet
+            terlarang, serta bersertifikasi Halal BPJPH & BPOM RI.
+          </p>
+          <span class="guide-badge">Selalu periksa tanggal produksi dan nomor stiker pada kemasan.</span>
+        </div>
+      </div>
+    </div>
+  </section> -->
+
+  <!-- ==================== FOOTER ==================== -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-grid">
+
+        <div class="footer-brand">
+          <div class="brand-logo" style="margin-bottom: 12px;">
+            <div class="logo-badge">
+              <i class="fa-solid fa-cake-candles"></i>
+            </div>
+            <div class="brand-text">
+              <h1>AMANDA</h1>
+              <span>BROWNIES • BALIKPAPAN</span>
+            </div>
+          </div>
+          <p>Layanan resmi pengecekan produk & pemesanan Amanda Brownies untuk wilayah Kota Balikpapan, Kalimantan
+            Timur.</p>
+          <div style="display: flex; gap: 12px; font-size: 18px;">
+            <a href="#" style="color: var(--primary-gold);"><i class="fa-brands fa-instagram"></i></a>
+            <a href="#" style="color: var(--primary-gold);"><i class="fa-brands fa-tiktok"></i></a>
+            <a href="#" style="color: var(--primary-gold);"><i class="fa-brands fa-facebook"></i></a>
+            <a href="#" style="color: var(--primary-gold);"><i class="fa-brands fa-whatsapp"></i></a>
+          </div>
+        </div>
+
+        <div class="footer-col">
+          <h4 class="font-serif">Varian Favorit</h4>
+          <ul class="footer-links">
+            <li><a href="#katalog" onclick="setCategory('kukus')">Brownies Kukus Original</a></li>
+            <li><a href="#katalog" onclick="setCategory('kukus')">Brownies Cheese Cream</a></li>
+            <li><a href="#katalog" onclick="setCategory('marble')">Tiramisu Marble</a></li>
+            <li><a href="#katalog" onclick="setCategory('kukus')">Sarikaya Pandan</a></li>
+            <li><a href="#katalog" onclick="setCategory('bakar')">Brownies Bakar Almond</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-col">
+          <h4 class="font-serif">Outlet Balikpapan</h4>
+          <ul class="footer-links">
+            <li><a href="#outlet-locator" onclick="filterLocatorCity('Balikpapan Selatan')">MT Haryono (Damai)</a></li>
+            <li><a href="#outlet-locator" onclick="filterLocatorCity('Balikpapan Selatan')">Ruhui Rahayu (Dome)</a></li>
+            <li><a href="#outlet-locator" onclick="filterLocatorCity('Balikpapan Kota')">Ahmad Yani (Klandasan)</a></li>
+            <li><a href="#outlet-locator" onclick="filterLocatorCity('Balikpapan Selatan')">Sepinggan (Bandara)</a></li>
+            <li><a href="#outlet-locator" onclick="filterLocatorCity('Balikpapan Utara')">KM. 4.5 Batu Ampar</a></li>
+            <li><a href="#outlet-locator" onclick="filterLocatorCity('Balikpapan Kota')">Balikpapan Baru (Sentra
+                Eropa)</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-col">
+          <h4 class="font-serif">Layanan Balikpapan</h4>
+          <p style="color: var(--text-muted); font-size: 13.5px; margin-bottom: 12px;">
+            <i class="fa-solid fa-phone" style="color: var(--primary-gold); margin-right: 6px;"></i>
+            Outlet MT Haryono: (0542) 876-5432
+          </p>
+          <p style="color: var(--text-muted); font-size: 13.5px; margin-bottom: 12px;">
+            <i class="fa-brands fa-whatsapp" style="color: var(--accent-green); margin-right: 6px;"></i>
+            WhatsApp Center: +62 813-2211-9988
+          </p>
+          <p style="color: var(--text-dim); font-size: 12.5px;">
+            Jam Operasional: 07.30 - 21.30 WITA
+          </p>
+        </div>
+
+      </div>
+
+      <div class="footer-bottom"
+        style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+        <p>&copy; 2026 Amanda Brownies Kukus Kota Balikpapan. Hak Cipta Dilindungi.</p>
+        <p style="color: var(--text-dim); font-size: 12px;">Sistem Informasi & Pemesanan Resmi Outlet Balikpapan</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="./supabase.js?v=1.0"></script>
+  <script src="./data.js?v=2.5"></script>
+  <script src="./app.js?v=3.0"></script>
+</body>
+
+</html>

@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Superadmin Platform | Amanda Brownies WaaS Management</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;0,800;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+    rel="stylesheet">
+
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+  <!-- Superadmin Stylesheet -->
+  <link rel="stylesheet" href="superadmin.css?v=1.1">
+
+  <!-- Strict Auth Guard (Executes before page renders) -->
+  <script src="auth.js?v=1.0"></script>
+  <script>
+    enforceAuth('superadmin');
+  </script>
+</head>
+
+<body>
+
+  <div class="sa-layout">
+
+    <!-- ==================== SUPERADMIN SIDEBAR ==================== -->
+    <aside class="sa-sidebar" id="sa-sidebar">
+      <div class="sa-brand">
+        <div class="brand-crown-icon">
+          <i class="fa-solid fa-crown"></i>
+        </div>
+        <div class="brand-text">
+          <h2>AMANDA ROOT</h2>
+          <span>SUPERADMIN PORTAL</span>
+        </div>
+      </div>
+
+      <nav class="sa-nav">
+        <ul>
+          <li>
+            <button class="sa-nav-item active" onclick="switchSaTab('overview', this)">
+              <i class="fa-solid fa-chart-line"></i>
+              <span>Ringkasan Platform</span>
+            </button>
+          </li>
+          <li>
+            <button class="sa-nav-item" onclick="switchSaTab('tenants', this)">
+              <i class="fa-solid fa-building-user"></i>
+              <span>Kelola Penyewa (Cabang)</span>
+              <span class="sa-badge" id="badge-tenants-count">0</span>
+            </button>
+          </li>
+          <li>
+            <button class="sa-nav-item" onclick="switchSaTab('invoices', this)">
+              <i class="fa-solid fa-file-invoice-dollar"></i>
+              <span>Verifikasi Invoice & Tagihan</span>
+              <span class="sa-badge warning" id="badge-pending-invoices">0</span>
+            </button>
+          </li>
+          <li>
+            <button class="sa-nav-item" onclick="switchSaTab('plans', this)">
+              <i class="fa-solid fa-tags"></i>
+              <span>Master Paket Sewa</span>
+            </button>
+          </li>
+          <li>
+            <button class="sa-nav-item" onclick="switchSaTab('gateway', this)">
+              <i class="fa-solid fa-money-bill-transfer"></i>
+              <span>Rekening & QRIS Gateway</span>
+            </button>
+          </li>
+        </ul>
+      </nav>
+
+      <div class="sa-sidebar-footer">
+        <a href="admin.html" target="_blank" class="sa-footer-link">
+          <i class="fa-solid fa-store"></i>
+          <span>Buka CMS Cabang</span>
+        </a>
+        <a href="billing.html" target="_blank" class="sa-footer-link">
+          <i class="fa-solid fa-cart-shopping"></i>
+          <span>Portal Sewa Publik</span>
+        </a>
+      </div>
+    </aside>
+
+    <!-- ==================== MAIN CONTENT ==================== -->
+    <main class="sa-main">
+
+      <!-- Top Header -->
+      <header class="sa-topbar">
+        <div class="topbar-left">
+          <button class="sa-btn-toggle" onclick="toggleSaSidebar()">
+            <i class="fa-solid fa-bars"></i>
+          </button>
+          <div>
+            <h1 id="sa-page-heading">Ringkasan Platform WaaS</h1>
+            <span class="sa-subheading">Kontrol Pusat Seluruh Penyewa Sistem, Finansial, dan Verifikasi Tagihan</span>
+          </div>
+        </div>
+
+        <div class="topbar-right">
+          <button class="supabase-status-pill local" id="topbar-db-pill" onclick="openSupabaseModal()" title="Pengaturan Database Supabase Cloud">
+            <span class="db-dot orange"></span>
+            <span>Database: Lokal</span>
+          </button>
+          <div class="sa-root-pill">
+            <span class="pulse-dot"></span>
+            <span>Superadmin Aktif</span>
+          </div>
+          <a href="index.html" target="_blank" class="btn-live-view">
+            <i class="fa-solid fa-globe"></i> Website Utama
+          </a>
+        </div>
+      </header>
+
+      <!-- Content Container -->
+      <div class="sa-content-wrap">
+
+        <!-- ==================== TAB 1: OVERVIEW ==================== -->
+        <section id="sa-sec-overview" class="sa-section active">
+          
+          <!-- Key Metrics Grid -->
+          <div class="metrics-grid">
+            <div class="metric-card">
+              <div class="metric-icon-wrap gold">
+                <i class="fa-solid fa-sack-dollar"></i>
+              </div>
+              <div class="metric-data">
+                <span class="metric-title">Total Pendapatan Sewa</span>
+                <h3 class="metric-num" id="sa-stat-revenue">Rp 0</h3>
+                <span class="metric-desc text-green"><i class="fa-solid fa-arrow-trend-up"></i> Realtime dari invoice lunas</span>
+              </div>
+            </div>
+
+            <div class="metric-card">
+              <div class="metric-icon-wrap olive">
+                <i class="fa-solid fa-store"></i>
+              </div>
+              <div class="metric-data">
+                <span class="metric-title">Penyewa / Cabang Aktif</span>
+                <h3 class="metric-num" id="sa-stat-active-tenants">0</h3>
+                <span class="metric-desc" id="sa-stat-total-tenants-desc">Dari 0 total terdaftar</span>
+              </div>
+            </div>
+
+            <div class="metric-card">
+              <div class="metric-icon-wrap orange">
+                <i class="fa-solid fa-clock-rotate-left"></i>
+              </div>
+              <div class="metric-data">
+                <span class="metric-title">Invoice Menunggu Bayar</span>
+                <h3 class="metric-num text-orange" id="sa-stat-pending-invoices">0</h3>
+                <span class="metric-desc">Perlu verifikasi atau follow-up</span>
+              </div>
+            </div>
+
+            <div class="metric-card">
+              <div class="metric-icon-wrap green">
+                <i class="fa-solid fa-chart-pie"></i>
+              </div>
+              <div class="metric-data">
+                <span class="metric-title">Estimasi Omzet Bulanan (MRR)</span>
+                <h3 class="metric-num" id="sa-stat-mrr">Rp 0</h3>
+                <span class="metric-desc">Berdasarkan total paket aktif</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Quick Actions & Expiry Alerts -->
+          <div class="sa-grid-split">
+            <!-- Tenants Near Expiry / Expired -->
+            <div class="sa-card">
+              <div class="sa-card-head">
+                <div class="head-title">
+                  <i class="fa-solid fa-triangle-exclamation text-orange"></i>
+                  <h3>Penyewa Mendekati Jatuh Tempo / Kadaluarsa</h3>
+                </div>
+                <button class="btn-sm" onclick="switchSaTab('tenants', document.querySelectorAll('.sa-nav-item')[1])">Lihat Semua</button>
+              </div>
+              <div class="sa-card-body" id="sa-overview-expiring-list">
+                <!-- Injected by superadmin.js -->
+              </div>
+            </div>
+
+            <!-- Recent Invoices -->
+            <div class="sa-card">
+              <div class="sa-card-head">
+                <div class="head-title">
+                  <i class="fa-solid fa-receipt text-olive"></i>
+                  <h3>Transaksi Invoice Terbaru</h3>
+                </div>
+                <button class="btn-sm" onclick="switchSaTab('invoices', document.querySelectorAll('.sa-nav-item')[2])">Pusat Invoice</button>
+              </div>
+              <div class="sa-card-body" id="sa-overview-recent-invoices">
+                <!-- Injected by superadmin.js -->
+              </div>
+            </div>
+          </div>
+
+        </section>
+
+        <!-- ==================== TAB 2: TENANTS MANAGEMENT ==================== -->
+        <section id="sa-sec-tenants" class="sa-section">
+          
+          <div class="section-toolbar">
+            <div class="toolbar-left">
+              <h2>Manajemen Penyewa Sistem (Tenants)</h2>
+              <p>Kelola seluruh klien/cabang yang menyewa landing page dan CMS.</p>
+            </div>
+            <button class="btn-primary" onclick="openTenantModal()">
+              <i class="fa-solid fa-plus"></i> Tambah Cabang / Penyewa Baru
+            </button>
+          </div>
+
+          <!-- Filter & Search Bar -->
+          <div class="filter-bar">
+            <div class="search-input-wrap">
+              <i class="fa-solid fa-magnifying-glass"></i>
+              <input type="text" id="tenant-search-input" placeholder="Cari nama cabang, kontak, domain, atau kota..." oninput="filterTenantsTable()">
+            </div>
+            <div class="filter-tabs">
+              <button class="filter-btn active" data-filter="all" onclick="setTenantFilter('all', this)">Semua (<span id="count-tenant-all">0</span>)</button>
+              <button class="filter-btn" data-filter="active" onclick="setTenantFilter('active', this)">Aktif (<span id="count-tenant-active">0</span>)</button>
+              <button class="filter-btn" data-filter="expired" onclick="setTenantFilter('expired', this)">Kadaluarsa (<span id="count-tenant-expired">0</span>)</button>
+            </div>
+          </div>
+
+          <!-- Tenants Table -->
+          <div class="sa-card">
+            <div class="table-responsive">
+              <table class="sa-table">
+                <thead>
+                  <tr>
+                    <th>Nama Usaha & Cabang</th>
+                    <th>Kota / Wilayah</th>
+                    <th>Paket Sewa</th>
+                    <th>Masa Aktif & Sisa</th>
+                    <th>Domain</th>
+                    <th>Status</th>
+                    <th style="text-align: right;">Aksi</th>
+                  </tr>
+                </thead>
+                <tbody id="sa-tenants-tbody">
+                  <!-- Injected by superadmin.js -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+        </section>
+
+        <!-- ==================== TAB 3: INVOICES & VERIFICATION ==================== -->
+        <section id="sa-sec-invoices" class="sa-section">
+          
+          <div class="section-toolbar">
+            <div class="toolbar-left">
+              <h2>Pusat Verifikasi Invoice & Tagihan</h2>
+              <p>Verifikasi pembayaran penyewa dengan 1-klik untuk mengaktifkan perpanjangan sistem otomatis.</p>
+            </div>
+          </div>
+
+          <!-- Invoice Filter Bar -->
+          <div class="filter-bar">
+            <div class="search-input-wrap">
+              <i class="fa-solid fa-magnifying-glass"></i>
+              <input type="text" id="invoice-search-input" placeholder="Cari nomor invoice, nama penyewa..." oninput="filterInvoicesTable()">
+            </div>
+            <div class="filter-tabs">
+              <button class="filter-btn active" data-inv-filter="all" onclick="setInvoiceFilter('all', this)">Semua (<span id="count-inv-all">0</span>)</button>
+              <button class="filter-btn" data-inv-filter="PENDING" onclick="setInvoiceFilter('PENDING', this)">Menunggu Bayar (<span id="count-inv-pending">0</span>)</button>
+              <button class="filter-btn" data-inv-filter="PAID" onclick="setInvoiceFilter('PAID', this)">Lunas (<span id="count-inv-paid">0</span>)</button>
+            </div>
+          </div>
+
+          <!-- Invoices Table -->
+          <div class="sa-card">
+            <div class="table-responsive">
+              <table class="sa-table">
+                <thead>
+                  <tr>
+                    <th>No. Invoice</th>
+                    <th>Tanggal Terbit</th>
+                    <th>Penyewa / Mitra</th>
+                    <th>Paket & Durasi</th>
+                    <th>Total Bayar</th>
+                    <th>Metode</th>
+                    <th>Status</th>
+                    <th style="text-align: right;">Aksi Verifikasi</th>
+                  </tr>
+                </thead>
+                <tbody id="sa-invoices-tbody">
+                  <!-- Injected by superadmin.js -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+        </section>
+
+        <!-- ==================== TAB 4: MASTER PRICING PLANS ==================== -->
+        <section id="sa-sec-plans" class="sa-section">
+          
+          <div class="section-toolbar">
+            <div class="toolbar-left">
+              <h2>Master Paket Sewa & Tarif Sistem</h2>
+              <p>Atur harga langganan Bulanan dan Tahunan yang tampil di portal pemesanan publik.</p>
+            </div>
+          </div>
+
+          <div class="plans-admin-grid" id="sa-plans-grid">
+            <!-- Injected by superadmin.js -->
+          </div>
+
+        </section>
+
+        <!-- ==================== TAB 5: GATEWAY & BANK ACCOUNTS ==================== -->
+        <section id="sa-sec-gateway" class="sa-section">
+          
+          <div class="section-toolbar">
+            <div class="toolbar-left">
+              <h2>Pengaturan Rekening & QRIS Platform</h2>
+              <p>Kelola nomor rekening bank dan instruksi pembayaran yang diterima dari penyewa.</p>
+            </div>
+          </div>
+
+          <div class="gateway-admin-grid" id="sa-gateway-grid">
+            <!-- Injected by superadmin.js -->
+          </div>
+
+        </section>
+
+      </div>
+    </main>
+
+  </div>
+
+  <!-- ==================== MODAL: ADD/EDIT TENANT ==================== -->
+  <div class="sa-modal-overlay" id="sa-tenant-modal" onclick="closeModalOnOverlay(event, 'sa-tenant-modal')">
+    <div class="sa-modal-card">
+      <div class="sa-modal-head">
+        <h3 id="sa-tenant-modal-title">Tambah Cabang / Penyewa Baru</h3>
+        <button class="sa-modal-close" onclick="closeSaModal('sa-tenant-modal')"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <form id="sa-tenant-form" onsubmit="saveTenantForm(event)">
+        <input type="hidden" id="tenant-form-id">
+
+        <div class="form-group">
+          <label>Nama Bisnis / Cabang Outlet *</label>
+          <input type="text" id="tenant-form-name" required placeholder="Contoh: Amanda Brownies Cabang Samarinda">
+        </div>
+
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label>Kota / Wilayah *</label>
+            <input type="text" id="tenant-form-city" required placeholder="Contoh: Kota Samarinda, Kaltim">
+          </div>
+          <div class="form-group">
+            <label>Domain / Subdomain *</label>
+            <input type="text" id="tenant-form-domain" required placeholder="samarinda.amandabrownies.id">
+          </div>
+        </div>
+
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label>WhatsApp Kontak *</label>
+            <input type="text" id="tenant-form-phone" required placeholder="6281234567890">
+          </div>
+          <div class="form-group">
+            <label>Email Admin</label>
+            <input type="email" id="tenant-form-email" placeholder="admin@cabang.id">
+          </div>
+        </div>
+
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label>Pilih Paket Langganan *</label>
+            <select id="tenant-form-plan" required onchange="onTenantPlanChange(this.value)">
+              <option value="plan-1m">Paket Starter (1 Bulan) - Rp 99.000</option>
+              <option value="plan-3m">Paket Kuartal (3 Bulan) - Rp 279.000</option>
+              <option value="plan-6m" selected>Paket Bisnis (6 Bulan) - Rp 499.000</option>
+              <option value="plan-12m">Paket Enterprise (1 Tahun) - Rp 899.000</option>
+              <option value="plan-24m">Paket Bisnis Pro (2 Tahun) - Rp 1.599.000</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Status Akun Sewa *</label>
+            <select id="tenant-form-status" required>
+              <option value="active">Aktif & Berjalan</option>
+              <option value="pending">Menunggu Aktivasi</option>
+              <option value="expired">Kadaluarsa</option>
+              <option value="suspended">Ditangguhkan (Suspended)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Catatan Operasional</label>
+          <textarea id="tenant-form-notes" rows="2" placeholder="Catatan internal pengelola platform..."></textarea>
+        </div>
+
+        <div class="sa-modal-actions">
+          <button type="button" class="sa-btn-sec" onclick="closeSaModal('sa-tenant-modal')">Batal</button>
+          <button type="submit" class="btn-primary"><i class="fa-solid fa-floppy-disk"></i> Simpan Data Penyewa</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL: EXTEND SUBSCRIPTION ==================== -->
+  <div class="sa-modal-overlay" id="sa-extend-modal" onclick="closeModalOnOverlay(event, 'sa-extend-modal')">
+    <div class="sa-modal-card">
+      <div class="sa-modal-head">
+        <h3>Perpanjang Masa Sewa Cabang</h3>
+        <button class="sa-modal-close" onclick="closeSaModal('sa-extend-modal')"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="extend-modal-body">
+        <p style="font-size: 13.5px; color: var(--text-muted); margin-bottom: 16px;">
+          Pilih durasi perpanjangan untuk penyewa <strong id="extend-tenant-name">-</strong>.
+        </p>
+        <input type="hidden" id="extend-tenant-id">
+
+        <div class="extend-options-grid">
+          <button class="btn-extend-opt" onclick="applyManualExtension(1)">
+            <strong>+1 Bulan (30 Hari)</strong>
+            <span>Paket Bulanan</span>
+          </button>
+          <button class="btn-extend-opt" onclick="applyManualExtension(6)">
+            <strong>+6 Bulan</strong>
+            <span>Paket Bisnis Kuartalan</span>
+          </button>
+          <button class="btn-extend-opt highlight" onclick="applyManualExtension(12)">
+            <strong>+1 Tahun (12 Bulan)</strong>
+            <span>Paket Enterprise Tahunan</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL: SUPABASE CONFIGURATION ==================== -->
+  <div class="sa-modal-overlay" id="sa-supabase-modal" onclick="closeModalOnOverlay(event, 'sa-supabase-modal')">
+    <div class="sa-modal-card">
+      <div class="sa-modal-head">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <i class="fa-solid fa-database" style="color: #3ecf8e; font-size: 20px;"></i>
+          <h3>Koneksi Database Supabase Cloud</h3>
+        </div>
+        <button class="sa-modal-close" onclick="closeSaModal('sa-supabase-modal')"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <form id="sa-supabase-form" onsubmit="saveSupabaseSettingsFromForm(event)">
+        <div class="form-group">
+          <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 12px; line-height: 1.5;">
+            Hubungkan aplikasi dengan database <strong>Supabase (PostgreSQL Cloud)</strong> agar seluruh produk, cabang, invoice, dan data penyewa tersimpan secara terpusat dan tersinkronisasi realtime.
+          </p>
+        </div>
+
+        <div class="form-group">
+          <label>Supabase Project URL *</label>
+          <input type="url" id="sb-form-url" required placeholder="https://xyzcompany.supabase.co">
+          <small style="color: var(--text-dim); font-size: 11px;">Dapat ditemukan di Supabase Dashboard -> Project Settings -> API</small>
+        </div>
+
+        <div class="form-group">
+          <label>Supabase Anon Public API Key *</label>
+          <input type="text" id="sb-form-key" required placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...">
+          <small style="color: var(--text-dim); font-size: 11px;">Gunakan <code>anon</code> public key, aman untuk frontend.</small>
+        </div>
+
+        <div class="form-group" style="background: var(--bg-elevated); border-radius: var(--radius-md); padding: 12px; border: 1px solid var(--ch-sand-border); margin: 0 24px 14px;">
+          <div style="display: flex; align-items: center; justify-content: space-between;">
+            <div>
+              <strong style="font-size: 12.5px; color: var(--text-main);">Gunakan Skema SQL</strong>
+              <div style="font-size: 11.5px; color: var(--text-dim);">Jalankan query di <code>supabase_schema.sql</code> di Supabase SQL Editor.</div>
+            </div>
+            <button type="button" class="btn-sm" onclick="testSupabaseFromForm()">
+              <i class="fa-solid fa-plug"></i> Tes Koneksi
+            </button>
+          </div>
+        </div>
+
+        <div class="sa-modal-actions">
+          <button type="button" class="sa-btn-sec" onclick="closeSaModal('sa-supabase-modal')">Tutup</button>
+          <button type="submit" class="btn-primary"><i class="fa-solid fa-floppy-disk"></i> Simpan & Hubungkan Database</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="sa-toast" class="sa-toast" role="alert">
+    <div class="toast-icon"><i class="fa-solid fa-circle-check"></i></div>
+    <div class="toast-text">
+      <span class="toast-title" id="sa-toast-title">Sukses</span>
+      <span class="toast-msg" id="sa-toast-msg">Data berhasil diperbarui.</span>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <!-- Official Supabase JS v2 CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase.js?v=1.0"></script>
+  <script src="data.js?v=2.5"></script>
+  <script src="superadmin.js?v=1.1"></script>
+</body>
+
+</html>

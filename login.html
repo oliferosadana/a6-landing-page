@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login Portal Resmi | Amanda Brownies Platform</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;0,800;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+    rel="stylesheet">
+
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+  <!-- Login Stylesheet -->
+  <link rel="stylesheet" href="login.css?v=1.0">
+</head>
+
+<body>
+
+  <div class="login-page-wrap">
+    
+    <!-- Left Visual Panel (Desktop) -->
+    <div class="login-visual-panel">
+      <div class="visual-overlay"></div>
+      <div class="visual-content">
+        <div class="visual-logo-badge">
+          <i class="fa-solid fa-cake-candles"></i>
+        </div>
+        <h1 class="font-serif">AMANDA PLATFORM</h1>
+        <p class="visual-tagline">Sistem Manajemen Terpadu Landing Page, Katalog Menu, Multi-Cabang Outlet, & Portal WaaS Kalimantan.</p>
+
+        <div class="visual-highlights">
+          <div class="vh-item">
+            <i class="fa-solid fa-shield-check"></i>
+            <span>Otentikasi Berlapis & Session Guard</span>
+          </div>
+          <div class="vh-item">
+            <i class="fa-solid fa-bolt"></i>
+            <span>Sinkronisasi Realtime Supabase PostgreSQL</span>
+          </div>
+          <div class="vh-item">
+            <i class="fa-solid fa-shop"></i>
+            <span>Manajemen Multi-Tenant 6 Cabang Balikpapan</span>
+          </div>
+        </div>
+
+        <div class="visual-footer">
+          <span>&copy; 2026 Amanda Brownies Platform. Hak Cipta Dilindungi.</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Form Panel -->
+    <div class="login-form-panel">
+      
+      <div class="login-card-container">
+
+        <!-- Top Navigation / Back -->
+        <div class="login-top-nav">
+          <a href="index.html" class="btn-back-home">
+            <i class="fa-solid fa-arrow-left"></i> Kembali ke Website
+          </a>
+          <span class="secure-badge"><i class="fa-solid fa-lock"></i> SSL Secured</span>
+        </div>
+
+        <!-- Header -->
+        <div class="login-header">
+          <h2 class="font-serif">Selamat Datang</h2>
+          <p>Masuk ke portal manajemen platform atau panel kelola cabang Anda.</p>
+        </div>
+
+        <!-- Role Switcher Tabs -->
+        <div class="role-switcher">
+          <button type="button" class="role-tab active" id="tab-role-superadmin" onclick="switchLoginRole('superadmin')">
+            <i class="fa-solid fa-crown"></i>
+            <span>Superadmin</span>
+          </button>
+          <button type="button" class="role-tab" id="tab-role-tenant" onclick="switchLoginRole('tenant_admin')">
+            <i class="fa-solid fa-store"></i>
+            <span>Admin Cabang</span>
+          </button>
+        </div>
+
+        <!-- Error / Info Banner -->
+        <div id="login-alert" class="login-alert-box" style="display: none;">
+          <i class="fa-solid fa-circle-exclamation"></i>
+          <span id="login-alert-text">Email atau password salah.</span>
+        </div>
+
+        <!-- Login Form -->
+        <form id="login-form" onsubmit="handleLoginFormSubmit(event)">
+          <input type="hidden" id="login-role-input" value="superadmin">
+
+          <div class="form-group">
+            <label for="login-email">Email / Akun Terdaftar *</label>
+            <div class="input-with-icon">
+              <i class="fa-solid fa-envelope"></i>
+              <input type="email" id="login-email" required placeholder="superadmin@amanda.id" autocomplete="email">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <div class="label-row">
+              <label for="login-password">Kata Sandi / Password *</label>
+            </div>
+            <div class="input-with-icon">
+              <i class="fa-solid fa-key"></i>
+              <input type="password" id="login-password" required placeholder="••••••••••••" autocomplete="current-password">
+              <button type="button" class="btn-toggle-eye" onclick="togglePasswordVisibility('login-password', this)">
+                <i class="fa-regular fa-eye"></i>
+              </button>
+            </div>
+          </div>
+
+          <div class="form-options-row">
+            <label class="remember-label">
+              <input type="checkbox" id="remember-me" checked>
+              <span>Ingat saya selama 7 hari</span>
+            </label>
+          </div>
+
+          <button type="submit" class="btn-login-submit" id="btn-login-submit">
+            <i class="fa-solid fa-right-to-bracket"></i>
+            <span id="btn-submit-text">Masuk ke Superadmin</span>
+          </button>
+        </form>
+
+        <!-- Quick Demo Credentials Box for Easy Testing -->
+        <div class="demo-creds-box">
+          <div class="demo-head">
+            <i class="fa-solid fa-key" style="color: var(--ch-gold);"></i>
+            <strong>Akun Login Pengujian (1-Klik Isi):</strong>
+          </div>
+          <div class="demo-buttons-grid">
+            <button type="button" class="btn-demo-autofill" onclick="fillDemoCreds('superadmin@amanda.id', 'superadmin2026', 'superadmin')">
+              👑 <strong>Superadmin</strong>
+              <small>superadmin@amanda.id</small>
+            </button>
+            <button type="button" class="btn-demo-autofill" onclick="fillDemoCreds('admin.balikpapan@amandabrownies.id', 'amanda123', 'tenant_admin')">
+              🍰 <strong>Admin Balikpapan</strong>
+              <small>admin.balikpapan@...</small>
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase.js?v=1.0"></script>
+  <script src="auth.js?v=1.0"></script>
+  <script>
+    // URL Params handler
+    document.addEventListener('DOMContentLoaded', () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const reason = urlParams.get('reason');
+      const msg = urlParams.get('msg');
+      const alertBox = document.getElementById('login-alert');
+      const alertText = document.getElementById('login-alert-text');
+
+      if (reason === 'unauthenticated') {
+        alertText.textContent = 'Silakan masuk terlebih dahulu untuk mengakses halaman tersebut.';
+        alertBox.style.display = 'flex';
+      } else if (msg === 'logged_out') {
+        alertText.textContent = 'Anda telah berhasil keluar (Logged out).';
+        alertBox.className = 'login-alert-box success';
+        alertBox.style.display = 'flex';
+      }
+
+      // Check if already logged in -> auto redirect
+      const session = getAuthSession();
+      if (session && session.user) {
+        if (session.user.role === 'superadmin') {
+          window.location.replace('superadmin.html');
+        } else {
+          window.location.replace('admin.html');
+        }
+      }
+    });
+
+    function switchLoginRole(role) {
+      document.getElementById('login-role-input').value = role;
+      document.querySelectorAll('.role-tab').forEach(t => t.classList.remove('active'));
+
+      const tabSuper = document.getElementById('tab-role-superadmin');
+      const tabTenant = document.getElementById('tab-role-tenant');
+      const emailInput = document.getElementById('login-email');
+      const submitText = document.getElementById('btn-submit-text');
+
+      if (role === 'superadmin') {
+        tabSuper.classList.add('active');
+        emailInput.placeholder = 'superadmin@amanda.id';
+        submitText.textContent = 'Masuk ke Superadmin Platform';
+      } else {
+        tabTenant.classList.add('active');
+        emailInput.placeholder = 'admin.balikpapan@amandabrownies.id';
+        submitText.textContent = 'Masuk ke CMS Cabang';
+      }
+    }
+
+    function togglePasswordVisibility(inputId, btn) {
+      const input = document.getElementById(inputId);
+      if (input.type === 'password') {
+        input.type = 'text';
+        btn.innerHTML = '<i class="fa-regular fa-eye-slash"></i>';
+      } else {
+        input.type = 'password';
+        btn.innerHTML = '<i class="fa-regular fa-eye"></i>';
+      }
+    }
+
+    function fillDemoCreds(email, pass, role) {
+      document.getElementById('login-email').value = email;
+      document.getElementById('login-password').value = pass;
+      switchLoginRole(role);
+      document.getElementById('login-alert').style.display = 'none';
+    }
+
+    async function handleLoginFormSubmit(e) {
+      e.preventDefault();
+      const email = document.getElementById('login-email').value;
+      const pass = document.getElementById('login-password').value;
+      const role = document.getElementById('login-role-input').value;
+      const submitBtn = document.getElementById('btn-login-submit');
+      const alertBox = document.getElementById('login-alert');
+      const alertText = document.getElementById('login-alert-text');
+
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Memverifikasi...';
+
+      const res = await login(email, pass, role);
+
+      if (res.success) {
+        alertBox.className = 'login-alert-box success';
+        alertText.textContent = 'Login berhasil! Mengalihkan...';
+        alertBox.style.display = 'flex';
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const redirect = urlParams.get('redirect');
+
+        setTimeout(() => {
+          if (redirect && !redirect.includes('login.html')) {
+            window.location.replace(redirect);
+          } else if (res.session.user.role === 'superadmin') {
+            window.location.replace('superadmin.html');
+          } else {
+            window.location.replace('admin.html');
+          }
+        }, 600);
+      } else {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<i class="fa-solid fa-right-to-bracket"></i> Masuk';
+        alertBox.className = 'login-alert-box';
+        alertText.textContent = res.message || 'Login gagal.';
+        alertBox.style.display = 'flex';
+      }
+    }
+  </script>
+</body>
+
+</html>

@@ -1,0 +1,7 @@
+# robots.txt for Amanda Brownies Platform
+User-agent: *
+Allow: /
+Disallow: /admin.html
+Disallow: /superadmin.html
+
+Sitemap: https://amandabrownies.id/sitemap.xml

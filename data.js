@@ -73,7 +73,7 @@ const DEFAULT_OUTLETS = [
     distance: "2.4 km",
     booths: [
       {
-        id: "bth-02-a",
+        id: "bth-02-aa",
         name: "Booth BSCC Dome Balikpapan",
         location: "Area Pintu Masuk Barat BSCC Dome",
         hours: "08.30 - 21.00 WITA",
@@ -81,7 +81,7 @@ const DEFAULT_OUTLETS = [
         wa: "6281255443322"
       },
       {
-        id: "bth-02-b",
+        id: "bth-02-bb",
         name: "Booth Pasar Segar Balikpapan Baru",
         location: "Kios Kuliner Blok RA-08 Pasar Segar",
         hours: "07.00 - 17.00 WITA",
@@ -424,13 +424,13 @@ function getStoredData(key, fallback) {
   }
 }
 
-function saveStoredData(key, data) {
+function saveStoredData(key, data, syncCloud = true) {
   try {
     localStorage.setItem(key, JSON.stringify(data));
     notifyAmandaDataChanged();
 
-    // Auto-sync to Supabase Cloud if connected
-    if (typeof pushToSupabase === 'function' && typeof isSupabaseActive === 'function' && isSupabaseActive()) {
+    // Auto-sync to Supabase Cloud if connected and syncCloud is true
+    if (syncCloud && typeof pushToSupabase === 'function' && typeof isSupabaseActive === 'function' && isSupabaseActive()) {
       const tableMap = {
         'amanda_products': 'products',
         'amanda_promos': 'promos',
@@ -452,7 +452,7 @@ function saveStoredData(key, data) {
 function notifyAmandaDataChanged() {
   try {
     localStorage.setItem('amanda_sync_timestamp', Date.now().toString());
-  } catch (e) {}
+  } catch (e) { }
   window.dispatchEvent(new CustomEvent('amanda_data_updated'));
 }
 

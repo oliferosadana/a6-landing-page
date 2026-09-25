@@ -1,11 +1,11 @@
 /**
- * AMANDA BROWNIES - SUPABASE DATABASE CLIENT & SYNC LAYER
- * Provides seamless PostgreSQL cloud synchronization with fallback to LocalStorage.
+ * AMANDA BROWNIES - SUPABASE DATABASE CLIENT & CLOUD DATA ENGINE
+ * Direct PostgreSQL cloud synchronization with Realtime Postgres changes.
  */
 
 const SUPABASE_CONFIG_STORAGE_KEY = 'amanda_supabase_config';
 
-// Active Supabase Configuration (Configured from User Credentials)
+// Active Supabase Cloud Project Configuration
 const DEFAULT_SUPABASE_URL = 'https://ffzzlertrzfrpuhbspws.supabase.co';
 const DEFAULT_SUPABASE_KEY = 'sb_publishable_64yf0NZHiOLEylWhspci4A_EaOWuVyB';
 
@@ -16,8 +16,9 @@ let supabaseConfig = {
 };
 
 let supabaseClient = null;
+let isInitialSupabaseSyncDone = false;
 
-// Initialize Supabase on load
+// Initialize Supabase immediately
 (function initSupabaseModule() {
   loadSupabaseConfig();
   if (supabaseConfig.url && supabaseConfig.key && supabaseConfig.enabled) {
@@ -26,7 +27,7 @@ let supabaseClient = null;
 })();
 
 /**
- * Load Supabase configuration from localStorage with fallback to default
+ * Load Supabase configuration
  */
 function loadSupabaseConfig() {
   try {
@@ -59,6 +60,7 @@ function saveSupabaseConfig(url, key, enabled = true) {
   localStorage.setItem(SUPABASE_CONFIG_STORAGE_KEY, JSON.stringify(supabaseConfig));
   if (enabled && supabaseConfig.url && supabaseConfig.key) {
     createSupabaseClient();
+    pullAllDataFromSupabase();
   } else {
     supabaseClient = null;
   }
@@ -71,9 +73,15 @@ function saveSupabaseConfig(url, key, enabled = true) {
 function createSupabaseClient() {
   if (typeof supabase !== 'undefined' && supabase.createClient) {
     try {
-      supabaseClient = supabase.createClient(supabaseConfig.url, supabaseConfig.key);
-      console.log('✅ Supabase client connected to:', supabaseConfig.url);
+      supabaseClient = supabase.createClient(supabaseConfig.url, supabaseConfig.key, {
+        auth: {
+          persistSession: true,
+          autoRefreshToken: true
+        }
+      });
+      console.log('⚡ Connected directly to Supabase Cloud Database:', supabaseConfig.url);
       initSupabaseRealtime();
+      pullAllDataFromSupabase();
     } catch (e) {
       console.error('Failed to create Supabase client:', e);
       supabaseClient = null;
@@ -83,9 +91,15 @@ function createSupabaseClient() {
     window.addEventListener('load', () => {
       if (typeof supabase !== 'undefined' && supabase.createClient) {
         try {
-          supabaseClient = supabase.createClient(supabaseConfig.url, supabaseConfig.key);
-          console.log('✅ Supabase client initialized on window load');
+          supabaseClient = supabase.createClient(supabaseConfig.url, supabaseConfig.key, {
+            auth: {
+              persistSession: true,
+              autoRefreshToken: true
+            }
+          });
+          console.log('⚡ Supabase client initialized on window load');
           initSupabaseRealtime();
+          pullAllDataFromSupabase();
           updateSupabaseStatusIndicator();
         } catch (e) {
           console.error('Failed to init Supabase:', e);
@@ -114,91 +128,310 @@ async function testSupabaseConnection(url, key) {
 
   try {
     const testClient = supabase.createClient(url.trim(), key.trim());
-    const { data, error } = await testClient.from('products').select('count', { count: 'exact', head: true });
+    const { data, error } = await testClient.from('outlets').select('count', { count: 'exact', head: true });
     
     if (error && error.code !== 'PGRST116') {
-      // If table does not exist yet or auth issue
       return { success: false, message: error.message || 'Gagal terhubung ke Supabase.' };
     }
-    return { success: true, message: 'Berhasil terhubung ke Supabase Cloud Database!' };
+    return { success: true, message: 'Berhasil terhubung langsung ke Supabase PostgreSQL!' };
   } catch (err) {
     return { success: false, message: err.message || 'Koneksi error.' };
   }
 }
 
 /**
- * Pull all data from Supabase to local memory & localStorage
+ * PULL ALL DATA DIRECTLY FROM SUPABASE POSTGRESQL
  */
 async function pullAllDataFromSupabase() {
   if (!isSupabaseActive()) return false;
 
   try {
-    console.log('🔄 Syncing all data from Supabase Cloud...');
+    console.log('📥 Mengambil data langsung dari Supabase Cloud Database...');
 
-    // 1. Products
-    const { data: prods, error: errProd } = await supabaseClient.from('products').select('*');
-    if (!errProd && prods && prods.length > 0) {
-      AMANDA_PRODUCTS = prods;
-      saveStoredData('amanda_products', AMANDA_PRODUCTS);
+    // 1. Fetch Outlets & Booths
+    const { data: dbOutlets, error: errOut } = await supabaseClient
+      .from('outlets')
+      .select('*')
+      .order('id', { ascending: true });
+
+    if (!errOut && dbOutlets) {
+      if (dbOutlets.length > 0) {
+        AMANDA_OUTLETS = dbOutlets.map(o => ({
+          id: o.id,
+          name: o.name,
+          city: o.city,
+          region: o.region || 'Kota Balikpapan',
+          image: o.image,
+          address: o.address,
+          phone: o.phone,
+          wa: o.wa,
+          hours: o.hours,
+          mapsUrl: o.maps_url || o.mapsUrl || '',
+          distance: o.distance || '1.0 km',
+          booths: Array.isArray(o.booths) ? o.booths : (typeof o.booths === 'string' ? JSON.parse(o.booths) : [])
+        }));
+        saveStoredData('amanda_outlets', AMANDA_OUTLETS, false);
+      } else {
+        // Table empty -> Seed initial outlets to Supabase
+        console.log('🌱 Tabel outlets kosong di Supabase. Melakukan auto-seed...');
+        await seedDefaultDataToSupabase('outlets');
+      }
     }
 
-    // 2. Promos
-    const { data: promos, error: errPromo } = await supabaseClient.from('promos').select('*');
-    if (!errPromo && promos && promos.length > 0) {
-      AMANDA_PROMOS = promos;
-      saveStoredData('amanda_promos', AMANDA_PROMOS);
+    // 2. Fetch Products & Stocks
+    const { data: dbProducts, error: errProd } = await supabaseClient
+      .from('products')
+      .select('*')
+      .order('id', { ascending: true });
+
+    if (!errProd && dbProducts) {
+      if (dbProducts.length > 0) {
+        AMANDA_PRODUCTS = dbProducts.map(p => ({
+          id: p.id,
+          name: p.name,
+          category: p.category,
+          categoryLabel: p.category_label || (p.category === 'kukus' ? 'Brownies Kukus' : (p.category === 'bakar' ? 'Brownies Bakar' : 'Premium & Marble')),
+          price: Number(p.price) || 0,
+          description: p.description || '',
+          image: p.image,
+          badge: p.badge || '',
+          badgeColor: p.badge_color || (p.category === 'bakar' ? 'bakar' : (p.category === 'marble' ? 'coffee' : 'gold')),
+          weight: p.weight || '700 gram',
+          shelfLife: p.shelf_life || p.shelfLife || '4 Hari (Suhu Ruang)',
+          outlets: Array.isArray(p.stocks) ? p.stocks : (Array.isArray(p.outlets) ? p.outlets : [])
+        }));
+        saveStoredData('amanda_products', AMANDA_PRODUCTS, false);
+      } else {
+        console.log('🌱 Tabel products kosong di Supabase. Melakukan auto-seed...');
+        await seedDefaultDataToSupabase('products');
+      }
     }
 
-    // 3. Outlets
-    const { data: outlets, error: errOut } = await supabaseClient.from('outlets').select('*');
-    if (!errOut && outlets && outlets.length > 0) {
-      AMANDA_OUTLETS = outlets;
-      saveStoredData('amanda_outlets', AMANDA_OUTLETS);
+    // 3. Fetch Promos
+    const { data: dbPromos, error: errPromo } = await supabaseClient
+      .from('promos')
+      .select('*')
+      .order('id', { ascending: true });
+
+    if (!errPromo && dbPromos) {
+      if (dbPromos.length > 0) {
+        AMANDA_PROMOS = dbPromos.map(pr => ({
+          id: pr.id,
+          title: pr.title,
+          badge: pr.badge,
+          badgeColor: pr.badge_color || pr.badgeColor || 'gold',
+          image: pr.image,
+          period: pr.period,
+          description: pr.description,
+          waMessage: pr.wa_msg || pr.waMessage || '',
+          aspectRatio: "4/5",
+          active: true
+        }));
+        saveStoredData('amanda_promos', AMANDA_PROMOS, false);
+      } else {
+        await seedDefaultDataToSupabase('promos');
+      }
     }
 
-    // 4. Ticker
-    const { data: ticker, error: errTick } = await supabaseClient.from('ticker').select('*');
-    if (!errTick && ticker && ticker.length > 0) {
-      AMANDA_TICKER = ticker;
-      saveStoredData('amanda_ticker', AMANDA_TICKER);
+    // 4. Fetch Ticker
+    const { data: dbTicker, error: errTick } = await supabaseClient
+      .from('ticker')
+      .select('*')
+      .order('id', { ascending: true });
+
+    if (!errTick && dbTicker) {
+      if (dbTicker.length > 0) {
+        AMANDA_TICKER = dbTicker.map(t => ({
+          id: t.id,
+          title: t.title,
+          text: t.text,
+          icon: t.icon || 'fa-solid fa-bullhorn'
+        }));
+        saveStoredData('amanda_ticker', AMANDA_TICKER, false);
+      } else {
+        await seedDefaultDataToSupabase('ticker');
+      }
     }
 
-    // 5. Invoices
-    const { data: invoices, error: errInv } = await supabaseClient.from('invoices').select('*').order('created_at', { ascending: false });
-    if (!errInv && invoices && invoices.length > 0) {
-      saveInvoiceHistory(invoices);
+    // 5. Fetch Tenants
+    const { data: dbTenants, error: errTen } = await supabaseClient
+      .from('tenants')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (!errTen && dbTenants) {
+      if (dbTenants.length > 0) {
+        const tenants = dbTenants.map(tn => ({
+          id: tn.id,
+          name: tn.name,
+          city: tn.city,
+          phone: tn.phone,
+          email: tn.email,
+          domain: tn.domain,
+          planId: tn.plan_id || tn.planId || 'plan-6m',
+          planName: tn.plan_name || tn.planName || 'Paket Bisnis (6 Bulan)',
+          cycle: tn.cycle || 'monthly',
+          status: tn.status || 'active',
+          startDate: tn.start_date || tn.startDate,
+          expiresAt: tn.expires_at || tn.expiresAt,
+          totalPaid: Number(tn.total_paid) || Number(tn.totalPaid) || 0,
+          outletsCount: tn.outlets_count || tn.outletsCount || 1,
+          notes: tn.notes || ''
+        }));
+        saveTenants(tenants, false);
+      } else {
+        await seedDefaultDataToSupabase('tenants');
+      }
     }
 
-    // 6. Tenants
-    const { data: tenants, error: errTen } = await supabaseClient.from('tenants').select('*').order('created_at', { ascending: false });
-    if (!errTen && tenants && tenants.length > 0) {
-      saveTenants(tenants);
+    // 6. Fetch Invoices
+    const { data: dbInvoices, error: errInv } = await supabaseClient
+      .from('invoices')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (!errInv && dbInvoices && dbInvoices.length > 0) {
+      const invoices = dbInvoices.map(inv => ({
+        id: inv.id,
+        date: inv.created_at ? inv.created_at.substring(0, 10) : '2026-09-01',
+        dueDate: inv.due_date ? inv.due_date.substring(0, 10) : '2026-09-04',
+        tenantName: inv.tenant_name,
+        tenantPhone: inv.tenant_phone,
+        tenantEmail: inv.tenant_email,
+        tenantDomain: inv.tenant_domain,
+        planId: inv.plan_id,
+        planName: inv.plan_name,
+        durationMonths: inv.duration_months || 1,
+        subtotal: Number(inv.subtotal) || 0,
+        uniqueCode: inv.unique_code || 0,
+        totalAmount: Number(inv.total_amount) || 0,
+        paymentMethodId: inv.payment_method_id,
+        paymentMethodName: inv.payment_method_name,
+        status: inv.status || 'PENDING',
+        paidAt: inv.paid_at || null
+      }));
+      saveInvoiceHistory(invoices, false);
     }
 
-    // Dispatch event to trigger re-renders
+    isInitialSupabaseSyncDone = true;
     notifyAmandaDataChanged();
-    console.log('✅ Supabase sync complete.');
+    console.log('✅ Data berhasil dimuat langsung dari Supabase PostgreSQL!');
     return true;
   } catch (err) {
-    console.error('Error pulling from Supabase:', err);
+    console.error('Error fetching data from Supabase:', err);
     return false;
   }
 }
 
 /**
- * Push an individual record or table update to Supabase
+ * PUSH DATA DIRECTLY TO SUPABASE POSTGRESQL
  */
 async function pushToSupabase(tableName, payload, operation = 'upsert') {
   if (!isSupabaseActive()) return null;
 
   try {
+    let dbPayload = payload;
+
+    // Transform Javascript models to PostgreSQL columns
+    if (tableName === 'outlets') {
+      const list = Array.isArray(payload) ? payload : [payload];
+      dbPayload = list.map(o => ({
+        id: o.id,
+        name: o.name,
+        city: o.city,
+        region: o.region || 'Kota Balikpapan',
+        image: o.image,
+        address: o.address,
+        phone: o.phone || '',
+        wa: o.wa,
+        hours: o.hours,
+        maps_url: o.mapsUrl || o.maps_url || '',
+        distance: o.distance || '1.0 km',
+        booths: o.booths || []
+      }));
+    } else if (tableName === 'products') {
+      const list = Array.isArray(payload) ? payload : [payload];
+      dbPayload = list.map(p => ({
+        id: p.id,
+        name: p.name,
+        category: p.category,
+        price: Number(p.price) || 0,
+        description: p.description || '',
+        image: p.image,
+        badge: p.badge || '',
+        stocks: p.outlets || p.stocks || []
+      }));
+    } else if (tableName === 'promos') {
+      const list = Array.isArray(payload) ? payload : [payload];
+      dbPayload = list.map(pr => ({
+        id: pr.id,
+        title: pr.title,
+        badge: pr.badge,
+        badge_color: pr.badgeColor || pr.badge_color || 'gold',
+        image: pr.image,
+        period: pr.period,
+        description: pr.description || '',
+        wa_msg: pr.waMessage || pr.wa_msg || ''
+      }));
+    } else if (tableName === 'ticker') {
+      const list = Array.isArray(payload) ? payload : [payload];
+      dbPayload = list.map((t, idx) => ({
+        id: t.id || ('tick-' + (idx + 1)),
+        title: t.title,
+        text: t.text,
+        icon: t.icon || 'fa-solid fa-bullhorn'
+      }));
+    } else if (tableName === 'tenants') {
+      const list = Array.isArray(payload) ? payload : [payload];
+      dbPayload = list.map(tn => ({
+        id: tn.id,
+        name: tn.name,
+        city: tn.city,
+        phone: tn.phone,
+        email: tn.email,
+        domain: tn.domain,
+        plan_id: tn.planId || tn.plan_id,
+        plan_name: tn.planName || tn.plan_name,
+        cycle: tn.cycle || 'monthly',
+        status: tn.status || 'active',
+        start_date: tn.startDate || tn.start_date || '2026-09-01',
+        expires_at: tn.expiresAt || tn.expires_at || '2027-03-01',
+        total_paid: Number(tn.totalPaid) || Number(tn.total_paid) || 0,
+        outlets_count: tn.outletsCount || tn.outlets_count || 1,
+        notes: tn.notes || ''
+      }));
+    } else if (tableName === 'invoices') {
+      const list = Array.isArray(payload) ? payload : [payload];
+      dbPayload = list.map(inv => ({
+        id: inv.id,
+        tenant_name: inv.tenantName || inv.tenant_name,
+        tenant_phone: inv.tenantPhone || inv.tenant_phone,
+        tenant_email: inv.tenantEmail || inv.tenant_email,
+        tenant_domain: inv.tenantDomain || inv.tenant_domain,
+        plan_id: inv.planId || inv.plan_id,
+        plan_name: inv.planName || inv.plan_name,
+        duration_months: inv.durationMonths || inv.duration_months || 1,
+        subtotal: Number(inv.subtotal) || 0,
+        unique_code: inv.uniqueCode || inv.unique_code || 0,
+        total_amount: Number(inv.totalAmount) || Number(inv.total_amount) || 0,
+        payment_method_id: inv.paymentMethodId || inv.payment_method_id,
+        payment_method_name: inv.paymentMethodName || inv.payment_method_name,
+        status: inv.status || 'PENDING',
+        paid_at: inv.paidAt || inv.paid_at || null
+      }));
+    }
+
     if (operation === 'upsert') {
-      const { data, error } = await supabaseClient.from(tableName).upsert(payload);
-      if (error) console.warn(`Supabase upsert [${tableName}] error:`, error);
+      const { data, error } = await supabaseClient.from(tableName).upsert(dbPayload);
+      if (error) {
+        console.warn(`Supabase upsert [${tableName}] warning:`, error.message);
+      } else {
+        console.log(`☁️ Supabase [${tableName}] berhasil di-update secara realtime!`);
+      }
       return data;
     } else if (operation === 'delete') {
       const { data, error } = await supabaseClient.from(tableName).delete().match(payload);
-      if (error) console.warn(`Supabase delete [${tableName}] error:`, error);
+      if (error) console.warn(`Supabase delete [${tableName}] error:`, error.message);
       return data;
     }
   } catch (e) {
@@ -208,53 +441,66 @@ async function pushToSupabase(tableName, payload, operation = 'upsert') {
 }
 
 /**
- * Initial Setup: Seed initial default data to Supabase
+ * Initial Auto-Seed default data to Supabase if tables are fresh
  */
-async function seedDefaultDataToSupabase() {
+async function seedDefaultDataToSupabase(specificTable = null) {
   if (!isSupabaseActive()) return;
 
   try {
-    // Seed Products
-    if (AMANDA_PRODUCTS && AMANDA_PRODUCTS.length > 0) {
-      await supabaseClient.from('products').upsert(AMANDA_PRODUCTS);
+    if (!specificTable || specificTable === 'outlets') {
+      if (typeof DEFAULT_OUTLETS !== 'undefined' && DEFAULT_OUTLETS.length > 0) {
+        await pushToSupabase('outlets', DEFAULT_OUTLETS);
+      }
     }
-    // Seed Promos
-    if (AMANDA_PROMOS && AMANDA_PROMOS.length > 0) {
-      await supabaseClient.from('promos').upsert(AMANDA_PROMOS);
+    if (!specificTable || specificTable === 'products') {
+      if (typeof DEFAULT_PRODUCTS !== 'undefined' && DEFAULT_PRODUCTS.length > 0) {
+        await pushToSupabase('products', DEFAULT_PRODUCTS);
+      }
     }
-    // Seed Outlets
-    if (AMANDA_OUTLETS && AMANDA_OUTLETS.length > 0) {
-      await supabaseClient.from('outlets').upsert(AMANDA_OUTLETS);
+    if (!specificTable || specificTable === 'promos') {
+      if (typeof DEFAULT_PROMOS !== 'undefined' && DEFAULT_PROMOS.length > 0) {
+        await pushToSupabase('promos', DEFAULT_PROMOS);
+      }
     }
-    // Seed Ticker
-    if (AMANDA_TICKER && AMANDA_TICKER.length > 0) {
-      await supabaseClient.from('ticker').upsert(AMANDA_TICKER);
+    if (!specificTable || specificTable === 'ticker') {
+      if (typeof DEFAULT_TICKER !== 'undefined' && DEFAULT_TICKER.length > 0) {
+        await pushToSupabase('ticker', DEFAULT_TICKER);
+      }
     }
-    // Seed Tenants
-    const tenants = getTenants();
-    if (tenants && tenants.length > 0) {
-      await supabaseClient.from('tenants').upsert(tenants);
+    if (!specificTable || specificTable === 'tenants') {
+      if (typeof DEFAULT_TENANTS !== 'undefined' && DEFAULT_TENANTS.length > 0) {
+        await pushToSupabase('tenants', DEFAULT_TENANTS);
+      }
     }
-    console.log('🌱 Default data successfully seeded to Supabase!');
+    if (!specificTable || specificTable === 'invoices') {
+      if (typeof DEFAULT_INVOICE_HISTORY !== 'undefined' && DEFAULT_INVOICE_HISTORY.length > 0) {
+        await pushToSupabase('invoices', DEFAULT_INVOICE_HISTORY);
+      }
+    }
+    console.log('🌱 Data default berhasil di-seed langsung ke Supabase Cloud!');
   } catch (e) {
     console.error('Failed to seed default data to Supabase:', e);
   }
 }
 
 /**
- * Realtime Subscription Listener
+ * Realtime Subscription Listener (Postgres Realtime WebSocket)
  */
 function initSupabaseRealtime() {
   if (!isSupabaseActive()) return;
 
   try {
     supabaseClient
-      .channel('public-changes')
+      .channel('public-realtime-changes')
       .on('postgres_changes', { event: '*', schema: 'public' }, (payload) => {
-        console.log('⚡ Realtime Supabase event received:', payload.eventType, payload.table);
+        console.log('⚡ Realtime Supabase event received:', payload.eventType, 'on table:', payload.table);
         pullAllDataFromSupabase();
       })
-      .subscribe();
+      .subscribe((status) => {
+        if (status === 'SUBSCRIBED') {
+          console.log('📡 Terhubung ke Supabase Realtime Channel (Live Postgres Changes).');
+        }
+      });
   } catch (e) {
     console.warn('Supabase Realtime not subscribed:', e);
   }
@@ -268,17 +514,17 @@ function updateSupabaseStatusIndicator() {
   pills.forEach(pill => {
     if (isSupabaseActive()) {
       pill.className = 'supabase-status-pill connected';
-      pill.innerHTML = '<span class="db-dot green"></span> <span>Supabase PostgreSQL (Cloud)</span>';
-      pill.title = 'Terhubung ke Database Cloud Supabase';
+      pill.innerHTML = '<span class="db-dot green"></span> <span>Supabase PostgreSQL (Live Cloud)</span>';
+      pill.title = 'Terhubung langsung ke Database Cloud Supabase';
     } else {
       pill.className = 'supabase-status-pill local';
       pill.innerHTML = '<span class="db-dot orange"></span> <span>Lokal (Klik utk Supabase)</span>';
-      pill.title = 'Berjalan di mode database lokal. Klik untuk menghubungkan ke Supabase.';
+      pill.title = 'Mode lokal. Klik untuk menghubungkan ke Supabase.';
     }
   });
 }
 
-// Initial status check
+// Initial status check & immediate cloud pull
 document.addEventListener('DOMContentLoaded', () => {
   updateSupabaseStatusIndicator();
   if (isSupabaseActive()) {

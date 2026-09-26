@@ -483,11 +483,6 @@ async function pushToSupabase(tableName, payload, operation = 'upsert') {
   }
   return null;
 }
-  } catch (e) {
-    console.warn(`Supabase sync failed for ${tableName}:`, e);
-  }
-  return null;
-}
 
 /**
  * Initial Auto-Seed default data to Supabase if tables are fresh

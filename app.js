@@ -572,7 +572,7 @@ function updatePromoCoverflow() {
 
       if (isPrimary1) {
         // Main Left Image (Primary 1)
-        card.style.transform = `translateX(-150px) translateZ(10px) rotateY(-3.5deg) scale(1.02)`;
+        card.style.transform = `translateX(-205px) translateZ(12px) rotateY(-3deg) scale(1)`;
         card.style.opacity = '1';
         card.style.zIndex = '10';
         card.style.filter = 'none';
@@ -580,7 +580,7 @@ function updatePromoCoverflow() {
         card.setAttribute('title', 'Klik untuk memperbesar gambar');
       } else if (isPrimary2) {
         // Main Right Image (Primary 2)
-        card.style.transform = `translateX(150px) translateZ(10px) rotateY(3.5deg) scale(1.02)`;
+        card.style.transform = `translateX(205px) translateZ(12px) rotateY(3deg) scale(1)`;
         card.style.opacity = '1';
         card.style.zIndex = '10';
         card.style.filter = 'none';
@@ -588,23 +588,23 @@ function updatePromoCoverflow() {
         card.setAttribute('title', 'Klik untuk memperbesar gambar');
       } else if (offset === -1) {
         // Left Flanking 3D Background Card
-        card.style.transform = `translateX(-360px) translateZ(-140px) rotateY(36deg) scale(0.82)`;
-        card.style.opacity = '0.65';
+        card.style.transform = `translateX(-450px) translateZ(-130px) rotateY(35deg) scale(0.82)`;
+        card.style.opacity = '0.55';
         card.style.zIndex = '5';
         card.style.filter = 'brightness(0.88)';
         card.style.pointerEvents = 'auto';
         card.setAttribute('title', 'Klik untuk melihat promo ini');
       } else if (offset === 2) {
         // Right Flanking 3D Background Card
-        card.style.transform = `translateX(360px) translateZ(-140px) rotateY(-36deg) scale(0.82)`;
-        card.style.opacity = '0.65';
+        card.style.transform = `translateX(450px) translateZ(-130px) rotateY(-35deg) scale(0.82)`;
+        card.style.opacity = '0.55';
         card.style.zIndex = '5';
         card.style.filter = 'brightness(0.88)';
         card.style.pointerEvents = 'auto';
         card.setAttribute('title', 'Klik untuk melihat promo ini');
       } else {
         // Distant Background Cards
-        const tx = offset < 0 ? -480 : 480;
+        const tx = offset < 0 ? -600 : 600;
         const rot = offset < 0 ? 45 : -45;
         card.style.transform = `translateX(${tx}px) translateZ(-240px) rotateY(${rot}deg) scale(0.7)`;
         card.style.opacity = '0';
@@ -630,25 +630,25 @@ function updatePromoCoverflow() {
         card.setAttribute('title', 'Klik untuk memperbesar gambar');
       } else if (offset === -1) {
         // Left Flanking 3D
-        card.style.transform = `translateX(-115px) translateZ(-85px) rotateY(32deg) scale(0.85)`;
-        card.style.opacity = '0.65';
+        card.style.transform = `translateX(-155px) translateZ(-95px) rotateY(32deg) scale(0.82)`;
+        card.style.opacity = '0.55';
         card.style.zIndex = '5';
         card.style.filter = 'brightness(0.9)';
         card.style.pointerEvents = 'auto';
         card.setAttribute('title', 'Klik untuk melihat promo ini');
       } else if (offset === 1) {
         // Right Flanking 3D
-        card.style.transform = `translateX(115px) translateZ(-85px) rotateY(-32deg) scale(0.85)`;
-        card.style.opacity = '0.65';
+        card.style.transform = `translateX(155px) translateZ(-95px) rotateY(-32deg) scale(0.82)`;
+        card.style.opacity = '0.55';
         card.style.zIndex = '5';
         card.style.filter = 'brightness(0.9)';
         card.style.pointerEvents = 'auto';
         card.setAttribute('title', 'Klik untuk melihat promo ini');
       } else {
         // Distant / Hidden
-        const tx = offset < 0 ? -170 : 170;
+        const tx = offset < 0 ? -260 : 260;
         const rot = offset < 0 ? 42 : -42;
-        card.style.transform = `translateX(${tx}px) translateZ(-160px) rotateY(${rot}deg) scale(0.72)`;
+        card.style.transform = `translateX(${tx}px) translateZ(-180px) rotateY(${rot}deg) scale(0.7)`;
         card.style.opacity = '0';
         card.style.zIndex = '1';
         card.style.filter = 'brightness(0.75)';

@@ -2574,13 +2574,13 @@ h4,
 .promo-coverflow-wrapper {
   position: relative;
   width: 100%;
-  max-width: 920px;
+  max-width: 960px;
   margin: 0 auto;
-  height: 450px;
+  height: 540px;
   display: flex;
   align-items: center;
   justify-content: center;
-  perspective: 1100px;
+  perspective: 1200px;
   perspective-origin: 50% 50%;
   user-select: none;
   touch-action: pan-y;
@@ -2598,13 +2598,14 @@ h4,
 
 .promo-coverflow-card {
   position: absolute;
-  width: 260px;
+  width: 380px;
+  max-width: calc(50% - 16px);
   aspect-ratio: 4 / 5;
-  border-radius: var(--radius-md, 14px);
+  border-radius: var(--radius-lg, 16px);
   overflow: hidden;
   background: #ffffff;
   border: 1.5px solid rgba(216, 201, 168, 0.6);
-  box-shadow: 0 14px 34px rgba(40, 25, 10, 0.16);
+  box-shadow: 0 16px 38px rgba(40, 25, 10, 0.16);
   cursor: pointer;
   transform-origin: center center;
   transition: transform 0.55s cubic-bezier(0.22, 1, 0.36, 1),
@@ -2652,7 +2653,7 @@ h4,
   align-items: center;
   justify-content: center;
   gap: 8px;
-  margin-top: 16px;
+  margin-top: 18px;
 }
 
 .promo-slide-dot {
@@ -2675,12 +2676,14 @@ h4,
 
 @media (max-width: 767px) {
   .promo-coverflow-wrapper {
-    height: 380px;
-    max-width: 360px;
+    height: 480px;
+    max-width: 380px;
     perspective: 850px;
   }
 
   .promo-coverflow-card {
-    width: 225px;
+    width: 330px;
+    max-width: 88vw;
+    border-radius: var(--radius-md, 14px);
   }
 }

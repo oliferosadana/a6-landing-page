@@ -322,6 +322,19 @@ const DEFAULT_PROMOS = [
     waMessage: "Halo Amanda Brownies Balikpapan, saya mau pesan Paket Bundling 3 Box Hemat Rp 210.000.",
     ctaText: "Pesan Paket 3 Box",
     active: true
+  },
+  {
+    id: "promo-03",
+    title: "Voucher Spesial Amanda Brownies",
+    badge: "Diskon Khusus",
+    badgeColor: "gold",
+    image: "assets/promo_flyer_1.jpg",
+    aspectRatio: "4/5",
+    description: "Dapatkan penawaran harga spesial untuk pembelian varian favorit di seluruh outlet resmi Amanda Brownies Kalimantan.",
+    period: "Berlaku Selama Persediaan Masih Ada",
+    waMessage: "Halo Amanda Brownies Balikpapan, saya ingin info promo voucher spesial.",
+    ctaText: "Info Promo",
+    active: true
   }
 ];
 

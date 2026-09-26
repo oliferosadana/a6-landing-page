@@ -60,13 +60,19 @@
   --transition-normal: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-*, *::before, *::after {
+*,
+*::before,
+*::after {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
 }
 
-body, button, input, select, textarea {
+body,
+button,
+input,
+select,
+textarea {
   font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -81,7 +87,7 @@ body {
   color: var(--text-main);
   line-height: 1.6;
   overflow-x: hidden;
-  background-image: 
+  background-image:
     radial-gradient(ellipse at 10% 0%, rgba(216, 201, 168, 0.35) 0%, transparent 50%),
     radial-gradient(ellipse at 90% 100%, rgba(79, 91, 42, 0.08) 0%, transparent 60%);
   background-attachment: fixed;
@@ -92,13 +98,16 @@ body {
   width: 8px;
   height: 8px;
 }
+
 ::-webkit-scrollbar-track {
   background: var(--bg-main);
 }
+
 ::-webkit-scrollbar-thumb {
   background: var(--ch-sand);
   border-radius: var(--radius-pill);
 }
+
 ::-webkit-scrollbar-thumb:hover {
   background: var(--ch-gold);
 }
@@ -110,7 +119,11 @@ body {
 }
 
 /* Typography Helpers */
-h1, h2, h3, h4, .font-serif {
+h1,
+h2,
+h3,
+h4,
+.font-serif {
   font-family: 'Playfair Display', Georgia, serif;
   letter-spacing: -0.01em;
   font-weight: 700;
@@ -311,6 +324,7 @@ h1, h2, h3, h4, .font-serif {
 .nav-dropdown-menu::-webkit-scrollbar {
   width: 4px;
 }
+
 .nav-dropdown-menu::-webkit-scrollbar-thumb {
   background: var(--border-sand-strong);
   border-radius: 4px;
@@ -849,8 +863,13 @@ h1, h2, h3, h4, .font-serif {
 }
 
 @keyframes tickerScroll {
-  0% { transform: translateX(0); }
-  100% { transform: translateX(-50%); }
+  0% {
+    transform: translateX(0);
+  }
+
+  100% {
+    transform: translateX(-50%);
+  }
 }
 
 .ticker-item {
@@ -965,82 +984,6 @@ h1, h2, h3, h4, .font-serif {
   color: var(--text-main);
 }
 
-/* ===================================================================
-   PROMO FLYER SHOWCASE (HANYA GAMBAR & BISA DIPERBESAR)
-   =================================================================== */
-.promo-showcase-section {
-  padding: 50px 0 32px;
-}
-
-.flyer-carousel-wrapper {
-  position: relative;
-  max-width: 920px;
-  margin: 0 auto;
-}
-
-.flyer-slides-track {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 28px;
-  align-items: stretch;
-  justify-content: center;
-}
-
-.flyer-card {
-  background: var(--bg-surface);
-  border: 1px solid var(--border-sand);
-  border-radius: var(--radius-lg);
-  overflow: hidden;
-  box-shadow: var(--shadow-card);
-  transition: border-color 0.25s ease, box-shadow 0.25s ease;
-  cursor: zoom-in;
-  position: relative;
-  display: flex;
-}
-
-.flyer-card:hover {
-  border-color: var(--primary-gold);
-  box-shadow: 0 12px 28px rgba(184, 137, 45, 0.2);
-}
-
-/* 4:5 Poster Image Frame */
-.flyer-media-box {
-  position: relative;
-  aspect-ratio: 4 / 5;
-  width: 100%;
-  overflow: hidden;
-  background: #ede3d1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  pointer-events: none;
-}
-
-.flyer-img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  transition: transform 0.35s ease;
-  display: block;
-  pointer-events: none;
-}
-
-.flyer-card:hover .flyer-img {
-  transform: scale(1.03);
-}
-
-.flyer-nav-arrow,
-.flyer-dots-row {
-  display: none;
-}
-
-@media (max-width: 680px) {
-  .flyer-slides-track {
-    grid-template-columns: 1fr;
-    max-width: 380px;
-    margin: 0 auto;
-  }
-}
 
 /* ===================================================================
    PRICE LIST SECTION (POSTER & BISA DIPERBESAR / ZOOM)
@@ -1153,8 +1096,15 @@ h1, h2, h3, h4, .font-serif {
 }
 
 @keyframes zoomModalIn {
-  0% { transform: scale(0.94); opacity: 0; }
-  100% { transform: scale(1); opacity: 1; }
+  0% {
+    transform: scale(0.94);
+    opacity: 0;
+  }
+
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
 }
 
 /* Top Action Bar in Lightbox Modal */
@@ -2542,3 +2492,195 @@ h1, h2, h3, h4, .font-serif {
   }
 }
 
+/* ==================== FOOTER WA MINIMAL BUTTONS ==================== */
+.footer-wa-minimal-list {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.btn-wa-minimal {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  padding: 6px 12px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(216, 201, 168, 0.2);
+  border-radius: 20px;
+  color: #f1ece4;
+  font-size: 12.5px;
+  font-weight: 500;
+  text-decoration: none;
+  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  width: fit-content;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+}
+
+.btn-wa-minimal .wa-icon-green {
+  color: #25D366;
+  font-size: 15px;
+  transition: transform 0.2s ease;
+}
+
+.btn-wa-minimal:hover {
+  background: rgba(37, 211, 102, 0.12);
+  border-color: rgba(37, 211, 102, 0.6);
+  color: #ffffff;
+  transform: translateX(3px);
+  box-shadow: 0 2px 8px rgba(37, 211, 102, 0.2);
+}
+
+.btn-wa-minimal:hover .wa-icon-green {
+  transform: scale(1.18);
+}
+
+.btn-wa-minimal .btn-wa-label {
+  font-weight: 600;
+  color: #ffffff;
+  font-size: 12px;
+}
+
+.btn-wa-minimal .btn-wa-num {
+  font-weight: 600;
+  color: var(--primary-gold);
+  font-size: 12px;
+  letter-spacing: 0.2px;
+}
+
+.btn-wa-minimal:hover .btn-wa-num {
+  color: #c9f5d6;
+}
+
+/* ===================================================================
+   RESPONSIVE PROMO FLYER 3D COVERFLOW (DESKTOP & MOBILE)
+   =================================================================== */
+.promo-showcase-section {
+  padding: 48px 0 54px;
+  background: var(--bg-main, #FAF7F2);
+  position: relative;
+  overflow: hidden;
+}
+
+.promo-section-head {
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.promo-section-head h2 {
+  color: var(--primary-olive-dark, #2b3318);
+  font-size: clamp(22px, 3.2vw, 30px);
+}
+
+.promo-coverflow-wrapper {
+  position: relative;
+  width: 100%;
+  max-width: 920px;
+  margin: 0 auto;
+  height: 450px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  perspective: 1100px;
+  perspective-origin: 50% 50%;
+  user-select: none;
+  touch-action: pan-y;
+}
+
+.promo-coverflow-stage {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transform-style: preserve-3d;
+}
+
+.promo-coverflow-card {
+  position: absolute;
+  width: 280px;
+  aspect-ratio: 4 / 5;
+  border-radius: var(--radius-md, 14px);
+  overflow: hidden;
+  background: #ffffff;
+  border: 1.5px solid rgba(216, 201, 168, 0.6);
+  box-shadow: 0 14px 34px rgba(40, 25, 10, 0.16);
+  cursor: pointer;
+  transform-origin: center center;
+  transition: transform 0.55s cubic-bezier(0.22, 1, 0.36, 1),
+              opacity 0.55s ease,
+              filter 0.55s ease,
+              box-shadow 0.55s ease,
+              border-color 0.35s ease;
+  will-change: transform, opacity;
+  backface-visibility: hidden;
+}
+
+.promo-coverflow-card:hover {
+  border-color: var(--primary-gold, #D8C9A8);
+}
+
+.promo-coverflow-card.is-active {
+  cursor: zoom-in;
+  border-color: var(--primary-gold, #D8C9A8);
+  box-shadow: 0 20px 48px rgba(60, 45, 20, 0.28);
+}
+
+.promo-coverflow-media {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: #ede3d1;
+}
+
+.promo-coverflow-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  pointer-events: none;
+  transition: transform 0.35s ease;
+}
+
+.promo-coverflow-card.is-active:hover .promo-coverflow-img {
+  transform: scale(1.025);
+}
+
+.promo-slider-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.promo-slide-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: rgba(79, 91, 42, 0.22);
+  border: none;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  padding: 0;
+}
+
+.promo-slide-dot.active {
+  width: 24px;
+  border-radius: 8px;
+  background: var(--primary-olive, #4F5B2A);
+  box-shadow: 0 2px 6px rgba(79, 91, 42, 0.25);
+}
+
+@media (max-width: 767px) {
+  .promo-coverflow-wrapper {
+    height: 380px;
+    max-width: 360px;
+    perspective: 850px;
+  }
+
+  .promo-coverflow-card {
+    width: 220px;
+  }
+}

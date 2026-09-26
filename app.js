@@ -244,10 +244,10 @@ function renderOutletLocatorList(filterCity = 'all') {
         </div>
         <ul class="booths-simple-list">
           ${boothsList.map(bth => {
-            const mapsQuery = encodeURIComponent(`${bth.name} ${out.city} Balikpapan`);
-            const mapsUrl = bth.mapsUrl || `https://maps.google.com/?q=${mapsQuery}`;
-            const waMsg = encodeURIComponent(`Halo ${bth.name}, saya ingin memesan brownies Amanda. Mohon info ketersediaan stok.`);
-            return `
+      const mapsQuery = encodeURIComponent(`${bth.name} ${out.city} Balikpapan`);
+      const mapsUrl = bth.mapsUrl || `https://maps.google.com/?q=${mapsQuery}`;
+      const waMsg = encodeURIComponent(`Halo ${bth.name}, saya ingin memesan brownies Amanda. Mohon info ketersediaan stok.`);
+      return `
               <li class="booth-simple-item">
                 <div class="booth-simple-text">
                   <span class="booth-simple-name"><i class="fa-solid fa-circle-dot" style="font-size: 7px; color: var(--primary-gold); margin-right: 4px;"></i>${bth.name}</span>
@@ -263,7 +263,7 @@ function renderOutletLocatorList(filterCity = 'all') {
                 </div>
               </li>
             `;
-          }).join('')}
+    }).join('')}
         </ul>
       </div>
     ` : '';
@@ -487,21 +487,212 @@ function copyPromoCode(code) {
 }
 
 // ===================================================================
-// PROMO FLYER SHOWCASE & LIGHTBOX (SIMPEL, HANYA GAMBAR & BISA DI-ZOOM)
 // ===================================================================
-function renderPromoFlyers() {
-  const track = document.getElementById('flyer-slides-track');
-  if (!track || typeof AMANDA_PROMOS === 'undefined') return;
+// PROMO FLYER 3D COVERFLOW SHOWCASE (DESKTOP & MOBILE)
+// ===================================================================
+let currentPromoSlide = 0;
+let promoSlideAutoTimer = null;
+let isPromoSlideHovered = false;
 
-  track.innerHTML = AMANDA_PROMOS.map(promo => {
+function renderPromoFlyers() {
+  const stage = document.getElementById('promo-coverflow-stage');
+  if (!stage || typeof AMANDA_PROMOS === 'undefined' || AMANDA_PROMOS.length === 0) return;
+
+  if (currentPromoSlide >= AMANDA_PROMOS.length) {
+    currentPromoSlide = 0;
+  }
+
+  stage.innerHTML = AMANDA_PROMOS.map((promo, idx) => {
     return `
-      <div class="flyer-card" id="card-${promo.id}" onclick="openFlyerModal('${promo.id}')" title="Klik untuk memperbesar gambar promo">
-        <div class="flyer-media-box">
-          <img src="${promo.image}" alt="${promo.title}" class="flyer-img" loading="lazy" />
+      <div class="promo-coverflow-card ${idx === currentPromoSlide ? 'is-active' : ''}" 
+           id="promo-card-${idx}" 
+           data-index="${idx}" 
+           onclick="handlePromoCardClick('${promo.id}', ${idx})" 
+           title="${idx === currentPromoSlide ? 'Klik untuk memperbesar gambar' : 'Klik untuk melihat promo ini'}">
+        <div class="promo-coverflow-media">
+          <img src="${promo.image}" alt="${promo.title || 'Promo Amanda'}" class="promo-coverflow-img" loading="lazy" />
         </div>
       </div>
     `;
   }).join('');
+
+  renderPromoPagination();
+  updatePromoCoverflow();
+  initPromoSlideEvents();
+  startPromoSlideAutoPlay();
+}
+
+function handlePromoCardClick(promoId, index) {
+  if (currentPromoSlide === index) {
+    openFlyerModal(promoId);
+  } else {
+    currentPromoSlide = index;
+    updatePromoCoverflow();
+  }
+}
+
+function updatePromoCoverflow() {
+  const cards = document.querySelectorAll('.promo-coverflow-card');
+  const dots = document.querySelectorAll('.promo-slide-dot');
+  if (!cards || cards.length === 0) return;
+
+  const total = cards.length;
+  const isMobile = window.innerWidth <= 767;
+
+  cards.forEach((card, idx) => {
+    let offset = idx - currentPromoSlide;
+
+    // Handle wrapping for natural circular coverflow
+    if (total > 2) {
+      if (offset > total / 2) offset -= total;
+      if (offset < -total / 2) offset += total;
+    }
+
+    const absOffset = Math.abs(offset);
+    const isActive = (idx === currentPromoSlide);
+    card.classList.toggle('is-active', isActive);
+
+    if (offset === 0) {
+      // Center Active Card
+      const scale = isMobile ? 1 : 1.05;
+      card.style.transform = `translateX(0px) translateZ(0px) rotateY(0deg) scale(${scale})`;
+      card.style.opacity = '1';
+      card.style.zIndex = '10';
+      card.style.filter = 'none';
+      card.style.pointerEvents = 'auto';
+      card.setAttribute('title', 'Klik untuk memperbesar gambar');
+    } else if (offset === -1) {
+      // Immediate Left Card
+      const tx = isMobile ? -105 : -195;
+      const tz = isMobile ? -80 : -130;
+      const rot = isMobile ? 32 : 36;
+      const scale = isMobile ? 0.86 : 0.88;
+      card.style.transform = `translateX(${tx}px) translateZ(${tz}px) rotateY(${rot}deg) scale(${scale})`;
+      card.style.opacity = isMobile ? '0.7' : '0.85';
+      card.style.zIndex = '5';
+      card.style.filter = 'brightness(0.92)';
+      card.style.pointerEvents = 'auto';
+      card.setAttribute('title', 'Klik untuk melihat promo ini');
+    } else if (offset === 1) {
+      // Immediate Right Card
+      const tx = isMobile ? 105 : 195;
+      const tz = isMobile ? -80 : -130;
+      const rot = isMobile ? -32 : -36;
+      const scale = isMobile ? 0.86 : 0.88;
+      card.style.transform = `translateX(${tx}px) translateZ(${tz}px) rotateY(${rot}deg) scale(${scale})`;
+      card.style.opacity = isMobile ? '0.7' : '0.85';
+      card.style.zIndex = '5';
+      card.style.filter = 'brightness(0.92)';
+      card.style.pointerEvents = 'auto';
+      card.setAttribute('title', 'Klik untuk melihat promo ini');
+    } else if (offset <= -2) {
+      // Far Left Cards
+      const tx = isMobile ? -165 : -310;
+      const tz = isMobile ? -160 : -230;
+      const rot = isMobile ? 42 : 48;
+      const scale = isMobile ? 0.72 : 0.76;
+      card.style.transform = `translateX(${tx}px) translateZ(${tz}px) rotateY(${rot}deg) scale(${scale})`;
+      card.style.opacity = absOffset > 2 ? '0' : (isMobile ? '0.25' : '0.45');
+      card.style.zIndex = '2';
+      card.style.filter = 'brightness(0.75)';
+      card.style.pointerEvents = absOffset > 2 ? 'none' : 'auto';
+      card.setAttribute('title', 'Klik untuk melihat promo ini');
+    } else if (offset >= 2) {
+      // Far Right Cards
+      const tx = isMobile ? 165 : 310;
+      const tz = isMobile ? -160 : -230;
+      const rot = isMobile ? -42 : -48;
+      const scale = isMobile ? 0.72 : 0.76;
+      card.style.transform = `translateX(${tx}px) translateZ(${tz}px) rotateY(${rot}deg) scale(${scale})`;
+      card.style.opacity = absOffset > 2 ? '0' : (isMobile ? '0.25' : '0.45');
+      card.style.zIndex = '2';
+      card.style.filter = 'brightness(0.75)';
+      card.style.pointerEvents = absOffset > 2 ? 'none' : 'auto';
+      card.setAttribute('title', 'Klik untuk melihat promo ini');
+    }
+  });
+
+  dots.forEach((dot, idx) => {
+    dot.classList.toggle('active', idx === currentPromoSlide);
+  });
+}
+
+function renderPromoPagination() {
+  const pagination = document.getElementById('promo-slider-pagination');
+  if (!pagination || typeof AMANDA_PROMOS === 'undefined') return;
+
+  const total = AMANDA_PROMOS.length;
+  if (total <= 1) {
+    pagination.innerHTML = '';
+    return;
+  }
+
+  pagination.innerHTML = AMANDA_PROMOS.map((_, idx) => `
+    <button class="promo-slide-dot ${idx === currentPromoSlide ? 'active' : ''}" onclick="goToPromoSlideIndex(${idx})" aria-label="Lihat Promo ${idx + 1}"></button>
+  `).join('');
+}
+
+function goToPromoSlideIndex(index) {
+  if (typeof AMANDA_PROMOS === 'undefined' || AMANDA_PROMOS.length === 0) return;
+  currentPromoSlide = (index + AMANDA_PROMOS.length) % AMANDA_PROMOS.length;
+  updatePromoCoverflow();
+}
+
+function nextPromoSlideItem() {
+  if (typeof AMANDA_PROMOS === 'undefined' || AMANDA_PROMOS.length === 0) return;
+  currentPromoSlide = (currentPromoSlide + 1) % AMANDA_PROMOS.length;
+  updatePromoCoverflow();
+}
+
+function prevPromoSlideItem() {
+  if (typeof AMANDA_PROMOS === 'undefined' || AMANDA_PROMOS.length === 0) return;
+  currentPromoSlide = (currentPromoSlide - 1 + AMANDA_PROMOS.length) % AMANDA_PROMOS.length;
+  updatePromoCoverflow();
+}
+
+function startPromoSlideAutoPlay() {
+  if (promoSlideAutoTimer) clearInterval(promoSlideAutoTimer);
+  const total = (typeof AMANDA_PROMOS !== 'undefined' && AMANDA_PROMOS) ? AMANDA_PROMOS.length : 0;
+  if (total <= 1) return;
+
+  promoSlideAutoTimer = setInterval(() => {
+    if (!isPromoSlideHovered) {
+      nextPromoSlideItem();
+    }
+  }, 5000);
+}
+
+function initPromoSlideEvents() {
+  const wrapper = document.getElementById('promo-coverflow-wrapper');
+  if (!wrapper || wrapper.dataset.initEvents) return;
+  wrapper.dataset.initEvents = 'true';
+
+  wrapper.addEventListener('mouseenter', () => { isPromoSlideHovered = true; });
+  wrapper.addEventListener('mouseleave', () => { isPromoSlideHovered = false; });
+
+  // Touch Swipe for Mobile
+  let touchStartX = 0;
+  let touchEndX = 0;
+
+  wrapper.addEventListener('touchstart', (e) => {
+    touchStartX = e.changedTouches[0].screenX;
+  }, { passive: true });
+
+  wrapper.addEventListener('touchend', (e) => {
+    touchEndX = e.changedTouches[0].screenX;
+    const diff = touchStartX - touchEndX;
+    if (Math.abs(diff) > 35) {
+      if (diff > 0) {
+        nextPromoSlideItem();
+      } else {
+        prevPromoSlideItem();
+      }
+    }
+  }, { passive: true });
+
+  window.addEventListener('resize', () => {
+    updatePromoCoverflow();
+  });
 }
 
 // ===================================================================

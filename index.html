@@ -195,7 +195,7 @@
     </button>
   </div>
 
-  <!-- ==================== PROMO FLYER SECTION (HANYA GAMBAR & BISA DIPERBESAR) ==================== -->
+  <!-- ==================== PROMO FLYER SECTION (3D COVERFLOW SHOWCASE) ==================== -->
   <section class="promo-showcase-section" id="promo">
     <div class="container">
 
@@ -203,12 +203,16 @@
         <h2 class="font-serif">Promo Spesial Amanda</h2>
       </div>
 
-      <!-- Flyer Gallery Wrapper -->
-      <div class="flyer-carousel-wrapper" id="flyer-carousel-wrapper">
-        <!-- Injected dynamically by app.js from AMANDA_PROMOS -->
-        <div class="flyer-slides-track" id="flyer-slides-track">
-          <!-- Dynamic Promo Flyer Cards -->
+      <!-- 3D Coverflow Stage (Desktop & Mobile) -->
+      <div class="promo-coverflow-wrapper" id="promo-coverflow-wrapper">
+        <div class="promo-coverflow-stage" id="promo-coverflow-stage">
+          <!-- Injected dynamically by app.js from AMANDA_PROMOS -->
         </div>
+      </div>
+
+      <!-- Minimalist Pagination Dots -->
+      <div class="promo-slider-pagination" id="promo-slider-pagination">
+        <!-- Dynamic Dots -->
       </div>
 
     </div>
@@ -473,27 +477,38 @@
           </ul>
         </div>
 
-        <div class="footer-col">
+        <div class="footer-col footer-contact-col">
           <h4 class="font-serif">Kontak Layanan</h4>
-          <p style="color: var(--text-dim); font-size: 13.5px; margin-bottom: 12px;">
-            <i class="fa-solid fa-phone" style="color: var(--primary-gold); margin-right: 6px;"></i>
-            Reseller: (0542) 876-5432
-          </p>
-          <p style="color: var(--text-dim); font-size: 13.5px; margin-bottom: 12px;">
-            <i class="fa-brands fa-whatsapp" style="color: var(--accent-green); margin-right: 6px;"></i>
-            Kerjasama: +62 813-2211-9988
-          </p>
-          <p style="color: var(--text-dim); font-size: 13.5px; margin-bottom: 12px;">
-            <i class="fa-brands fa-whatsapp" style="color: var(--accent-green); margin-right: 6px;"></i>
-            Komplain: +62 813-2211-9988
-          </p>
-          <p style="color: var(--text-dim); font-size: 12.5px;">
-            Jam Operasional: 07.00 - 22.00 WITA
-          </p>
-          <a href="https://wa.me/6281322119988?text=Halo%20Amanda%20Brownies%20Kalimantan%2C%20saya%20ingin%20info%20pemesanan"
-            target="_blank" class="btn-network-wa">
-            <i class="fa-brands fa-whatsapp"></i> Hubungi Outlet
-          </a>
+          <!-- <p style="color: var(--text-dim); font-size: 12px; margin-bottom: 10px;">
+            <i class="fa-regular fa-clock" style="color: var(--primary-gold); margin-right: 4px;"></i>
+            07.00 - 22.00 WITA
+          </p> -->
+
+          <div class="footer-wa-minimal-list">
+            <!-- WA Pemesanan -->
+            <a href="https://wa.me/6281322119988?text=Halo%20Amanda%20Brownies%20Kalimantan%2C%20saya%20ingin%20pesan%20brownies."
+              target="_blank" rel="noopener noreferrer" class="btn-wa-minimal" title="Pesan Brownies via WhatsApp">
+              <i class="fa-brands fa-whatsapp wa-icon-green"></i>
+              <span class="btn-wa-label">Kerjasama:</span>
+              <span class="btn-wa-num">+62 813-2211-9988</span>
+            </a>
+
+            <!-- WA Reseller -->
+            <a href="https://wa.me/6281322119988?text=Halo%20Amanda%20Brownies%20Kalimantan%2C%20saya%20ingin%20info%20kemitraan%20Reseller%20%26%20Keagenan."
+              target="_blank" rel="noopener noreferrer" class="btn-wa-minimal" title="Daftar Reseller & Agen">
+              <i class="fa-brands fa-whatsapp wa-icon-green"></i>
+              <span class="btn-wa-label">Reseller:</span>
+              <span class="btn-wa-num">(0542) 876-5432</span>
+            </a>
+
+            <!-- WA Kerjasama & Komplain -->
+            <a href="https://wa.me/6281322119988?text=Halo%20Amanda%20Brownies%20Kalimantan%2C%20saya%20ingin%20info%20Kerjasama%20%2F%20Layanan%20Pelanggan."
+              target="_blank" rel="noopener noreferrer" class="btn-wa-minimal" title="Kerjasama & Layanan Pelanggan">
+              <i class="fa-brands fa-whatsapp wa-icon-green"></i>
+              <span class="btn-wa-label">Komplain:</span>
+              <span class="btn-wa-num">+62 813-2211-9988</span>
+            </a>
+          </div>
         </div>
 
       </div>

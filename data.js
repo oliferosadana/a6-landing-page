@@ -760,16 +760,16 @@ function getRentalSubscription() {
   return getStoredData('amanda_rental_sub', DEFAULT_RENTAL_SUBSCRIPTION);
 }
 
-function saveRentalSubscription(data) {
-  saveStoredData('amanda_rental_sub', data);
+function saveRentalSubscription(data, syncCloud = true) {
+  saveStoredData('amanda_rental_sub', data, syncCloud);
 }
 
 function getInvoiceHistory() {
   return getStoredData('amanda_invoices', DEFAULT_INVOICE_HISTORY);
 }
 
-function saveInvoiceHistory(list) {
-  saveStoredData('amanda_invoices', list);
+function saveInvoiceHistory(list, syncCloud = true) {
+  saveStoredData('amanda_invoices', list, syncCloud);
 }
 
 function getInvoiceById(id) {
@@ -863,23 +863,23 @@ function getTenants() {
   return getStoredData('amanda_platform_tenants', DEFAULT_TENANTS);
 }
 
-function saveTenants(list) {
-  saveStoredData('amanda_platform_tenants', list);
+function saveTenants(list, syncCloud = true) {
+  saveStoredData('amanda_platform_tenants', list, syncCloud);
 }
 
 function getRentalPlans() {
   return getStoredData('amanda_platform_plans', DEFAULT_RENTAL_PLANS);
 }
 
-function saveRentalPlans(plans) {
-  saveStoredData('amanda_platform_plans', plans);
+function saveRentalPlans(plans, syncCloud = true) {
+  saveStoredData('amanda_platform_plans', plans, syncCloud);
 }
 
 function getPaymentMethods() {
   return getStoredData('amanda_platform_payments', DEFAULT_PAYMENT_METHODS);
 }
 
-function savePaymentMethods(methods) {
-  saveStoredData('amanda_platform_payments', methods);
+function savePaymentMethods(methods, syncCloud = true) {
+  saveStoredData('amanda_platform_payments', methods, syncCloud);
 }
 

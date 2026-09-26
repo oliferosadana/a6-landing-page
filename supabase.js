@@ -139,13 +139,16 @@ async function testSupabaseConnection(url, key) {
   }
 }
 
+let isCurrentlyPulling = false;
+
 /**
  * PULL ALL DATA DIRECTLY FROM SUPABASE POSTGRESQL
  */
 async function pullAllDataFromSupabase() {
-  if (!isSupabaseActive()) return false;
+  if (!isSupabaseActive() || isCurrentlyPulling) return false;
 
   try {
+    isCurrentlyPulling = true;
     console.log('📥 Mengambil data langsung dari Supabase Cloud Database...');
 
     // 1. Fetch Outlets & Booths
@@ -345,6 +348,8 @@ async function pullAllDataFromSupabase() {
   } catch (err) {
     console.error('Error fetching data from Supabase:', err);
     return false;
+  } finally {
+    isCurrentlyPulling = false;
   }
 }
 
@@ -532,6 +537,8 @@ async function seedDefaultDataToSupabase(specificTable = null) {
   }
 }
 
+let realtimePullDebounceTimer = null;
+
 /**
  * Realtime Subscription Listener (Postgres Realtime WebSocket)
  */
@@ -543,7 +550,11 @@ function initSupabaseRealtime() {
       .channel('public-realtime-changes')
       .on('postgres_changes', { event: '*', schema: 'public' }, (payload) => {
         console.log('⚡ Realtime Supabase event received:', payload.eventType, 'on table:', payload.table);
-        pullAllDataFromSupabase();
+        // Debounce pull requests to prevent rapid cascade loops
+        if (realtimePullDebounceTimer) clearTimeout(realtimePullDebounceTimer);
+        realtimePullDebounceTimer = setTimeout(() => {
+          pullAllDataFromSupabase();
+        }, 800);
       })
       .subscribe((status) => {
         if (status === 'SUBSCRIBED') {
@@ -576,7 +587,7 @@ function updateSupabaseStatusIndicator() {
 // Initial status check & immediate cloud pull
 document.addEventListener('DOMContentLoaded', () => {
   updateSupabaseStatusIndicator();
-  if (isSupabaseActive()) {
+  if (isSupabaseActive() && !isInitialSupabaseSyncDone) {
     pullAllDataFromSupabase();
   }
 });

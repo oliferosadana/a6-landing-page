@@ -175,6 +175,7 @@ function renderPriceListsManager() {
         <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 8px;">${p.caption || '-'}</p>
         <div class="cms-promo-actions">
           <button class="btn-edit-sm" onclick="editPriceList('${p.id}')"><i class="fa-solid fa-pen-to-square"></i> Edit Poster</button>
+          <button class="btn-del-sm" onclick="deletePriceList('${p.id}')" title="Hapus"><i class="fa-solid fa-trash"></i></button>
         </div>
       </div>
     </div>
@@ -186,21 +187,43 @@ function editPriceList(id) {
   if (item) openPriceListModal(item);
 }
 
-function openPriceListModal(item) {
+function deletePriceList(id) {
+  if (confirm('Apakah Anda yakin ingin menghapus poster price list ini?')) {
+    AMANDA_PRICELISTS = AMANDA_PRICELISTS.filter(p => p.id !== id);
+    saveStoredData('amanda_pricelists', AMANDA_PRICELISTS);
+    renderPriceListsManager();
+    showCmsToast('Poster price list berhasil dihapus!');
+  }
+}
+
+function openPriceListModal(item = null) {
   const modal = document.getElementById('pricelist-modal');
   const form = document.getElementById('pricelist-form');
+  const titleElem = document.getElementById('pricelist-modal-title');
   if (!modal || !form) return;
 
   const fileInput = document.getElementById('pricelist-form-file');
   if (fileInput) fileInput.value = '';
 
   form.reset();
-  document.getElementById('pricelist-form-id').value = item.id;
-  document.getElementById('pricelist-form-title').value = item.title;
-  document.getElementById('pricelist-form-badge').value = item.badge || '';
-  document.getElementById('pricelist-form-image').value = item.image;
-  document.getElementById('pricelist-form-caption').value = item.caption || '';
-  previewPriceListImage(item.image);
+
+  if (item) {
+    if (titleElem) titleElem.textContent = 'Edit Poster Price List';
+    document.getElementById('pricelist-form-id').value = item.id;
+    document.getElementById('pricelist-form-title').value = item.title;
+    document.getElementById('pricelist-form-badge').value = item.badge || '';
+    document.getElementById('pricelist-form-image').value = item.image;
+    document.getElementById('pricelist-form-caption').value = item.caption || '';
+    previewPriceListImage(item.image);
+  } else {
+    if (titleElem) titleElem.textContent = 'Tambah Poster Price List Baru';
+    document.getElementById('pricelist-form-id').value = '';
+    document.getElementById('pricelist-form-title').value = '';
+    document.getElementById('pricelist-form-badge').value = 'Price List Brownies';
+    document.getElementById('pricelist-form-image').value = 'assets/amanda_pricelist_poster.jpg';
+    document.getElementById('pricelist-form-caption').value = 'Daftar Harga Resmi Amanda Brownies Kalimantan';
+    previewPriceListImage('assets/amanda_pricelist_poster.jpg');
+  }
 
   modal.classList.add('active');
 }
@@ -218,17 +241,25 @@ function savePriceListForm(e) {
   const image = document.getElementById('pricelist-form-image').value.trim();
   const caption = document.getElementById('pricelist-form-caption').value.trim();
 
-  const idx = AMANDA_PRICELISTS.findIndex(p => p.id === id);
-  if (idx !== -1) {
-    AMANDA_PRICELISTS[idx] = { ...AMANDA_PRICELISTS[idx], title, badge, image, caption };
+  if (id) {
+    const idx = AMANDA_PRICELISTS.findIndex(p => p.id === id);
+    if (idx !== -1) {
+      AMANDA_PRICELISTS[idx] = { ...AMANDA_PRICELISTS[idx], title, badge, image, caption };
+    }
   } else {
-    AMANDA_PRICELISTS.push({ id: 'price-' + Date.now(), title, badge, image, caption });
+    AMANDA_PRICELISTS.push({
+      id: 'price-' + Date.now(),
+      title,
+      badge,
+      image,
+      caption
+    });
   }
 
   saveStoredData('amanda_pricelists', AMANDA_PRICELISTS);
   closeModal('pricelist-modal');
-  renderPromosManager();
-  showCmsToast('Poster price list berhasil diperbarui!');
+  renderPriceListsManager();
+  showCmsToast('Poster price list berhasil disimpan!');
 }
 
 // ==================== IMAGE UPLOAD HELPER (FILE FROM DEVICE / SMARTPHONE) ====================

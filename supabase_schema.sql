@@ -134,20 +134,52 @@ ALTER TABLE public.invoices ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.platform_settings ENABLE ROW LEVEL SECURITY;
 
 -- Izinkan SELECT / INSERT / UPDATE / DELETE untuk Anon Key (Frontend Web)
+DROP POLICY IF EXISTS "Public full access to tenants" ON public.tenants;
 CREATE POLICY "Public full access to tenants" ON public.tenants FOR ALL USING (true) WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Public full access to products" ON public.products;
 CREATE POLICY "Public full access to products" ON public.products FOR ALL USING (true) WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Public full access to promos" ON public.promos;
 CREATE POLICY "Public full access to promos" ON public.promos FOR ALL USING (true) WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Public full access to outlets" ON public.outlets;
 CREATE POLICY "Public full access to outlets" ON public.outlets FOR ALL USING (true) WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Public full access to outlet_categories" ON public.outlet_categories;
 CREATE POLICY "Public full access to outlet_categories" ON public.outlet_categories FOR ALL USING (true) WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Public full access to ticker" ON public.ticker;
 CREATE POLICY "Public full access to ticker" ON public.ticker FOR ALL USING (true) WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Public full access to invoices" ON public.invoices;
 CREATE POLICY "Public full access to invoices" ON public.invoices FOR ALL USING (true) WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Public full access to settings" ON public.platform_settings;
 CREATE POLICY "Public full access to settings" ON public.platform_settings FOR ALL USING (true) WITH CHECK (true);
 
--- Enable Realtime for all tables
-ALTER PUBLICATION supabase_realtime ADD TABLE public.tenants;
-ALTER PUBLICATION supabase_realtime ADD TABLE public.products;
-ALTER PUBLICATION supabase_realtime ADD TABLE public.promos;
-ALTER PUBLICATION supabase_realtime ADD TABLE public.outlets;
-ALTER PUBLICATION supabase_realtime ADD TABLE public.outlet_categories;
-ALTER PUBLICATION supabase_realtime ADD TABLE public.ticker;
-ALTER PUBLICATION supabase_realtime ADD TABLE public.invoices;
+-- Enable Realtime for all tables (Aman dijalankan berulang kali)
+DO $$
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_publication_tables WHERE pubname = 'supabase_realtime' AND tablename = 'tenants') THEN
+    ALTER PUBLICATION supabase_realtime ADD TABLE public.tenants;
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_publication_tables WHERE pubname = 'supabase_realtime' AND tablename = 'products') THEN
+    ALTER PUBLICATION supabase_realtime ADD TABLE public.products;
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_publication_tables WHERE pubname = 'supabase_realtime' AND tablename = 'promos') THEN
+    ALTER PUBLICATION supabase_realtime ADD TABLE public.promos;
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_publication_tables WHERE pubname = 'supabase_realtime' AND tablename = 'outlets') THEN
+    ALTER PUBLICATION supabase_realtime ADD TABLE public.outlets;
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_publication_tables WHERE pubname = 'supabase_realtime' AND tablename = 'outlet_categories') THEN
+    ALTER PUBLICATION supabase_realtime ADD TABLE public.outlet_categories;
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_publication_tables WHERE pubname = 'supabase_realtime' AND tablename = 'ticker') THEN
+    ALTER PUBLICATION supabase_realtime ADD TABLE public.ticker;
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_publication_tables WHERE pubname = 'supabase_realtime' AND tablename = 'invoices') THEN
+    ALTER PUBLICATION supabase_realtime ADD TABLE public.invoices;
+  END IF;
+END $$;

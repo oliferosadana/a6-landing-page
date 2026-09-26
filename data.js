@@ -530,11 +530,15 @@ function saveStoredData(key, data, syncCloud = true) {
   }
 }
 
+let amandaNotifyTimer = null;
 function notifyAmandaDataChanged() {
-  try {
-    localStorage.setItem('amanda_sync_timestamp', Date.now().toString());
-  } catch (e) { }
-  window.dispatchEvent(new CustomEvent('amanda_data_updated'));
+  if (amandaNotifyTimer) clearTimeout(amandaNotifyTimer);
+  amandaNotifyTimer = setTimeout(() => {
+    try {
+      localStorage.setItem('amanda_sync_timestamp', Date.now().toString());
+    } catch (e) { }
+    window.dispatchEvent(new CustomEvent('amanda_data_updated'));
+  }, 120);
 }
 
 // Global active datasets loaded from localStorage or defaults

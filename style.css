@@ -992,20 +992,15 @@ h1, h2, h3, h4, .font-serif {
   border-radius: var(--radius-lg);
   overflow: hidden;
   box-shadow: var(--shadow-card);
-  transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1), border-color 0.3s ease, box-shadow 0.3s ease;
+  transition: border-color 0.25s ease, box-shadow 0.25s ease;
   cursor: zoom-in;
   position: relative;
   display: flex;
-  backface-visibility: hidden;
-  -webkit-backface-visibility: hidden;
-  transform: translate3d(0, 0, 0);
-  will-change: transform;
 }
 
 .flyer-card:hover {
-  transform: translateY(-3px);
   border-color: var(--primary-gold);
-  box-shadow: 0 14px 32px rgba(184, 137, 45, 0.18), 0 4px 10px rgba(35, 27, 20, 0.06);
+  box-shadow: 0 12px 28px rgba(184, 137, 45, 0.2);
 }
 
 /* 4:5 Poster Image Frame */
@@ -1018,25 +1013,20 @@ h1, h2, h3, h4, .font-serif {
   display: flex;
   align-items: center;
   justify-content: center;
-  isolation: isolate;
-  transform: translateZ(0);
-  -webkit-mask-image: -webkit-radial-gradient(white, black);
+  pointer-events: none;
 }
 
 .flyer-img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+  transition: transform 0.35s ease;
   display: block;
-  backface-visibility: hidden;
-  -webkit-backface-visibility: hidden;
-  transform: translate3d(0, 0, 0) scale(1);
-  will-change: transform;
+  pointer-events: none;
 }
 
 .flyer-card:hover .flyer-img {
-  transform: translate3d(0, 0, 0) scale(1.03);
+  transform: scale(1.03);
 }
 
 .flyer-nav-arrow,
@@ -1079,20 +1069,15 @@ h1, h2, h3, h4, .font-serif {
   border-radius: var(--radius-lg);
   overflow: hidden;
   box-shadow: var(--shadow-card);
-  transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1), border-color 0.3s ease, box-shadow 0.3s ease;
+  transition: border-color 0.25s ease, box-shadow 0.25s ease;
   cursor: pointer;
   position: relative;
   display: flex;
-  backface-visibility: hidden;
-  -webkit-backface-visibility: hidden;
-  transform: translate3d(0, 0, 0);
-  will-change: transform;
 }
 
 .pricelist-card:hover {
-  transform: translateY(-3px);
   border-color: var(--primary-gold);
-  box-shadow: 0 16px 36px rgba(184, 137, 45, 0.2), 0 4px 12px rgba(35, 27, 20, 0.08);
+  box-shadow: 0 14px 32px rgba(184, 137, 45, 0.22);
 }
 
 .pricelist-media-box {
@@ -1104,25 +1089,20 @@ h1, h2, h3, h4, .font-serif {
   display: flex;
   align-items: center;
   justify-content: center;
-  isolation: isolate;
-  transform: translateZ(0);
-  -webkit-mask-image: -webkit-radial-gradient(white, black);
+  pointer-events: none;
 }
 
 .pricelist-img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+  transition: transform 0.35s ease;
   display: block;
-  backface-visibility: hidden;
-  -webkit-backface-visibility: hidden;
-  transform: translate3d(0, 0, 0) scale(1);
-  will-change: transform;
+  pointer-events: none;
 }
 
 .pricelist-card:hover .pricelist-img {
-  transform: translate3d(0, 0, 0) scale(1.03);
+  transform: scale(1.03);
 }
 
 @media (max-width: 680px) {
@@ -1465,17 +1445,12 @@ h1, h2, h3, h4, .font-serif {
   border-radius: var(--radius-lg);
   overflow: hidden;
   box-shadow: var(--shadow-card);
-  transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1), border-color 0.3s ease, box-shadow 0.3s ease;
+  transition: border-color 0.25s ease, box-shadow 0.25s ease;
   display: flex;
   flex-direction: column;
-  backface-visibility: hidden;
-  -webkit-backface-visibility: hidden;
-  transform: translate3d(0, 0, 0);
-  will-change: transform;
 }
 
 .product-card:hover {
-  transform: translateY(-3px);
   border-color: var(--primary-olive);
   box-shadow: var(--shadow-hover);
 }
@@ -1485,25 +1460,20 @@ h1, h2, h3, h4, .font-serif {
   height: 185px;
   overflow: hidden;
   background: #ede3d1;
-  isolation: isolate;
-  transform: translateZ(0);
-  -webkit-mask-image: -webkit-radial-gradient(white, black);
+  pointer-events: none;
 }
 
 .card-header-media img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+  transition: transform 0.35s ease;
   display: block;
-  backface-visibility: hidden;
-  -webkit-backface-visibility: hidden;
-  transform: translate3d(0, 0, 0) scale(1);
-  will-change: transform;
+  pointer-events: none;
 }
 
 .product-card:hover .card-header-media img {
-  transform: translate3d(0, 0, 0) scale(1.04);
+  transform: scale(1.04);
 }
 
 .card-media-overlay {
@@ -1619,20 +1589,15 @@ h1, h2, h3, h4, .font-serif {
   border-radius: var(--radius-lg);
   overflow: hidden;
   box-shadow: var(--shadow-card);
-  transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1), border-color 0.3s ease, box-shadow 0.3s ease;
+  transition: border-color 0.25s ease, box-shadow 0.25s ease;
   display: grid;
   grid-template-columns: 240px 1fr;
   align-items: stretch;
-  backface-visibility: hidden;
-  -webkit-backface-visibility: hidden;
-  transform: translate3d(0, 0, 0);
-  will-change: transform;
 }
 
 .outlet-network-card:hover {
   border-color: var(--primary-olive);
   box-shadow: var(--shadow-hover);
-  transform: translateY(-2px);
 }
 
 .outlet-network-media {
@@ -1642,25 +1607,20 @@ h1, h2, h3, h4, .font-serif {
   min-height: 230px;
   overflow: hidden;
   background: #ede3d1;
-  isolation: isolate;
-  transform: translateZ(0);
-  -webkit-mask-image: -webkit-radial-gradient(white, black);
+  pointer-events: none;
 }
 
 .outlet-store-img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+  transition: transform 0.35s ease;
   display: block;
-  backface-visibility: hidden;
-  -webkit-backface-visibility: hidden;
-  transform: translate3d(0, 0, 0) scale(1);
-  will-change: transform;
+  pointer-events: none;
 }
 
 .outlet-network-card:hover .outlet-store-img {
-  transform: translate3d(0, 0, 0) scale(1.04);
+  transform: scale(1.04);
 }
 
 .outlet-area-pill {

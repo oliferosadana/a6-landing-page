@@ -314,8 +314,6 @@ async function pullAllDataFromSupabase() {
       }));
       saveInvoiceHistory(invoices, false);
     }
-      saveInvoiceHistory(invoices, false);
-    }
 
     isInitialSupabaseSyncDone = true;
     notifyAmandaDataChanged();
@@ -452,15 +450,20 @@ async function pushToSupabase(tableName, payload, operation = 'upsert') {
       }));
     }
 
-    const { data, error } = await supabaseClient.from(tableName).upsert(dbPayload);
+    const { data, error } = await supabaseClient.from(tableName).upsert(dbPayload, { onConflict: 'id' });
     if (error) {
-      console.warn(`Supabase upsert [${tableName}] warning:`, error.message);
+      console.error(`❌ Supabase upsert [${tableName}] FAILED:`, error.message, '| Code:', error.code, '| Details:', error.details, '| Hint:', error.hint);
+      if (typeof showCmsToast === 'function') {
+        showCmsToast('Gagal sinkron ke Cloud: ' + (error.message || 'Izin ditolak (RLS)'), 'error');
+      } else if (typeof showSaToast === 'function') {
+        showSaToast('Gagal sinkron ke Cloud: ' + (error.message || 'Izin ditolak (RLS)'), 'error');
+      }
     } else {
-      console.log(`☁️ Supabase [${tableName}] berhasil di-update secara realtime!`);
+      console.log(`☁️ Supabase [${tableName}] berhasil di-update secara realtime! Data count:`, Array.isArray(dbPayload) ? dbPayload.length : 1);
     }
     return data;
   } catch (e) {
-    console.warn(`Supabase sync failed for ${tableName}:`, e);
+    console.error(`❌ Supabase sync exception for [${tableName}]:`, e);
   }
   return null;
 }

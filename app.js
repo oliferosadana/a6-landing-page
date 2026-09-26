@@ -523,11 +523,24 @@ function renderPromoFlyers() {
 }
 
 function handlePromoCardClick(promoId, index) {
-  if (currentPromoSlide === index) {
-    openFlyerModal(promoId);
+  const isDesktop = window.innerWidth >= 768;
+  const total = (typeof AMANDA_PROMOS !== 'undefined' && AMANDA_PROMOS.length > 0) ? AMANDA_PROMOS.length : 1;
+
+  if (isDesktop) {
+    const isPrimaryPair = (index === currentPromoSlide || (total >= 2 && index === (currentPromoSlide + 1) % total));
+    if (isPrimaryPair) {
+      openFlyerModal(promoId);
+    } else {
+      currentPromoSlide = index;
+      updatePromoCoverflow();
+    }
   } else {
-    currentPromoSlide = index;
-    updatePromoCoverflow();
+    if (currentPromoSlide === index) {
+      openFlyerModal(promoId);
+    } else {
+      currentPromoSlide = index;
+      updatePromoCoverflow();
+    }
   }
 }
 
@@ -548,67 +561,100 @@ function updatePromoCoverflow() {
       if (offset < -total / 2) offset += total;
     }
 
-    const absOffset = Math.abs(offset);
-    const isActive = (idx === currentPromoSlide);
-    card.classList.toggle('is-active', isActive);
+    if (!isMobile) {
+      // ==========================================
+      // DESKTOP: 2 GAMBAR UTAMA BERDAMPINGAN (3D)
+      // ==========================================
+      const isPrimary1 = (offset === 0);
+      const isPrimary2 = (offset === 1 || (total === 2 && (offset === 1 || offset === -1)));
+      const isPrimary = isPrimary1 || isPrimary2;
+      card.classList.toggle('is-active', isPrimary);
 
-    if (offset === 0) {
-      // Center Active Card
-      const scale = isMobile ? 1 : 1.05;
-      card.style.transform = `translateX(0px) translateZ(0px) rotateY(0deg) scale(${scale})`;
-      card.style.opacity = '1';
-      card.style.zIndex = '10';
-      card.style.filter = 'none';
-      card.style.pointerEvents = 'auto';
-      card.setAttribute('title', 'Klik untuk memperbesar gambar');
-    } else if (offset === -1) {
-      // Immediate Left Card
-      const tx = isMobile ? -105 : -195;
-      const tz = isMobile ? -80 : -130;
-      const rot = isMobile ? 32 : 36;
-      const scale = isMobile ? 0.86 : 0.88;
-      card.style.transform = `translateX(${tx}px) translateZ(${tz}px) rotateY(${rot}deg) scale(${scale})`;
-      card.style.opacity = isMobile ? '0.7' : '0.85';
-      card.style.zIndex = '5';
-      card.style.filter = 'brightness(0.92)';
-      card.style.pointerEvents = 'auto';
-      card.setAttribute('title', 'Klik untuk melihat promo ini');
-    } else if (offset === 1) {
-      // Immediate Right Card
-      const tx = isMobile ? 105 : 195;
-      const tz = isMobile ? -80 : -130;
-      const rot = isMobile ? -32 : -36;
-      const scale = isMobile ? 0.86 : 0.88;
-      card.style.transform = `translateX(${tx}px) translateZ(${tz}px) rotateY(${rot}deg) scale(${scale})`;
-      card.style.opacity = isMobile ? '0.7' : '0.85';
-      card.style.zIndex = '5';
-      card.style.filter = 'brightness(0.92)';
-      card.style.pointerEvents = 'auto';
-      card.setAttribute('title', 'Klik untuk melihat promo ini');
-    } else if (offset <= -2) {
-      // Far Left Cards
-      const tx = isMobile ? -165 : -310;
-      const tz = isMobile ? -160 : -230;
-      const rot = isMobile ? 42 : 48;
-      const scale = isMobile ? 0.72 : 0.76;
-      card.style.transform = `translateX(${tx}px) translateZ(${tz}px) rotateY(${rot}deg) scale(${scale})`;
-      card.style.opacity = absOffset > 2 ? '0' : (isMobile ? '0.25' : '0.45');
-      card.style.zIndex = '2';
-      card.style.filter = 'brightness(0.75)';
-      card.style.pointerEvents = absOffset > 2 ? 'none' : 'auto';
-      card.setAttribute('title', 'Klik untuk melihat promo ini');
-    } else if (offset >= 2) {
-      // Far Right Cards
-      const tx = isMobile ? 165 : 310;
-      const tz = isMobile ? -160 : -230;
-      const rot = isMobile ? -42 : -48;
-      const scale = isMobile ? 0.72 : 0.76;
-      card.style.transform = `translateX(${tx}px) translateZ(${tz}px) rotateY(${rot}deg) scale(${scale})`;
-      card.style.opacity = absOffset > 2 ? '0' : (isMobile ? '0.25' : '0.45');
-      card.style.zIndex = '2';
-      card.style.filter = 'brightness(0.75)';
-      card.style.pointerEvents = absOffset > 2 ? 'none' : 'auto';
-      card.setAttribute('title', 'Klik untuk melihat promo ini');
+      if (isPrimary1) {
+        // Main Left Image (Primary 1)
+        card.style.transform = `translateX(-150px) translateZ(10px) rotateY(-3.5deg) scale(1.02)`;
+        card.style.opacity = '1';
+        card.style.zIndex = '10';
+        card.style.filter = 'none';
+        card.style.pointerEvents = 'auto';
+        card.setAttribute('title', 'Klik untuk memperbesar gambar');
+      } else if (isPrimary2) {
+        // Main Right Image (Primary 2)
+        card.style.transform = `translateX(150px) translateZ(10px) rotateY(3.5deg) scale(1.02)`;
+        card.style.opacity = '1';
+        card.style.zIndex = '10';
+        card.style.filter = 'none';
+        card.style.pointerEvents = 'auto';
+        card.setAttribute('title', 'Klik untuk memperbesar gambar');
+      } else if (offset === -1) {
+        // Left Flanking 3D Background Card
+        card.style.transform = `translateX(-360px) translateZ(-140px) rotateY(36deg) scale(0.82)`;
+        card.style.opacity = '0.65';
+        card.style.zIndex = '5';
+        card.style.filter = 'brightness(0.88)';
+        card.style.pointerEvents = 'auto';
+        card.setAttribute('title', 'Klik untuk melihat promo ini');
+      } else if (offset === 2) {
+        // Right Flanking 3D Background Card
+        card.style.transform = `translateX(360px) translateZ(-140px) rotateY(-36deg) scale(0.82)`;
+        card.style.opacity = '0.65';
+        card.style.zIndex = '5';
+        card.style.filter = 'brightness(0.88)';
+        card.style.pointerEvents = 'auto';
+        card.setAttribute('title', 'Klik untuk melihat promo ini');
+      } else {
+        // Distant Background Cards
+        const tx = offset < 0 ? -480 : 480;
+        const rot = offset < 0 ? 45 : -45;
+        card.style.transform = `translateX(${tx}px) translateZ(-240px) rotateY(${rot}deg) scale(0.7)`;
+        card.style.opacity = '0';
+        card.style.zIndex = '1';
+        card.style.filter = 'brightness(0.7)';
+        card.style.pointerEvents = 'none';
+        card.setAttribute('title', 'Klik untuk melihat promo ini');
+      }
+    } else {
+      // ==========================================
+      // MOBILE (HP): 1 GAMBAR UTAMA TENGAH (3D)
+      // ==========================================
+      const isPrimary = (offset === 0);
+      card.classList.toggle('is-active', isPrimary);
+
+      if (offset === 0) {
+        // Center Active Card
+        card.style.transform = `translateX(0px) translateZ(0px) rotateY(0deg) scale(1)`;
+        card.style.opacity = '1';
+        card.style.zIndex = '10';
+        card.style.filter = 'none';
+        card.style.pointerEvents = 'auto';
+        card.setAttribute('title', 'Klik untuk memperbesar gambar');
+      } else if (offset === -1) {
+        // Left Flanking 3D
+        card.style.transform = `translateX(-115px) translateZ(-85px) rotateY(32deg) scale(0.85)`;
+        card.style.opacity = '0.65';
+        card.style.zIndex = '5';
+        card.style.filter = 'brightness(0.9)';
+        card.style.pointerEvents = 'auto';
+        card.setAttribute('title', 'Klik untuk melihat promo ini');
+      } else if (offset === 1) {
+        // Right Flanking 3D
+        card.style.transform = `translateX(115px) translateZ(-85px) rotateY(-32deg) scale(0.85)`;
+        card.style.opacity = '0.65';
+        card.style.zIndex = '5';
+        card.style.filter = 'brightness(0.9)';
+        card.style.pointerEvents = 'auto';
+        card.setAttribute('title', 'Klik untuk melihat promo ini');
+      } else {
+        // Distant / Hidden
+        const tx = offset < 0 ? -170 : 170;
+        const rot = offset < 0 ? 42 : -42;
+        card.style.transform = `translateX(${tx}px) translateZ(-160px) rotateY(${rot}deg) scale(0.72)`;
+        card.style.opacity = '0';
+        card.style.zIndex = '1';
+        card.style.filter = 'brightness(0.75)';
+        card.style.pointerEvents = 'none';
+        card.setAttribute('title', 'Klik untuk melihat promo ini');
+      }
     }
   });
 

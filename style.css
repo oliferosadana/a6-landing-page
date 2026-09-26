@@ -2598,7 +2598,7 @@ h4,
 
 .promo-coverflow-card {
   position: absolute;
-  width: 280px;
+  width: 260px;
   aspect-ratio: 4 / 5;
   border-radius: var(--radius-md, 14px);
   overflow: hidden;
@@ -2681,6 +2681,6 @@ h4,
   }
 
   .promo-coverflow-card {
-    width: 220px;
+    width: 225px;
   }
 }

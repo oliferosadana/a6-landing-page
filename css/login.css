@@ -54,7 +54,7 @@ body {
 /* ==================== LEFT VISUAL PANEL ==================== */
 .login-visual-panel {
   flex: 1;
-  background: var(--ch-olive-deep) url('assets/amanda_brownies_hero_1790255505694.jpg') center/cover no-repeat;
+  background: var(--ch-olive-deep) url('../assets/amanda_brownies_hero_1790255505694.jpg') center/cover no-repeat;
   position: relative;
   display: flex;
   align-items: center;

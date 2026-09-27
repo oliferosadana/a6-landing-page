@@ -57,6 +57,39 @@ Aplikasi web modern, ultra-cepat, dan terpadu untuk ekosistem **Landing Page Pub
 
 ---
 
+## 📁 Struktur Direktori Proyek
+
+```text
+amanda-brownies-landing/
+├── assets/                  # Aset gambar, logo, flyer promo 4:5, foto menu & outlet
+├── css/                     # Seluruh file stylesheet modular
+│   ├── style.css            # Desain landing page & panggung 3D Coverflow
+│   ├── admin.css            # Desain panel CMS Cabang
+│   ├── superadmin.css       # Desain dashboard Superadmin Platform
+│   ├── billing.css          # Desain portal sewa sistem
+│   ├── invoice.css          # Desain invoice digital & cetak A4
+│   └── login.css            # Desain autentikasi & modal login
+├── js/                      # Seluruh file logika JavaScript modular
+│   ├── app.js               # Interaksi landing page, 3D Coverflow, filter & modal zoom
+│   ├── admin.js             # Logika CMS Cabang (CRUD promo, produk, outlet, ticker)
+│   ├── superadmin.js        # Logika Superadmin (manajemen tenant, verifikasi invoice)
+│   ├── billing.js           # Logika portal pemesanan sewa & pembuatan invoice
+│   ├── invoice.js           # Logika rendering invoice, status lunas, cetak PDF
+│   ├── auth.js              # Otentikasi berlapis, session guard & logout
+│   ├── data.js              # Dataset master & sinkronisasi state
+│   └── supabase.js          # Integrasi backend realtime Supabase
+├── sql/                     # Skrip database & schema PostgreSQL
+│   └── supabase_schema.sql  # Schema tabel, RLS policy & realtime publication
+├── index.html               # Halaman utama landing page publik
+├── admin.html               # Halaman CMS Outlet Balikpapan
+├── superadmin.html          # Halaman Superadmin Platform
+├── billing.html             # Halaman portal pemesanan sewa sistem
+├── invoice.html             # Halaman lembar invoice tagihan
+└── login.html               # Halaman login portal multi-role
+```
+
+---
+
 ## 🎨 Palet Warna & Desain (Color Hunt Luxury)
 - **Primary Cream**: `#F5EFE3`
 - **Dark Olive**: `#4F5B2A` & `#222910`

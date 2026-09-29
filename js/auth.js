@@ -4,38 +4,33 @@
  */
 
 const AUTH_STORAGE_KEY = 'amanda_auth_session';
+const AUTH_USERS_KEY = 'amanda_auth_users';
 
-// Default Verified Accounts (Fallback / Initial Setup)
-const DEFAULT_ACCOUNTS = [
-  {
-    id: 'user-root-01',
-    name: 'Superadmin Amanda Root',
-    email: 'superadmin@amanda.id',
-    password: 'superadmin2026',
-    role: 'superadmin',
-    avatar: '👑'
-  },
-  {
-    id: 'user-bpn-01',
-    name: 'Admin Outlet Balikpapan',
-    email: 'admin.balikpapan@amandabrownies.id',
-    password: 'amanda123',
-    role: 'tenant_admin',
-    tenantId: 'tenant-bpn',
-    tenantName: 'Amanda Brownies Cabang Balikpapan',
-    avatar: '🍰'
-  },
-  {
-    id: 'user-smd-01',
-    name: 'Admin Outlet Samarinda',
-    email: 'admin.samarinda@amandabrownies.id',
-    password: 'amanda123',
-    role: 'tenant_admin',
-    tenantId: 'tenant-smd',
-    tenantName: 'Amanda Brownies Cabang Samarinda',
-    avatar: '🍰'
+/**
+ * Helper to compute SHA-256 hash for secure local verification
+ */
+async function hashPassword(text) {
+  try {
+    const msgUint8 = new TextEncoder().encode(text);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', msgUint8);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+  } catch (e) {
+    return text;
   }
-];
+}
+
+/**
+ * Get registered local accounts (if custom accounts were configured)
+ */
+function getRegisteredUsers() {
+  try {
+    const raw = localStorage.getItem(AUTH_USERS_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch (e) {
+    return [];
+  }
+}
 
 /**
  * Get Current Active Session
@@ -113,9 +108,9 @@ function enforceAuth(allowedRoles = []) {
 }
 
 /**
- * Login Handler
+ * Login Handler (Universal for Superadmin & Tenant Admin)
  */
-async function login(email, password, roleHint = null) {
+async function login(email, password) {
   const cleanEmail = email.trim().toLowerCase();
   const cleanPass = password.trim();
 
@@ -146,15 +141,15 @@ async function login(email, password, roleHint = null) {
     }
   }
 
-  // 2. Fallback to Local Verified Accounts
-  const found = DEFAULT_ACCOUNTS.find(a => a.email.toLowerCase() === cleanEmail && a.password === cleanPass);
+  // 2. Fallback to Local Verified Accounts in Storage (if any registered)
+  const users = getRegisteredUsers();
+  const hashedInput = await hashPassword(cleanPass);
+  const found = users.find(a => 
+    a.email && a.email.toLowerCase() === cleanEmail && 
+    (a.passwordHash === hashedInput || a.password === cleanPass)
+  );
 
   if (found) {
-    // Check if role matches if roleHint provided
-    if (roleHint && found.role !== roleHint && found.role !== 'superadmin') {
-      return { success: false, message: `Akun ini terdaftar sebagai ${found.role}, bukan ${roleHint}.` };
-    }
-
     const session = saveAuthSession(found, true);
     return { success: true, session, source: 'local' };
   }

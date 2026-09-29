@@ -76,19 +76,6 @@
           <p>Masuk ke portal manajemen platform atau panel kelola cabang Anda.</p>
         </div>
 
-        <!-- Role Switcher Tabs -->
-        <div class="role-switcher">
-          <button type="button" class="role-tab active" id="tab-role-superadmin"
-            onclick="switchLoginRole('superadmin')">
-            <i class="fa-solid fa-crown"></i>
-            <span>Superadmin</span>
-          </button>
-          <button type="button" class="role-tab" id="tab-role-tenant" onclick="switchLoginRole('tenant_admin')">
-            <i class="fa-solid fa-store"></i>
-            <span>Admin Cabang</span>
-          </button>
-        </div>
-
         <!-- Error / Info Banner -->
         <div id="login-alert" class="login-alert-box" style="display: none;">
           <i class="fa-solid fa-circle-exclamation"></i>
@@ -97,13 +84,11 @@
 
         <!-- Login Form -->
         <form id="login-form" onsubmit="handleLoginFormSubmit(event)">
-          <input type="hidden" id="login-role-input" value="superadmin">
-
           <div class="form-group">
             <label for="login-email">Email / Akun Terdaftar *</label>
             <div class="input-with-icon">
               <i class="fa-solid fa-envelope"></i>
-              <input type="email" id="login-email" required placeholder="superadmin@amanda.id" autocomplete="email">
+              <input type="email" id="login-email" required placeholder="admin@perusahaan.com" autocomplete="email">
             </div>
           </div>
 
@@ -130,28 +115,14 @@
 
           <button type="submit" class="btn-login-submit" id="btn-login-submit">
             <i class="fa-solid fa-right-to-bracket"></i>
-            <span id="btn-submit-text">Masuk ke Superadmin</span>
+            <span id="btn-submit-text">Masuk ke Panel</span>
           </button>
         </form>
 
-        <!-- Quick Demo Credentials Box for Easy Testing -->
-        <div class="demo-creds-box">
-          <div class="demo-head">
-            <i class="fa-solid fa-key" style="color: var(--ch-gold);"></i>
-            <strong>Akun Login Pengujian (1-Klik Isi):</strong>
-          </div>
-          <div class="demo-buttons-grid">
-            <button type="button" class="btn-demo-autofill"
-              onclick="fillDemoCreds('superadmin@amanda.id', 'superadmin2026', 'superadmin')">
-              👑 <strong>Superadmin</strong>
-              <small>superadmin@amanda.id</small>
-            </button>
-            <button type="button" class="btn-demo-autofill"
-              onclick="fillDemoCreds('admin.balikpapan@amandabrownies.id', 'amanda123', 'tenant_admin')">
-              🍰 <strong>Admin Balikpapan</strong>
-              <small>admin.balikpapan@...</small>
-            </button>
-          </div>
+        <!-- Security & Privacy Notice -->
+        <div class="login-security-footer">
+          <i class="fa-solid fa-shield-halved"></i>
+          <span>Portal ini terlindungi otentikasi aman SSL/TLS. Sistem akan otomatis mengarahkan ke dashboard yang sesuai dengan hak akses akun Anda.</span>
         </div>
 
       </div>
@@ -197,26 +168,6 @@
       }
     });
 
-    function switchLoginRole(role) {
-      document.getElementById('login-role-input').value = role;
-      document.querySelectorAll('.role-tab').forEach(t => t.classList.remove('active'));
-
-      const tabSuper = document.getElementById('tab-role-superadmin');
-      const tabTenant = document.getElementById('tab-role-tenant');
-      const emailInput = document.getElementById('login-email');
-      const submitText = document.getElementById('btn-submit-text');
-
-      if (role === 'superadmin') {
-        tabSuper.classList.add('active');
-        emailInput.placeholder = 'superadmin@amanda.id';
-        submitText.textContent = 'Masuk ke Superadmin Platform';
-      } else {
-        tabTenant.classList.add('active');
-        emailInput.placeholder = 'admin.balikpapan@amandabrownies.id';
-        submitText.textContent = 'Masuk ke CMS Cabang';
-      }
-    }
-
     function togglePasswordVisibility(inputId, btn) {
       const input = document.getElementById(inputId);
       if (input.type === 'password') {
@@ -228,18 +179,10 @@
       }
     }
 
-    function fillDemoCreds(email, pass, role) {
-      document.getElementById('login-email').value = email;
-      document.getElementById('login-password').value = pass;
-      switchLoginRole(role);
-      document.getElementById('login-alert').style.display = 'none';
-    }
-
     async function handleLoginFormSubmit(e) {
       e.preventDefault();
       const email = document.getElementById('login-email').value;
       const pass = document.getElementById('login-password').value;
-      const role = document.getElementById('login-role-input').value;
       const submitBtn = document.getElementById('btn-login-submit');
       const alertBox = document.getElementById('login-alert');
       const alertText = document.getElementById('login-alert-text');
@@ -247,11 +190,11 @@
       submitBtn.disabled = true;
       submitBtn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Memverifikasi...';
 
-      const res = await login(email, pass, role);
+      const res = await login(email, pass);
 
       if (res.success) {
         alertBox.className = 'login-alert-box success';
-        alertText.textContent = 'Login berhasil! Mengalihkan...';
+        alertText.textContent = 'Login berhasil! Mengalihkan ke panel Anda...';
         alertBox.style.display = 'flex';
 
         const urlParams = new URLSearchParams(window.location.search);
@@ -268,9 +211,9 @@
         }, 600);
       } else {
         submitBtn.disabled = false;
-        submitBtn.innerHTML = '<i class="fa-solid fa-right-to-bracket"></i> Masuk';
+        submitBtn.innerHTML = '<i class="fa-solid fa-right-to-bracket"></i> Masuk ke Panel';
         alertBox.className = 'login-alert-box';
-        alertText.textContent = res.message || 'Login gagal.';
+        alertText.textContent = res.message || 'Login gagal. Silakan periksa kembali email dan password.';
         alertBox.style.display = 'flex';
       }
     }

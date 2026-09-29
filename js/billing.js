@@ -180,10 +180,10 @@ function populateDefaultTenantForm() {
   const emailInput = document.getElementById('tenant-email');
   const domainInput = document.getElementById('tenant-domain');
 
-  if (nameInput) nameInput.value = sub.tenantName || 'Amanda Brownies Kota Balikpapan';
-  if (phoneInput) phoneInput.value = sub.tenantPhone || '081322119988';
-  if (emailInput) emailInput.value = sub.tenantEmail || 'admin.balikpapan@amandabrownies.id';
-  if (domainInput) domainInput.value = sub.domain || 'balikpapan.amandabrownies.id';
+  if (nameInput && sub && sub.tenantName) nameInput.value = sub.tenantName;
+  if (phoneInput && sub && sub.tenantPhone) phoneInput.value = sub.tenantPhone;
+  if (emailInput && sub && sub.tenantEmail) emailInput.value = sub.tenantEmail;
+  if (domainInput && sub && sub.domain) domainInput.value = sub.domain;
 }
 
 // 5. Update Order Summary Card

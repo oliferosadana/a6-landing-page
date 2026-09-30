@@ -984,5 +984,42 @@ document.addEventListener('keydown', (e) => {
   }
 });
 
+// ===================================================================
+// FLOATING WHATSAPP SPEED DIAL INTERACTION
+// ===================================================================
+function toggleWaSpeedDial(forceState = null) {
+  const container = document.getElementById('wa-speeddial-container');
+  if (!container) return;
+
+  if (forceState !== null) {
+    if (forceState) {
+      container.classList.add('active');
+    } else {
+      container.classList.remove('active');
+    }
+  } else {
+    container.classList.toggle('active');
+  }
+}
+
+// Close WhatsApp speed dial on click outside or Escape
+document.addEventListener('click', (e) => {
+  const container = document.getElementById('wa-speeddial-container');
+  if (!container || !container.classList.contains('active')) return;
+
+  if (!container.contains(e.target)) {
+    container.classList.remove('active');
+  }
+});
+
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    const container = document.getElementById('wa-speeddial-container');
+    if (container && container.classList.contains('active')) {
+      container.classList.remove('active');
+    }
+  }
+});
+
 
 

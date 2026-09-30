@@ -521,6 +521,102 @@
     </div>
   </footer>
 
+  <!-- ==================== FLOATING WHATSAPP SPEED DIAL BUBBLE ==================== -->
+  <div class="wa-speeddial-container" id="wa-speeddial-container">
+    <!-- Pop-up Menu Panel -->
+    <div class="wa-speeddial-menu" id="wa-speeddial-menu" role="menu" aria-label="Pilihan Layanan WhatsApp">
+      <div class="wa-speeddial-header">
+        <div class="wa-header-avatar">
+          <i class="fa-brands fa-whatsapp"></i>
+        </div>
+        <div class="wa-header-text">
+          <strong>Layanan Resmi Amanda</strong>
+          <span>Respon Cepat via WhatsApp</span>
+        </div>
+        <button type="button" class="wa-speeddial-close-btn" onclick="toggleWaSpeedDial(false)" aria-label="Tutup Pilihan">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div class="wa-speeddial-body">
+        <!-- 1. Kerjasama -->
+        <a href="https://wa.me/6281322119988?text=Halo%20Amanda%20Brownies%20Kalimantan%2C%20saya%20tertarik%20untuk%20mengajukan%20Kerjasama%20%2F%20Sponsorship%20%2F%20Pesanan%20Korporat."
+          target="_blank" rel="noopener noreferrer" class="wa-speeddial-item wa-item-kerjasama" onclick="toggleWaSpeedDial(false)">
+          <div class="wa-item-icon-wrap icon-gold">
+            <i class="fa-solid fa-handshake"></i>
+          </div>
+          <div class="wa-item-info">
+            <div class="wa-item-title">
+              <strong>Kerjasama</strong>
+              <span class="wa-item-badge">B2B</span>
+            </div>
+            <p class="wa-item-desc">Sponsorship, pengadaan event & korporat</p>
+          </div>
+          <i class="fa-solid fa-chevron-right wa-item-arrow"></i>
+        </a>
+
+        <!-- 2. Reseller -->
+        <a href="https://wa.me/6281322119988?text=Halo%20Amanda%20Brownies%20Kalimantan%2C%20saya%20ingin%20bergabung%20menjadi%20mitra%20Reseller%20%26%20Keagenan%20resmi."
+          target="_blank" rel="noopener noreferrer" class="wa-speeddial-item wa-item-reseller" onclick="toggleWaSpeedDial(false)">
+          <div class="wa-item-icon-wrap icon-green">
+            <i class="fa-solid fa-store"></i>
+          </div>
+          <div class="wa-item-info">
+            <div class="wa-item-title">
+              <strong>Reseller</strong>
+              <span class="wa-item-badge badge-green">Peluang</span>
+            </div>
+            <p class="wa-item-desc">Kemitraan keagenan & jualan produk resmi</p>
+          </div>
+          <i class="fa-solid fa-chevron-right wa-item-arrow"></i>
+        </a>
+
+        <!-- 3. Komplain & CS -->
+        <a href="https://wa.me/6281322119988?text=Halo%20Amanda%20Brownies%20Kalimantan%20Layanan%20Pelanggan%2C%20saya%20ingin%20menyampaikan%20masukan%20%2F%20komplain%20terkait%20pesanan."
+          target="_blank" rel="noopener noreferrer" class="wa-speeddial-item wa-item-komplain" onclick="toggleWaSpeedDial(false)">
+          <div class="wa-item-icon-wrap icon-orange">
+            <i class="fa-solid fa-headset"></i>
+          </div>
+          <div class="wa-item-info">
+            <div class="wa-item-title">
+              <strong>Komplain</strong>
+              <span class="wa-item-badge badge-orange">CS Help</span>
+            </div>
+            <p class="wa-item-desc">Layanan bantuan, kendala & kepuasan pelanggan</p>
+          </div>
+          <i class="fa-solid fa-chevron-right wa-item-arrow"></i>
+        </a>
+      </div>
+      
+      <div class="wa-speeddial-footer">
+        <i class="fa-solid fa-shield-check"></i>
+        <span>Admin Resmi Amanda Brownies Kalimantan</span>
+      </div>
+    </div>
+
+    <!-- Floating Main Action Button -->
+    <button type="button" class="wa-speeddial-main-btn" id="wa-main-trigger" onclick="toggleWaSpeedDial()"
+      aria-label="Buka Menu WhatsApp" title="Hubungi Kami via WhatsApp">
+      <!-- Glow & Pulse Ring -->
+      <span class="wa-pulse-ring"></span>
+      <span class="wa-pulse-ring delay"></span>
+      
+      <!-- Icon Container (WhatsApp Icon + Close Cross) -->
+      <span class="wa-icon-state wa-icon-chat">
+        <i class="fa-brands fa-whatsapp"></i>
+      </span>
+      <span class="wa-icon-state wa-icon-close">
+        <i class="fa-solid fa-xmark"></i>
+      </span>
+
+      <!-- Floating Tooltip Pill (Desktop) -->
+      <span class="wa-floating-tooltip">
+        <span>Ada pertanyaan?</span>
+        <strong>Hubungi Kami</strong>
+      </span>
+    </button>
+  </div>
+
   <!-- Scripts -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="js/data.js?v=2.5"></script>

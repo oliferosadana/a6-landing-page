@@ -183,17 +183,12 @@ function renderProductGrid() {
   gridContainer.innerHTML = filtered.map(product => {
     return `
       <div class="product-card" id="card-${product.id}" data-id="${product.id}">
-        <!-- Media Header: Image with Name Overlay -->
+        <!-- Media Header: Image with Name Overlay (No Description) -->
         <div class="card-header-media">
           <img src="${product.image}" alt="${product.name}" loading="lazy" />
           <div class="card-media-overlay">
             <h3 class="card-media-title font-serif">${product.name}</h3>
           </div>
-        </div>
-
-        <!-- Body Content: Description Only -->
-        <div class="card-body">
-          <p class="card-desc">${product.description}</p>
         </div>
       </div>
     `;

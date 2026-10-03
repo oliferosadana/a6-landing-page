@@ -58,7 +58,6 @@ function switchTab(tabName, btnElement) {
     'outlets': 'Cabang Outlet Resmi Balikpapan',
     'outlet-categories': 'Manajemen Kategori & Wilayah Outlet',
     'ticker': 'Pengumuman Running Promo Ticker',
-    'subscription': 'Status Sewa & Tagihan Website',
     'settings': 'Cadangan, Impor & Reset Data'
   };
   const headingElem = document.getElementById('page-heading');
@@ -77,7 +76,6 @@ function switchTab(tabName, btnElement) {
   if (tabName === 'outlets') renderOutletsManager();
   if (tabName === 'outlet-categories') renderOutletCategoriesManager();
   if (tabName === 'ticker') renderTickerManager();
-  if (tabName === 'subscription') renderSubscriptionManager();
 }
 
 function toggleSidebar() {
@@ -1378,160 +1376,6 @@ function showCmsToast(message, title = 'Sukses') {
     window.cmsToastTimeout = setTimeout(() => {
       toast.classList.remove('show');
     }, 3500);
-  }
-}
-
-// ===================================================================
-// RENTAL & SUBSCRIPTION MANAGEMENT
-// ===================================================================
-function renderSubscriptionManager() {
-  if (typeof getRentalSubscription !== 'function') return;
-
-  const sub = getRentalSubscription();
-  const days = calculateRemainingDays ? calculateRemainingDays(sub.expiresAt) : 30;
-  const isExpired = days <= 0 || sub.status !== 'ACTIVE';
-
-  // 1. Update Topbar & Sidebar Badges
-  const topbarSubText = document.getElementById('topbar-sub-text');
-  const topbarSubPill = document.getElementById('topbar-sub-pill');
-  const sidebarSubBadge = document.getElementById('badge-sub-days');
-
-  if (topbarSubText) {
-    topbarSubText.textContent = isExpired ? 'Sewa Berakhir!' : `Sewa Aktif: ${days} Hari`;
-  }
-  if (sidebarSubBadge) {
-    sidebarSubBadge.textContent = `${days}h`;
-    sidebarSubBadge.style.background = isExpired ? '#c0392b' : (days <= 7 ? '#e67e22' : 'var(--ch-gold)');
-  }
-  if (topbarSubPill) {
-    const dot = topbarSubPill.querySelector('.sub-dot');
-    if (dot) {
-      dot.className = 'sub-dot ' + (isExpired ? 'danger' : (days <= 7 ? 'warning' : ''));
-    }
-  }
-
-  // 2. Update Subscription Status Card
-  const cardDot = document.getElementById('sub-card-dot');
-  const cardPlanTag = document.getElementById('sub-card-plan-tag');
-  const cardPlanName = document.getElementById('sub-card-plan-name');
-  const cardStatusBadge = document.getElementById('sub-card-status-badge');
-  const cardStartDate = document.getElementById('sub-card-start-date');
-  const cardExpiryDate = document.getElementById('sub-card-expiry-date');
-  const cardRemainingDays = document.getElementById('sub-card-remaining-days');
-  const cardDomain = document.getElementById('sub-card-domain');
-  const progressPercent = document.getElementById('sub-progress-percent');
-  const progressFill = document.getElementById('sub-progress-fill');
-
-  if (cardPlanName) cardPlanName.textContent = sub.planName || 'Paket Usaha Amanda';
-  if (cardPlanTag) {
-    const isYearly = sub.planId && (sub.planId.includes('12m') || sub.planId.includes('24m') || sub.planId.includes('year') || (sub.planName && sub.planName.toLowerCase().includes('tahun')));
-    cardPlanTag.textContent = isYearly ? '⭐ PAKET TAHUNAN (HEMAT)' : '🗓️ PAKET BULANAN (FLEKSIBEL)';
-  }
-  if (cardStartDate) cardStartDate.textContent = sub.startDate ? formatAdminDate(sub.startDate) : '-';
-  if (cardExpiryDate) cardExpiryDate.textContent = sub.expiresAt ? formatAdminDate(sub.expiresAt) : '-';
-  if (cardRemainingDays) {
-    cardRemainingDays.textContent = isExpired ? '0 Hari (Kadaluarsa)' : `${days} Hari`;
-    cardRemainingDays.style.color = isExpired ? '#c0392b' : (days <= 7 ? '#e67e22' : 'var(--ch-gold-dark)');
-  }
-  if (cardDomain) cardDomain.textContent = sub.tenantDomain || 'amandaborneo.id';
-
-  if (cardDot) {
-    cardDot.className = 'sub-status-dot ' + (isExpired ? 'expired' : 'active');
-  }
-  if (cardStatusBadge) {
-    cardStatusBadge.className = isExpired ? 'badge-status-expired' : 'badge-status-active';
-    cardStatusBadge.innerHTML = isExpired 
-      ? '<i class="fa-solid fa-circle-exclamation"></i> KADALUARSA / PERLU PERPANJANG' 
-      : '<i class="fa-solid fa-shield-check"></i> AKTIF & BERJALAN';
-  }
-
-  // Calculate Progress Percent
-  if (progressPercent && progressFill) {
-    const totalEstDays = sub.planId && sub.planId.includes('12m') ? 365 : (sub.planId && sub.planId.includes('6m') ? 180 : 30);
-    const pct = isExpired ? 0 : Math.max(5, Math.min(100, Math.round((days / totalEstDays) * 100)));
-    progressPercent.textContent = isExpired ? 'Layanan berakhir' : `${pct}% sisa masa sewa (${days} hari)`;
-    progressFill.style.width = `${pct}%`;
-    progressFill.style.background = isExpired ? '#c0392b' : (pct <= 25 ? '#e67e22' : 'linear-gradient(90deg, var(--ch-olive), var(--ch-gold))');
-  }
-
-  // 3. Render Invoices History Table
-  renderInvoicesTable();
-}
-
-function renderInvoicesTable() {
-  const tbody = document.getElementById('cms-invoices-tbody');
-  if (!tbody || typeof getInvoiceHistory !== 'function') return;
-
-  const invoices = getInvoiceHistory();
-
-  if (!invoices || invoices.length === 0) {
-    tbody.innerHTML = `
-      <tr>
-        <td colspan="7" style="text-align: center; padding: 32px; color: var(--text-muted);">
-          <i class="fa-solid fa-receipt" style="font-size: 28px; color: var(--ch-sand-border); display: block; margin-bottom: 8px;"></i>
-          Belum ada riwayat tagihan invoice. <a href="billing.html" style="color: var(--ch-olive); font-weight: 700;">Buat pesanan sewa sekarang</a>.
-        </td>
-      </tr>
-    `;
-    return;
-  }
-
-  tbody.innerHTML = invoices.map(inv => {
-    const isPaid = inv.status === 'PAID';
-    return `
-      <tr>
-        <td>
-          <span class="inv-id-tag">${inv.id}</span>
-        </td>
-        <td style="color: var(--text-muted); font-size: 12.5px;">
-          ${formatAdminDate(inv.createdAt)}
-        </td>
-        <td>
-          <strong>${inv.planName || 'Sewa Sistem'}</strong>
-          <div style="font-size: 11px; color: var(--text-muted);">+${inv.durationMonths || 1} Bulan</div>
-        </td>
-        <td style="font-weight: 700; color: var(--text-main);">
-          ${formatAdminRupiah(inv.totalAmount || inv.subtotal || 0)}
-        </td>
-        <td style="font-size: 12px; color: var(--text-muted);">
-          ${inv.paymentMethodName ? inv.paymentMethodName.split('(')[0].trim() : 'Transfer'}
-        </td>
-        <td>
-          <span class="inv-status-pill-table ${isPaid ? 'paid' : 'pending'}">
-            <i class="fa-solid ${isPaid ? 'fa-circle-check' : 'fa-clock'}"></i>
-            ${isPaid ? 'LUNAS' : 'PENDING'}
-          </span>
-        </td>
-        <td style="text-align: right;">
-          <a href="invoice.html?id=${encodeURIComponent(inv.id)}" target="_blank" class="btn-table-action" title="Lihat & Cetak Invoice">
-            <i class="fa-solid fa-receipt"></i> Buka Invoice
-          </a>
-        </td>
-      </tr>
-    `;
-  }).join('');
-}
-
-function formatAdminRupiah(amount) {
-  return new Intl.NumberFormat('id-ID', {
-    style: 'currency',
-    currency: 'IDR',
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0
-  }).format(amount);
-}
-
-function formatAdminDate(dateStr) {
-  if (!dateStr) return '-';
-  try {
-    const d = new Date(dateStr);
-    return d.toLocaleDateString('id-ID', {
-      day: 'numeric',
-      month: 'short',
-      year: 'numeric'
-    });
-  } catch (e) {
-    return dateStr;
   }
 }
 

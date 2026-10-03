@@ -6,8 +6,8 @@
 const SUPABASE_CONFIG_STORAGE_KEY = 'amanda_supabase_config';
 
 // Active Supabase Cloud Project Configuration
-const DEFAULT_SUPABASE_URL = 'https://ffzzlertrzfrpuhbspws.supabase.co';
-const DEFAULT_SUPABASE_KEY = 'sb_publishable_64yf0NZHiOLEylWhspci4A_EaOWuVyB';
+const DEFAULT_SUPABASE_URL = 'https://zomkdefqivvbtxqzavpz.supabase.co';
+const DEFAULT_SUPABASE_KEY = 'sb_publishable_xG2a15CPnDELITqWHdodiQ__PnNZX8-';
 
 let supabaseConfig = {
   url: DEFAULT_SUPABASE_URL,
@@ -259,11 +259,22 @@ async function pullAllDataFromSupabase() {
       saveStoredData('amanda_ticker', AMANDA_TICKER, false);
     }
 
-    // 5. Fetch Tenants
-    const { data: dbTenants, error: errTen } = await supabaseClient
-      .from('tenants')
-      .select('*')
-      .order('created_at', { ascending: false });
+    // 5. Fetch Websites & Tenants & Check WAAS Suspension Status
+    const [{ data: dbTenants, error: errTen }, { data: dbWebsites }] = await Promise.all([
+      supabaseClient.from('tenants').select('*').order('created_at', { ascending: false }),
+      supabaseClient.from('websites').select('*')
+    ]);
+
+    let isAnySuspended = false;
+    let tenantDisplayName = 'Amanda Brownies Kalimantan';
+
+    if (dbWebsites && dbWebsites.length > 0) {
+      const amandaSite = dbWebsites.find(w => w.tenant_id === 'tenant_amanda' || w.id === 'site_amanda') || dbWebsites[0];
+      if (amandaSite && (amandaSite.status === 'SUSPENDED' || amandaSite.status === 'suspended')) {
+        isAnySuspended = true;
+        tenantDisplayName = amandaSite.name || tenantDisplayName;
+      }
+    }
 
     if (!errTen && dbTenants && dbTenants.length > 0) {
       const tenants = dbTenants.map(tn => ({
@@ -284,6 +295,20 @@ async function pullAllDataFromSupabase() {
         notes: tn.notes || ''
       }));
       saveTenants(tenants, false);
+
+      const amandaTenant = tenants.find(t => t.id === 'tenant_amanda') || tenants[0];
+      if (amandaTenant) {
+        tenantDisplayName = amandaTenant.name || tenantDisplayName;
+        if (amandaTenant.status === 'SUSPENDED' || amandaTenant.status === 'suspended') {
+          isAnySuspended = true;
+        }
+      }
+    }
+
+    if (isAnySuspended) {
+      showWaasSuspensionScreen(tenantDisplayName);
+    } else {
+      hideWaasSuspensionScreen();
     }
 
     // 6. Fetch Invoices
@@ -324,6 +349,47 @@ async function pullAllDataFromSupabase() {
     return false;
   } finally {
     isCurrentlyPulling = false;
+  }
+}
+
+/**
+ * Tampilkan Layar Penangguhan Website saat Disuspend oleh Super Admin WAAS
+ */
+function showWaasSuspensionScreen(tenantName = 'Amanda Brownies Kalimantan') {
+  let screen = document.getElementById('waas-suspension-screen');
+  if (!screen) {
+    screen = document.createElement('div');
+    screen.id = 'waas-suspension-screen';
+    screen.style.cssText = 'position:fixed;inset:0;background:rgba(15,23,42,0.95);backdrop-filter:blur(4px);z-index:9999999;display:flex;align-items:center;justify-content:center;padding:20px;color:#f8fafc;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;text-align:center;';
+    screen.innerHTML = `
+      <div style="max-width:460px;width:100%;background:#1e293b;border:1px solid #334155;border-radius:16px;padding:32px;box-shadow:0 20px 25px -5px rgba(0,0,0,0.5);">
+        <div style="width:52px;height:52px;background:rgba(239,68,68,0.12);color:#f87171;border:1px solid rgba(239,68,68,0.25);border-radius:12px;display:flex;align-items:center;justify-content:center;margin:0 auto 16px auto;">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+        </div>
+        <h1 style="font-size:20px;font-weight:800;letter-spacing:-0.02em;margin-bottom:8px;color:#ffffff;">Layanan Website Ditangguhkan</h1>
+        <p style="color:#94a3b8;font-size:13px;line-height:1.6;margin-bottom:20px;">
+          Website <strong style="color:#ffffff;">${tenantName}</strong> saat ini ditangguhkan oleh sistem karena masa sewa telah berakhir.
+        </p>
+        <div style="background:#0f172a;border:1px solid #334155;border-radius:10px;padding:12px;font-size:12px;color:#cbd5e1;text-align:left;line-height:1.5;margin-bottom:20px;">
+          <div style="font-weight:700;color:#f87171;margin-bottom:4px;">Pemberitahuan Pengelola:</div>
+          Akses publik dinonaktifkan sementara. Hubungi pengelola tenant atau selesaikan perpanjangan langganan untuk mengaktifkan kembali website.
+        </div>
+        <div style="font-size:11px;color:#64748b;border-top:1px solid #334155;padding-top:14px;font-family:monospace;">
+          BORNEOLINK WAAS PLATFORM • CLOUD SUSPENSION ENGINE
+        </div>
+      </div>
+    `;
+    document.body.appendChild(screen);
+  }
+}
+
+/**
+ * Hapus Layar Penangguhan saat Website Diaktifkan Kembali
+ */
+function hideWaasSuspensionScreen() {
+  const screen = document.getElementById('waas-suspension-screen');
+  if (screen) {
+    screen.remove();
   }
 }
 

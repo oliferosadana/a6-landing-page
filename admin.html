@@ -85,13 +85,6 @@
             </button>
           </li>
           <li>
-            <button class="nav-item" onclick="switchTab('subscription', this)">
-              <i class="fa-solid fa-file-invoice-dollar"></i>
-              <span>Status Sewa & Tagihan</span>
-              <span class="badge-count" id="badge-sub-days">30h</span>
-            </button>
-          </li>
-          <li>
             <button class="nav-item" onclick="switchTab('settings', this)">
               <i class="fa-solid fa-database"></i>
               <span>Cadangan & Reset Data</span>
@@ -101,19 +94,9 @@
       </nav>
 
       <div class="sidebar-footer">
-        <a href="superadmin.html" class="btn-view-site"
-          style="margin-bottom: 6px; background: rgba(30, 38, 14, 0.85); border-color: var(--ch-gold); color: #fff;">
-          <i class="fa-solid fa-crown" style="color: var(--ch-gold);"></i>
-          <span>Superadmin Platform</span>
-        </a>
-        <a href="billing.html" class="btn-view-site"
-          style="margin-bottom: 6px; background: rgba(184, 137, 45, 0.25); border-color: var(--ch-gold);">
-          <i class="fa-solid fa-cart-shopping"></i>
-          <span>Portal Sewa Sistem</span>
-        </a>
         <a href="index.html" target="_blank" class="btn-view-site">
           <i class="fa-solid fa-arrow-up-right-from-square"></i>
-          <span>Buka Landing Page</span>
+          <span>Buka Website Publik</span>
         </a>
       </div>
     </aside>
@@ -488,128 +471,6 @@
                 <button class="btn-danger" onclick="confirmResetDefault()">
                   <i class="fa-solid fa-trash-can"></i> Reset Semua Data ke Default
                 </button>
-              </div>
-            </div>
-          </div>
-
-        </section>
-
-        <!-- ==================== SECTION 7: STATUS SEWA & TAGIHAN ==================== -->
-        <section id="section-subscription" class="cms-section">
-
-          <div class="section-toolbar">
-            <div class="toolbar-left">
-              <h2>Status Sewa & Tagihan Website</h2>
-              <p>Pantau masa aktif sewa platform, histori invoice, dan lakukan perpanjangan layanan website cabang Anda.
-              </p>
-            </div>
-            <a href="billing.html" class="btn-primary">
-              <i class="fa-solid fa-cart-plus"></i> Perpanjang Masa Sewa
-            </a>
-          </div>
-
-          <!-- Subscription Status Banner -->
-          <div class="sub-status-card">
-            <div class="sub-status-header">
-              <div class="sub-plan-badge-wrap">
-                <span class="sub-status-dot active" id="sub-card-dot"></span>
-                <div>
-                  <span class="sub-plan-tag" id="sub-card-plan-tag">PAKET BULANAN</span>
-                  <h3 class="sub-plan-title" id="sub-card-plan-name">Paket Usaha (6 Bulan)</h3>
-                </div>
-              </div>
-              <div class="sub-status-pill-wrap">
-                <span class="badge-status-active" id="sub-card-status-badge">
-                  <i class="fa-solid fa-shield-check"></i> AKTIF & BERJALAN
-                </span>
-              </div>
-            </div>
-
-            <div class="sub-status-metrics-grid">
-              <div class="sub-metric-item">
-                <span class="metric-lbl"><i class="fa-regular fa-calendar-check"></i> Tanggal Mulai</span>
-                <strong class="metric-val" id="sub-card-start-date">-</strong>
-              </div>
-              <div class="sub-metric-item">
-                <span class="metric-lbl"><i class="fa-regular fa-clock"></i> Jatuh Tempo / Berakhir</span>
-                <strong class="metric-val" id="sub-card-expiry-date">-</strong>
-              </div>
-              <div class="sub-metric-item">
-                <span class="metric-lbl"><i class="fa-solid fa-hourglass-half"></i> Sisa Masa Aktif</span>
-                <strong class="metric-val text-gold" id="sub-card-remaining-days">30 Hari</strong>
-              </div>
-              <div class="sub-metric-item">
-                <span class="metric-lbl"><i class="fa-solid fa-globe"></i> Domain Resmi</span>
-                <strong class="metric-val" id="sub-card-domain">amandaborneo.id</strong>
-              </div>
-            </div>
-
-            <!-- Visual Progress Bar for Remaining Days -->
-            <div class="sub-progress-wrap">
-              <div class="sub-progress-info">
-                <span>Persentase Masa Aktif Layanan</span>
-                <span id="sub-progress-percent">85% tersisa</span>
-              </div>
-              <div class="sub-progress-bar">
-                <div class="sub-progress-fill" id="sub-progress-fill" style="width: 85%;"></div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Invoices History Table -->
-          <div class="panel-card" style="margin-top: 24px;">
-            <div class="panel-head">
-              <div class="panel-head-title">
-                <i class="fa-solid fa-file-invoice" style="color: var(--primary-olive);"></i>
-                <h3>Riwayat Tagihan & Invoice Pembayaran</h3>
-              </div>
-              <a href="billing.html" class="btn-secondary" style="font-size: 12px; padding: 6px 12px;">
-                <i class="fa-solid fa-plus"></i> Buat Pesanan Baru
-              </a>
-            </div>
-
-            <div class="panel-body" style="padding: 0;">
-              <div class="table-responsive">
-                <table class="cms-data-table">
-                  <thead>
-                    <tr>
-                      <th>No. Invoice</th>
-                      <th>Tanggal Terbit</th>
-                      <th>Paket Layanan</th>
-                      <th>Total Bayar</th>
-                      <th>Metode</th>
-                      <th>Status</th>
-                      <th style="text-align: right;">Aksi</th>
-                    </tr>
-                  </thead>
-                  <tbody id="cms-invoices-tbody">
-                    <!-- Injected by admin.js -->
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-
-          <!-- Help & Rental FAQ Notice -->
-          <div class="sub-help-grid" style="margin-top: 24px;">
-            <div class="panel-card">
-              <div class="panel-head">
-                <div class="panel-head-title">
-                  <i class="fa-solid fa-circle-question" style="color: var(--primary-gold);"></i>
-                  <h3>Bantuan & Layanan Sewa Website</h3>
-                </div>
-              </div>
-              <div class="panel-body">
-                <p style="font-size: 13.5px; color: var(--text-muted); line-height: 1.6;">
-                  Layanan sewa website Amanda Platform mencakup hosting ultra-cepat 99.9% uptime, backup database
-                  harian, domain kustom, serta pembaruan fitur katalog & promo berkala. Jika butuh konsultasi teknis
-                  atau konfirmasi pembayaran manual, hubungi tim support melalui WhatsApp.
-                </p>
-                <a href="https://wa.me/6281234567890?text=Halo%20Admin%20Amanda,%20saya%20ingin%20konsultasi%20mengenai%20sewa%20sistem%20website"
-                  target="_blank" class="btn-secondary"
-                  style="margin-top: 12px; display: inline-flex; align-items: center; gap: 8px;">
-                  <i class="fa-brands fa-whatsapp" style="color: #25d366;"></i> Hubungi Customer Care Sewa
-                </a>
               </div>
             </div>
           </div>

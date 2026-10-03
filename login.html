@@ -32,9 +32,8 @@
           <img src="assets/logo.png" alt="Amanda Brownies Official Logo"
             style="height: 64px; width: auto; max-width: 140px; object-fit: contain; filter: drop-shadow(0 4px 14px rgba(0,0,0,0.35));">
         </div>
-        <h1 class="font-serif">AMANDA PLATFORM</h1>
-        <p class="visual-tagline">Sistem Manajemen Terpadu Landing Page, Katalog Menu, Multi-Cabang Outlet, & Portal
-          WaaS Kalimantan.</p>
+        <h1 class="font-serif">AMANDA CMS</h1>
+        <p class="visual-tagline">Sistem Manajemen Pengelolaan Landing Page, Katalog Menu, Promo Flyer & Multi-Cabang Outlet Kalimantan.</p>
 
         <div class="visual-highlights">
           <div class="vh-item">
@@ -47,12 +46,12 @@
           </div>
           <div class="vh-item">
             <i class="fa-solid fa-shop"></i>
-            <span>Manajemen Multi-Tenant 6 Cabang Balikpapan</span>
+            <span>Pengelolaan Cabang Outlet Balikpapan</span>
           </div>
         </div>
 
         <div class="visual-footer">
-          <span>&copy; 2026 Amanda Brownies Platform. Hak Cipta Dilindungi.</span>
+          <span>&copy; 2026 Amanda Brownies Kalimantan. Hak Cipta Dilindungi.</span>
         </div>
       </div>
     </div>
@@ -73,7 +72,7 @@
         <!-- Header -->
         <div class="login-header">
           <h2 class="font-serif">Selamat Datang</h2>
-          <p>Masuk ke portal manajemen platform atau panel kelola cabang Anda.</p>
+          <p>Masuk ke panel CMS kelola menu, promo, dan outlet Amanda Brownies.</p>
         </div>
 
         <!-- Error / Info Banner -->
@@ -115,14 +114,14 @@
 
           <button type="submit" class="btn-login-submit" id="btn-login-submit">
             <i class="fa-solid fa-right-to-bracket"></i>
-            <span id="btn-submit-text">Masuk ke Panel</span>
+            <span id="btn-submit-text">Masuk ke Panel CMS</span>
           </button>
         </form>
 
         <!-- Security & Privacy Notice -->
         <div class="login-security-footer">
           <i class="fa-solid fa-shield-halved"></i>
-          <span>Portal ini terlindungi otentikasi aman SSL/TLS. Sistem akan otomatis mengarahkan ke dashboard yang sesuai dengan hak akses akun Anda.</span>
+          <span>Portal ini terlindungi otentikasi aman SSL/TLS. Masuk dengan akun resmi Anda untuk mengelola CMS.</span>
         </div>
 
       </div>
@@ -148,7 +147,7 @@
       // Handle redirection messages & clear stale sessions if unauthenticated
       if (reason === 'unauthenticated') {
         localStorage.removeItem(AUTH_STORAGE_KEY);
-        alertText.textContent = 'Silakan masuk terlebih dahulu untuk mengakses halaman tersebut.';
+        alertText.textContent = 'Silakan masuk terlebih dahulu untuk mengakses halaman CMS.';
         alertBox.style.display = 'flex';
       } else if (msg === 'logged_out') {
         localStorage.removeItem(AUTH_STORAGE_KEY);
@@ -156,14 +155,10 @@
         alertBox.className = 'login-alert-box success';
         alertBox.style.display = 'flex';
       } else {
-        // Auto redirect only if healthy session exists and no error flag was passed
+        // Auto redirect if session exists
         const session = getAuthSession();
-        if (session && session.user && session.user.role) {
-          if (session.user.role === 'superadmin') {
-            window.location.replace('superadmin.html');
-          } else if (session.user.role === 'tenant_admin') {
-            window.location.replace('admin.html');
-          }
+        if (session && session.user) {
+          window.location.replace('admin.html');
         }
       }
     });
@@ -194,7 +189,7 @@
 
       if (res.success) {
         alertBox.className = 'login-alert-box success';
-        alertText.textContent = 'Login berhasil! Mengalihkan ke panel Anda...';
+        alertText.textContent = 'Login berhasil! Mengalihkan ke panel CMS...';
         alertBox.style.display = 'flex';
 
         const urlParams = new URLSearchParams(window.location.search);
@@ -203,15 +198,13 @@
         setTimeout(() => {
           if (redirect && !redirect.includes('login.html')) {
             window.location.replace(redirect);
-          } else if (res.session.user.role === 'superadmin') {
-            window.location.replace('superadmin.html');
           } else {
             window.location.replace('admin.html');
           }
         }, 600);
       } else {
         submitBtn.disabled = false;
-        submitBtn.innerHTML = '<i class="fa-solid fa-right-to-bracket"></i> Masuk ke Panel';
+        submitBtn.innerHTML = '<i class="fa-solid fa-right-to-bracket"></i> Masuk ke Panel CMS';
         alertBox.className = 'login-alert-box';
         alertText.textContent = res.message || 'Login gagal. Silakan periksa kembali email dan password.';
         alertBox.style.display = 'flex';

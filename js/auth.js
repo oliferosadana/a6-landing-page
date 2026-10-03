@@ -95,11 +95,7 @@ function enforceAuth(allowedRoles = []) {
     const roles = Array.isArray(allowedRoles) ? allowedRoles : [allowedRoles];
     if (!roles.includes(session.user.role)) {
       alert(`⛔ Akses Ditolak: Anda tidak memiliki izin untuk membuka halaman ini.`);
-      if (session.user.role === 'superadmin') {
-        window.location.replace('superadmin.html');
-      } else {
-        window.location.replace('admin.html');
-      }
+      window.location.replace('admin.html');
       return false;
     }
   }
@@ -108,7 +104,7 @@ function enforceAuth(allowedRoles = []) {
 }
 
 /**
- * Login Handler (Universal for Superadmin & Tenant Admin)
+ * Login Handler (Universal CMS Admin)
  */
 async function login(email, password) {
   const cleanEmail = email.trim().toLowerCase();
@@ -124,14 +120,14 @@ async function login(email, password) {
 
       if (!error && data && data.user) {
         const userMeta = data.user.user_metadata || {};
-        const role = userMeta.role || (cleanEmail.includes('superadmin') ? 'superadmin' : 'tenant_admin');
+        const role = userMeta.role || 'tenant_admin';
         const userObj = {
           id: data.user.id,
-          name: userMeta.name || (role === 'superadmin' ? 'Superadmin Cloud' : 'Admin Cabang'),
+          name: userMeta.name || 'Admin Amanda',
           email: data.user.email,
           role: role,
           tenantId: userMeta.tenantId || 'tenant-bpn',
-          avatar: role === 'superadmin' ? '👑' : '🍰'
+          avatar: userMeta.avatar || '🍰'
         };
         const session = saveAuthSession(userObj, true);
         return { success: true, session, source: 'supabase' };

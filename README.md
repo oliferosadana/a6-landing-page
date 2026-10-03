@@ -1,6 +1,6 @@
-# Amanda Brownies Platform - WaaS & Multi-Tenant CMS
+# Amanda Brownies Kalimantan - Landing Page & CMS Admin
 
-Aplikasi web modern, ultra-cepat, dan terpadu untuk ekosistem **Landing Page Publik**, **Panel CMS Pengelolaan Cabang Outlet**, **Portal Sewa Sistem (WaaS)**, dan **Dashboard Superadmin Platform**.
+Aplikasi web modern, ultra-cepat, dan terpadu untuk ekosistem **Landing Page Publik** dan **Panel CMS Pengelolaan Cabang Outlet**.
 
 ---
 
@@ -8,11 +8,9 @@ Aplikasi web modern, ultra-cepat, dan terpadu untuk ekosistem **Landing Page Pub
 
 | Halaman | File | Deskripsi & Hak Akses |
 | :--- | :--- | :--- |
-| **Landing Page Publik** | [`index.html`](./index.html) | Katalog menu realtime, flyer promo 4:5 dengan lightbox zoom, locator 6 cabang & booth Balikpapan, dan WhatsApp checkout. |
-| **Panel CMS Cabang** | [`admin.html`](./admin.html) | Panel khusus admin cabang/tenant untuk mengelola menu, flyer 4:5, price list, stok 6 outlet, marquee ticker, dan memantau masa sewa cabang. |
-| **Portal Sewa & Checkout** | [`billing.html`](./billing.html) | Portal pemesanan sewa sistem dengan pilihan siklus **Bulanan & Tahunan**, formulir identitas penyewa, dan metode pembayaran QRIS/Bank. |
-| **Lembar Invoice Digital** | [`invoice.html`](./invoice.html) | Tampilan invoice minimalis, informatif, dan print-ready (Cetak/PDF A4) dengan 1-klik salin rekening/nominal & tombol verifikasi lunas. |
-| **Superadmin Platform** | [`superadmin.html`](./superadmin.html) | Dashboard pusat pemilik platform untuk mengontrol seluruh penyewa (multi-tenant), metrik keuangan (MRR & omzet), 1-klik persetujuan invoice, dan master tarif. |
+| **Landing Page Publik** | [`index.html`](./index.html) | Katalog menu realtime 2-kolom mobile, flyer promo 4:5 dengan lightbox zoom, floating WhatsApp speed dial (Kerjasama, Reseller, Komplain), dan outlet locator. |
+| **Panel CMS Cabang** | [`admin.html`](./admin.html) | Panel khusus admin untuk mengelola katalog menu, stok outlet, flyer promo 4:5, price list, kategori wilayah, running promo ticker, dan sinkronisasi Supabase. |
+| **Login Portal** | [`login.html`](./login.html) | Otentikasi aman terintegrasi Supabase Auth & Session Guard untuk akses ke panel CMS. |
 
 ---
 
@@ -21,39 +19,13 @@ Aplikasi web modern, ultra-cepat, dan terpadu untuk ekosistem **Landing Page Pub
 1. **Jalankan web server lokal:**
    ```bash
    npm start
-   # atau menggunakan python:
-   # python -m http.server 3000
+   # atau menggunakan serve:
+   # npx serve . -l 3000
    ```
 2. **Buka di browser:**
-   - Website Utama: `http://localhost:3000/`
-   - Superadmin Platform: `http://localhost:3000/superadmin.html`
-   - Panel CMS Cabang: `http://localhost:3000/admin.html`
-   - Portal Sewa Sistem: `http://localhost:3000/billing.html`
-
----
-
-## 🌐 Panduan Deployment ke Produksi
-
-### Opsi 1: Vercel (Rekomendasi - 1 Klik Deploy)
-1. Hubungkan repository GitHub ke [Vercel](https://vercel.com).
-2. Konfigurasi otomatis terdeteksi via file [`vercel.json`](./vercel.json).
-3. Klik **Deploy**.
-
-### Opsi 2: Netlify
-1. Drag & drop folder project atau hubungkan Git ke [Netlify](https://netlify.com).
-2. Konfigurasi otomatis terdeteksi via file [`netlify.toml`](./netlify.toml).
-
-### Opsi 3: VPS Linux / Ubuntu (Nginx)
-1. Copy seluruh isi folder project ke directory `/var/www/amanda-brownies-landing`.
-2. Gunakan konfigurasi Nginx yang telah disediakan di file [`nginx.conf`](./nginx.conf).
-3. Restart Nginx:
-   ```bash
-   sudo systemctl restart nginx
-   ```
-
-### Opsi 4: cPanel / Shared Hosting
-1. Kompres seluruh file menjadi `.zip`.
-2. Unggah dan ekstrak ke folder `public_html` di cPanel File Manager.
+   - Website Publik: `http://localhost:3000/`
+   - Login CMS: `http://localhost:3000/login.html`
+   - Panel CMS Admin: `http://localhost:3000/admin.html`
 
 ---
 
@@ -63,18 +35,12 @@ Aplikasi web modern, ultra-cepat, dan terpadu untuk ekosistem **Landing Page Pub
 amanda-brownies-landing/
 ├── assets/                  # Aset gambar, logo, flyer promo 4:5, foto menu & outlet
 ├── css/                     # Seluruh file stylesheet modular
-│   ├── style.css            # Desain landing page & panggung 3D Coverflow
+│   ├── style.css            # Desain landing page & floating WhatsApp speed dial
 │   ├── admin.css            # Desain panel CMS Cabang
-│   ├── superadmin.css       # Desain dashboard Superadmin Platform
-│   ├── billing.css          # Desain portal sewa sistem
-│   ├── invoice.css          # Desain invoice digital & cetak A4
-│   └── login.css            # Desain autentikasi & modal login
+│   └── login.css            # Desain antarmuka login CMS
 ├── js/                      # Seluruh file logika JavaScript modular
-│   ├── app.js               # Interaksi landing page, 3D Coverflow, filter & modal zoom
-│   ├── admin.js             # Logika CMS Cabang (CRUD promo, produk, outlet, ticker)
-│   ├── superadmin.js        # Logika Superadmin (manajemen tenant, verifikasi invoice)
-│   ├── billing.js           # Logika portal pemesanan sewa & pembuatan invoice
-│   ├── invoice.js           # Logika rendering invoice, status lunas, cetak PDF
+│   ├── app.js               # Interaksi landing page, katalog menu, speed dial WhatsApp
+│   ├── admin.js             # Logika CMS (CRUD promo, produk, outlet, ticker, categories)
 │   ├── auth.js              # Otentikasi berlapis, session guard & logout
 │   ├── data.js              # Dataset master & sinkronisasi state
 │   └── supabase.js          # Integrasi backend realtime Supabase
@@ -82,10 +48,7 @@ amanda-brownies-landing/
 │   └── supabase_schema.sql  # Schema tabel, RLS policy & realtime publication
 ├── index.html               # Halaman utama landing page publik
 ├── admin.html               # Halaman CMS Outlet Balikpapan
-├── superadmin.html          # Halaman Superadmin Platform
-├── billing.html             # Halaman portal pemesanan sewa sistem
-├── invoice.html             # Halaman lembar invoice tagihan
-└── login.html               # Halaman login portal multi-role
+└── login.html               # Halaman login CMS
 ```
 
 ---

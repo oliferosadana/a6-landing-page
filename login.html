@@ -154,12 +154,6 @@
         alertText.textContent = 'Anda telah berhasil keluar (Logged out).';
         alertBox.className = 'login-alert-box success';
         alertBox.style.display = 'flex';
-      } else {
-        // Auto redirect if session exists
-        const session = getAuthSession();
-        if (session && session.user) {
-          window.location.replace('admin.html');
-        }
       }
     });
 

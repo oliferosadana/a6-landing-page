@@ -71,11 +71,12 @@ function getAuthSession() {
 
     // Check expiration (24 hours token validity)
     if (session.expiresAt && Date.now() > session.expiresAt) {
-      logout(false);
+      localStorage.removeItem(AUTH_STORAGE_KEY);
       return null;
     }
     return session;
   } catch (e) {
+    localStorage.removeItem(AUTH_STORAGE_KEY);
     return null;
   }
 }
@@ -109,12 +110,17 @@ function saveAuthSession(user, remember = true) {
  * Call this directly in <head> or at the top of the file!
  */
 function enforceAuth(allowedRoles = []) {
+  // Prevent executing redirect if already on login page
+  const path = window.location.pathname.toLowerCase();
+  if (path.includes('login')) {
+    return false;
+  }
+
   const session = getAuthSession();
 
   // 1. Not logged in -> Redirect to login page
   if (!session || !session.user) {
-    const currentPath = window.location.pathname.split('/').pop() || 'index.html';
-    window.location.replace(`login.html?redirect=${encodeURIComponent(currentPath)}&reason=unauthenticated`);
+    window.location.replace('login.html?reason=unauthenticated');
     return false;
   }
 

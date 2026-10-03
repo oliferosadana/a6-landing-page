@@ -123,7 +123,7 @@ function enforceAuth(allowedRoles = []) {
     const roles = Array.isArray(allowedRoles) ? allowedRoles : [allowedRoles];
     if (!roles.includes(session.user.role)) {
       alert(`⛔ Akses Ditolak: Anda tidak memiliki izin untuk membuka halaman ini.`);
-      window.location.replace('admin.html');
+      window.location.replace('index.html');
       return false;
     }
   }

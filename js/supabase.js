@@ -6,8 +6,8 @@
 const SUPABASE_CONFIG_STORAGE_KEY = 'amanda_supabase_config';
 
 // Active Supabase Cloud Project Configuration
-const DEFAULT_SUPABASE_URL = 'https://zomkdefqivvbtxqzavpz.supabase.co';
-const DEFAULT_SUPABASE_KEY = 'sb_publishable_xG2a15CPnDELITqWHdodiQ__PnNZX8-';
+const DEFAULT_SUPABASE_URL = 'https://ffzzlertrzfrpuhbspws.supabase.co';
+const DEFAULT_SUPABASE_KEY = 'sb_publishable_64yf0NZHiOLEylWhspci4A_EaOWuVyB';
 
 let supabaseConfig = {
   url: DEFAULT_SUPABASE_URL,
@@ -17,6 +17,16 @@ let supabaseConfig = {
 
 let supabaseClient = null;
 let isInitialSupabaseSyncDone = false;
+
+/**
+ * Trigger UI updates across Landing Page & CMS when Supabase data is loaded
+ */
+function notifyAmandaDataChanged() {
+  if (typeof reloadAmandaData === 'function') {
+    reloadAmandaData();
+  }
+  window.dispatchEvent(new CustomEvent('amanda_data_updated'));
+}
 
 // Initialize Supabase immediately
 (function initSupabaseModule() {
@@ -34,8 +44,12 @@ function loadSupabaseConfig() {
     const raw = localStorage.getItem(SUPABASE_CONFIG_STORAGE_KEY);
     if (raw) {
       supabaseConfig = JSON.parse(raw);
-      if (!supabaseConfig.url) supabaseConfig.url = DEFAULT_SUPABASE_URL;
-      if (!supabaseConfig.key) supabaseConfig.key = DEFAULT_SUPABASE_KEY;
+      // Migrate old/outdated project URL if detected
+      if (!supabaseConfig.url || supabaseConfig.url.includes('zomkdefqivvbtxqzavpz')) {
+        supabaseConfig.url = DEFAULT_SUPABASE_URL;
+        supabaseConfig.key = DEFAULT_SUPABASE_KEY;
+        localStorage.setItem(SUPABASE_CONFIG_STORAGE_KEY, JSON.stringify(supabaseConfig));
+      }
     } else {
       supabaseConfig = {
         url: DEFAULT_SUPABASE_URL,

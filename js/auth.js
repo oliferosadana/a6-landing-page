@@ -20,15 +20,43 @@ async function hashPassword(text) {
   }
 }
 
+const DEFAULT_AUTH_USERS = [
+  {
+    id: 'usr-admin-bpn',
+    name: 'Admin Amanda Balikpapan',
+    email: 'admin@amanda.com',
+    password: 'admin',
+    role: 'tenant_admin',
+    tenantId: 'tenant-bpn',
+    tenantName: 'Amanda Balikpapan',
+    avatar: '🍰'
+  },
+  {
+    id: 'usr-superadmin',
+    name: 'Super Admin Platform',
+    email: 'superadmin@amanda.com',
+    password: 'admin',
+    role: 'superadmin',
+    tenantId: 'all',
+    tenantName: 'Platform Central',
+    avatar: '👑'
+  }
+];
+
 /**
  * Get registered local accounts (if custom accounts were configured)
  */
 function getRegisteredUsers() {
   try {
     const raw = localStorage.getItem(AUTH_USERS_KEY);
-    return raw ? JSON.parse(raw) : [];
+    if (!raw) {
+      localStorage.setItem(AUTH_USERS_KEY, JSON.stringify(DEFAULT_AUTH_USERS));
+      return DEFAULT_AUTH_USERS;
+    }
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) && parsed.length > 0 ? parsed : DEFAULT_AUTH_USERS;
   } catch (e) {
-    return [];
+    return DEFAULT_AUTH_USERS;
   }
 }
 

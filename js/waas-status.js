@@ -99,50 +99,27 @@
           background: rgba(2, 6, 23, 0.6);
           border: 1px solid rgba(255, 255, 255, 0.08);
           border-radius: 16px;
-          margin-bottom: 24px;
           text-align: left;
           font-size: 12px;
           color: #cbd5e1;
         ">
           <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
-            <span style="color: #64748b;">Tenant:</span>
-            <strong style="color: #ffffff;">Amanda Brownies Kalimantan</strong>
+            <span style="color: #64748b;">Domain:</span>
+            <strong style="color: #ffffff;">${window.location.hostname}</strong>
           </div>
           <div style="display: flex; justify-content: space-between;">
-            <span style="color: #64748b;">Platform:</span>
-            <span style="color: #38bdf8; font-family: monospace;">BorneoLink WAAS</span>
+            <span style="color: #64748b;">Status Jaringan:</span>
+            <span style="color: #f43f5e; font-family: monospace; font-weight: 700;">SUSPENDED (INACTIVE)</span>
           </div>
         </div>
 
-        <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
-          <a href="http://localhost:5173" target="_blank" style="
-            padding: 12px 24px;
-            background: #2563eb;
-            color: #ffffff;
-            font-size: 12px;
-            font-weight: 700;
-            border-radius: 100px;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
-            transition: transform 0.15s;
-          ">
-            <i class="fa-solid fa-arrow-up-right-from-square"></i> Buka Portal Admin WAAS
-          </a>
-          <button onclick="window.location.reload()" style="
-            padding: 12px 20px;
-            background: rgba(255, 255, 255, 0.08);
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            color: #e2e8f0;
-            font-size: 12px;
-            font-weight: 700;
-            border-radius: 100px;
-            cursor: pointer;
-          ">
-            <i class="fa-solid fa-rotate-right"></i> Refresh
-          </button>
+        <div style="
+          margin-top: 24px;
+          font-size: 11px;
+          color: #64748b;
+          font-family: monospace;
+        ">
+          BorneoLink Cloud Network &bull; HTTP 503 Service Unavailable
         </div>
       </div>
     `;

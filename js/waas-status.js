@@ -4,8 +4,9 @@
  */
 
 (function initWaasStatusEnforcer() {
-  const WAAS_SUPABASE_URL = 'https://zomkdefqivvbtxqzavpz.supabase.co';
-  const WAAS_SUPABASE_KEY = 'sb_publishable_xG2a15CPnDELITqWHdodiQ__PnNZX8-';
+  const vault = typeof getSecurityVaultData === 'function' ? getSecurityVaultData() : null;
+  const WAAS_SUPABASE_URL = (vault && vault.supabaseUrl) ? vault.supabaseUrl : (typeof DEFAULT_SUPABASE_URL !== 'undefined' ? DEFAULT_SUPABASE_URL : 'https://ffzzlertrzfrpuhbspws.supabase.co');
+  const WAAS_SUPABASE_KEY = (vault && vault.supabaseAnonKey) ? vault.supabaseAnonKey : (typeof DEFAULT_SUPABASE_KEY !== 'undefined' ? DEFAULT_SUPABASE_KEY : 'sb_publishable_64yf0NZHiOLEylWhspci4A_EaOWuVyB');
   const TENANT_ID = 'tenant_amanda';
   const WEBSITE_SUBDOMAIN = 'amanda';
 

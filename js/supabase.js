@@ -4,8 +4,9 @@
  */
 
 const SUPABASE_CONFIG_STORAGE_KEY = 'amanda_supabase_config';
+const SECURITY_VAULT_STORAGE_KEY = 'amanda_security_vault';
 
-// Active Supabase Cloud Project Configuration
+// Active Supabase Cloud Project Configuration (Managed via Admin Vault)
 const DEFAULT_SUPABASE_URL = 'https://ffzzlertrzfrpuhbspws.supabase.co';
 const DEFAULT_SUPABASE_KEY = 'sb_publishable_64yf0NZHiOLEylWhspci4A_EaOWuVyB';
 
@@ -17,6 +18,92 @@ let supabaseConfig = {
 
 let supabaseClient = null;
 let isInitialSupabaseSyncDone = false;
+
+/**
+ * Get Security Vault Data
+ */
+function getSecurityVaultData() {
+  try {
+    const raw = localStorage.getItem(SECURITY_VAULT_STORAGE_KEY);
+    if (raw) {
+      return JSON.parse(raw);
+    }
+  } catch (e) {
+    console.warn('Error reading Security Vault:', e);
+  }
+  return {
+    supabaseUrl: supabaseConfig.url || DEFAULT_SUPABASE_URL,
+    supabaseAnonKey: supabaseConfig.key || DEFAULT_SUPABASE_KEY,
+    supabaseSecretKey: '',
+    cloudflareToken: '',
+    webhookSecret: '',
+    lastUpdated: null
+  };
+}
+
+/**
+ * Save Security Vault Data (Local & Cloud Sync)
+ */
+async function saveSecurityVaultData(vaultData, syncToCloud = true) {
+  try {
+    const cleanData = {
+      supabaseUrl: (vaultData.supabaseUrl || '').trim(),
+      supabaseAnonKey: (vaultData.supabaseAnonKey || '').trim(),
+      supabaseSecretKey: (vaultData.supabaseSecretKey || '').trim(),
+      cloudflareToken: (vaultData.cloudflareToken || '').trim(),
+      webhookSecret: (vaultData.webhookSecret || '').trim(),
+      lastUpdated: new Date().toISOString()
+    };
+
+    localStorage.setItem(SECURITY_VAULT_STORAGE_KEY, JSON.stringify(cleanData));
+
+    // Update active runtime configuration
+    if (cleanData.supabaseUrl && cleanData.supabaseAnonKey) {
+      saveSupabaseConfig(cleanData.supabaseUrl, cleanData.supabaseAnonKey, true);
+    }
+
+    // Sync to Supabase platform_settings table if client is connected
+    if (syncToCloud && isSupabaseActive()) {
+      await syncSettingsToSupabase('system_security_vault', {
+        supabaseUrl: cleanData.supabaseUrl,
+        hasSecretKey: Boolean(cleanData.supabaseSecretKey),
+        secretKeyMasked: cleanData.supabaseSecretKey ? (cleanData.supabaseSecretKey.substring(0, 10) + '••••••••') : 'Not Configured',
+        hasCloudflareToken: Boolean(cleanData.cloudflareToken),
+        lastUpdated: cleanData.lastUpdated
+      });
+    }
+
+    return { success: true, message: 'Vault Kunci API & Kredensial berhasil disimpan dengan aman.' };
+  } catch (err) {
+    console.error('Save vault error:', err);
+    return { success: false, message: err.message || 'Gagal menyimpan vault keamanan.' };
+  }
+}
+
+/**
+ * Sync custom setting record to Supabase platform_settings table
+ */
+async function syncSettingsToSupabase(key, value) {
+  if (!isSupabaseActive()) return false;
+  try {
+    const { error } = await supabaseClient
+      .from('platform_settings')
+      .upsert({
+        key: key,
+        value: typeof value === 'object' ? value : { value: value },
+        updated_at: new Date().toISOString()
+      }, { onConflict: 'key' });
+
+    if (error) {
+      console.warn(`Gagal sync setting [${key}] ke Cloud:`, error.message);
+      return false;
+    }
+    return true;
+  } catch (e) {
+    console.warn(`Exception sync setting [${key}]:`, e);
+    return false;
+  }
+}
 
 /**
  * Trigger UI updates across Landing Page & CMS when Supabase data is loaded
@@ -41,10 +128,19 @@ function notifyAmandaDataChanged() {
  */
 function loadSupabaseConfig() {
   try {
+    const vault = getSecurityVaultData();
+    if (vault && vault.supabaseUrl && vault.supabaseAnonKey) {
+      supabaseConfig = {
+        url: vault.supabaseUrl,
+        key: vault.supabaseAnonKey,
+        enabled: true
+      };
+      return;
+    }
+
     const raw = localStorage.getItem(SUPABASE_CONFIG_STORAGE_KEY);
     if (raw) {
       supabaseConfig = JSON.parse(raw);
-      // Migrate old/outdated project URL if detected
       if (!supabaseConfig.url || supabaseConfig.url.includes('zomkdefqivvbtxqzavpz')) {
         supabaseConfig.url = DEFAULT_SUPABASE_URL;
         supabaseConfig.key = DEFAULT_SUPABASE_KEY;

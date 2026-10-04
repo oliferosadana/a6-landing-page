@@ -20,12 +20,15 @@ async function hashPassword(text) {
   }
 }
 
+// Default accounts with SHA-256 hashed password (initial hash: 'admin')
+const DEFAULT_PASSWORD_HASH = '8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918';
+
 const DEFAULT_AUTH_USERS = [
   {
     id: 'usr-admin-bpn',
     name: 'Admin Amanda Balikpapan',
     email: 'admin@amanda.com',
-    password: 'admin',
+    passwordHash: DEFAULT_PASSWORD_HASH,
     role: 'tenant_admin',
     tenantId: 'tenant-bpn',
     tenantName: 'Amanda Balikpapan',
@@ -35,7 +38,7 @@ const DEFAULT_AUTH_USERS = [
     id: 'usr-superadmin',
     name: 'Super Admin Platform',
     email: 'superadmin@amanda.com',
-    password: 'admin',
+    passwordHash: DEFAULT_PASSWORD_HASH,
     role: 'superadmin',
     tenantId: 'all',
     tenantName: 'Platform Central',
@@ -57,6 +60,49 @@ function getRegisteredUsers() {
     return Array.isArray(parsed) && parsed.length > 0 ? parsed : DEFAULT_AUTH_USERS;
   } catch (e) {
     return DEFAULT_AUTH_USERS;
+  }
+}
+
+/**
+ * Update Admin credentials (email & password) securely
+ */
+async function updateAdminCredentials(userId, newEmail, newPassword, newName) {
+  try {
+    const users = getRegisteredUsers();
+    const userIdx = users.findIndex(u => u.id === userId || u.email === newEmail);
+    
+    let targetUser = userIdx >= 0 ? users[userIdx] : users[0];
+    if (newEmail) targetUser.email = newEmail.trim().toLowerCase();
+    if (newName) targetUser.name = newName.trim();
+    if (newPassword && newPassword.trim()) {
+      targetUser.passwordHash = await hashPassword(newPassword.trim());
+      delete targetUser.password;
+    }
+
+    if (userIdx >= 0) {
+      users[userIdx] = targetUser;
+    } else {
+      users.push(targetUser);
+    }
+
+    localStorage.setItem(AUTH_USERS_KEY, JSON.stringify(users));
+
+    // Update active session if currently logged in as this user
+    const currentSession = getAuthSession();
+    if (currentSession && currentSession.user) {
+      currentSession.user.email = targetUser.email;
+      currentSession.user.name = targetUser.name;
+      localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(currentSession));
+    }
+
+    // Sync to Supabase platform_settings if connected
+    if (typeof syncSettingsToSupabase === 'function') {
+      await syncSettingsToSupabase('admin_users', users);
+    }
+
+    return { success: true, message: 'Kredensial admin berhasil diperbarui.' };
+  } catch (err) {
+    return { success: false, message: err.message || 'Gagal memperbarui kredensial.' };
   }
 }
 

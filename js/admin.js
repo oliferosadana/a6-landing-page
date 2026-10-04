@@ -58,7 +58,8 @@ function switchTab(tabName, btnElement) {
     'outlets': 'Cabang Outlet Resmi Balikpapan',
     'outlet-categories': 'Manajemen Kategori & Wilayah Outlet',
     'ticker': 'Pengumuman Running Promo Ticker',
-    'settings': 'Cadangan, Impor & Reset Data'
+    'settings': 'Cadangan, Impor & Reset Data',
+    'security': 'Vault Kunci API & Keamanan Database'
   };
   const headingElem = document.getElementById('page-heading');
   if (headingElem) headingElem.textContent = headingMap[tabName] || 'CMS Amanda Balikpapan';
@@ -76,6 +77,7 @@ function switchTab(tabName, btnElement) {
   if (tabName === 'outlets') renderOutletsManager();
   if (tabName === 'outlet-categories') renderOutletCategoriesManager();
   if (tabName === 'ticker') renderTickerManager();
+  if (tabName === 'security') renderSecurityVault();
 }
 
 function toggleSidebar() {
@@ -1378,4 +1380,142 @@ function showCmsToast(message, title = 'Sukses') {
     }, 3500);
   }
 }
+
+// ===================================================================
+// SECURITY VAULT & API CREDENTIALS CONTROLLER
+// ===================================================================
+function renderSecurityVault() {
+  const vault = typeof getSecurityVaultData === 'function' ? getSecurityVaultData() : null;
+  if (!vault) return;
+
+  const urlInput = document.getElementById('vault-supabase-url');
+  const anonKeyInput = document.getElementById('vault-supabase-anon-key');
+  const secretKeyInput = document.getElementById('vault-supabase-secret-key');
+  const cfTokenInput = document.getElementById('vault-cf-token');
+  const webhookInput = document.getElementById('vault-webhook-secret');
+  const lastUpdatedElem = document.getElementById('vault-last-updated');
+  const statusLabel = document.getElementById('vault-status-label');
+
+  if (urlInput) urlInput.value = vault.supabaseUrl || '';
+  if (anonKeyInput) anonKeyInput.value = vault.supabaseAnonKey || '';
+  if (secretKeyInput) secretKeyInput.value = vault.supabaseSecretKey || '';
+  if (cfTokenInput) cfTokenInput.value = vault.cloudflareToken || '';
+  if (webhookInput) webhookInput.value = vault.webhookSecret || '';
+
+  if (lastUpdatedElem) {
+    lastUpdatedElem.textContent = vault.lastUpdated 
+      ? `Terakhir diperbarui: ${new Date(vault.lastUpdated).toLocaleString('id-ID')}`
+      : 'Belum pernah disinkronkan.';
+  }
+
+  if (statusLabel) {
+    const isConn = typeof isSupabaseActive === 'function' && isSupabaseActive();
+    statusLabel.textContent = isConn ? 'Tersambung Aktif' : 'Menunggu Konfigurasi';
+    statusLabel.style.color = isConn ? 'var(--accent-green)' : 'var(--accent-red)';
+  }
+
+  // Populate Admin User Form
+  const session = typeof getAuthSession === 'function' ? getAuthSession() : null;
+  const adminNameInput = document.getElementById('admin-user-name');
+  const adminEmailInput = document.getElementById('admin-user-email');
+  if (session && session.user) {
+    if (adminNameInput) adminNameInput.value = session.user.name || 'Admin Amanda Balikpapan';
+    if (adminEmailInput) adminEmailInput.value = session.user.email || 'admin@amanda.com';
+  }
+}
+
+function refreshSecurityVaultUI() {
+  renderSecurityVault();
+  showCmsToast('Data Vault Keamanan dimuat ulang.', 'Vault Refreshed');
+}
+
+function toggleVaultInputMask(inputId, btnElement) {
+  const input = document.getElementById(inputId);
+  if (!input) return;
+  if (input.type === 'password') {
+    input.type = 'text';
+    if (btnElement) btnElement.innerHTML = '<i class="fa-regular fa-eye-slash"></i>';
+  } else {
+    input.type = 'password';
+    if (btnElement) btnElement.innerHTML = '<i class="fa-regular fa-eye"></i>';
+  }
+}
+
+async function handleSaveVaultCredentials(event) {
+  event.preventDefault();
+  const btn = document.getElementById('btn-save-vault');
+  if (btn) {
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Menyimpan ke Database...';
+  }
+
+  const vaultData = {
+    supabaseUrl: document.getElementById('vault-supabase-url').value,
+    supabaseAnonKey: document.getElementById('vault-supabase-anon-key').value,
+    supabaseSecretKey: document.getElementById('vault-supabase-secret-key').value,
+    cloudflareToken: document.getElementById('vault-cf-token').value,
+    webhookSecret: document.getElementById('vault-webhook-secret').value
+  };
+
+  if (typeof saveSecurityVaultData === 'function') {
+    const res = await saveSecurityVaultData(vaultData, true);
+    if (res.success) {
+      showCmsToast('Kredensial Vault & Secret Key berhasil disimpan dan disinkronkan ke PostgreSQL!', 'Vault Tersimpan');
+    } else {
+      showCmsToast('Gagal menyimpan: ' + res.message, 'Error Vault');
+    }
+  }
+
+  if (btn) {
+    btn.disabled = false;
+    btn.innerHTML = '<i class="fa-solid fa-cloud-arrow-up"></i> Simpan Kredensial & Sinkronkan ke Database';
+  }
+  renderSecurityVault();
+}
+
+async function testCloudVaultConnection() {
+  const url = document.getElementById('vault-supabase-url').value;
+  const anonKey = document.getElementById('vault-supabase-anon-key').value;
+  const btn = document.getElementById('btn-test-vault');
+
+  if (btn) {
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Menguji...';
+  }
+
+  if (typeof testSupabaseConnection === 'function') {
+    const res = await testSupabaseConnection(url, anonKey);
+    if (res.success) {
+      showCmsToast(res.message, 'Koneksi Berhasil');
+    } else {
+      showCmsToast('Koneksi Gagal: ' + res.message, 'Uji Koneksi');
+    }
+  }
+
+  if (btn) {
+    btn.disabled = false;
+    btn.innerHTML = '<i class="fa-solid fa-bolt"></i> Uji Koneksi Database';
+  }
+  renderSecurityVault();
+}
+
+async function handleUpdateAdminCredentials(event) {
+  event.preventDefault();
+  const session = typeof getAuthSession === 'function' ? getAuthSession() : null;
+  const userId = session && session.user ? session.user.id : 'usr-admin-bpn';
+  const name = document.getElementById('admin-user-name').value;
+  const email = document.getElementById('admin-user-email').value;
+  const pass = document.getElementById('admin-user-password').value;
+
+  if (typeof updateAdminCredentials === 'function') {
+    const res = await updateAdminCredentials(userId, email, pass, name);
+    if (res.success) {
+      document.getElementById('admin-user-password').value = '';
+      showCmsToast('Kredensial Admin CMS berhasil diperbarui dengan enkripsi SHA-256!', 'Sukses');
+    } else {
+      showCmsToast('Gagal: ' + res.message, 'Error');
+    }
+  }
+}
+
 

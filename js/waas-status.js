@@ -4,24 +4,39 @@
  */
 
 (function initWaasStatusEnforcer() {
+  const DEFAULT_WAAS_SUPABASE_URL = 'https://zomkdefqivvbtxqzavpz.supabase.co';
+  const DEFAULT_WAAS_SUPABASE_KEY = 'sb_publishable_xG2a15CPnDELITqWHdodiQ__PnNZX8-';
+
   const vault = typeof getSecurityVaultData === 'function' ? getSecurityVaultData() : null;
-  const WAAS_SUPABASE_URL = (vault && vault.supabaseUrl) ? vault.supabaseUrl : (typeof DEFAULT_SUPABASE_URL !== 'undefined' ? DEFAULT_SUPABASE_URL : 'https://ffzzlertrzfrpuhbspws.supabase.co');
-  const WAAS_SUPABASE_KEY = (vault && vault.supabaseAnonKey) ? vault.supabaseAnonKey : (typeof DEFAULT_SUPABASE_KEY !== 'undefined' ? DEFAULT_SUPABASE_KEY : 'sb_publishable_64yf0NZHiOLEylWhspci4A_EaOWuVyB');
+  const WAAS_SUPABASE_URL = (vault && vault.supabaseUrl && !vault.supabaseUrl.includes('ffzzlertrzfrpuhbspws'))
+    ? vault.supabaseUrl
+    : (typeof DEFAULT_SUPABASE_URL !== 'undefined' && !DEFAULT_SUPABASE_URL.includes('ffzzlertrzfrpuhbspws')
+      ? DEFAULT_SUPABASE_URL
+      : DEFAULT_WAAS_SUPABASE_URL);
+
+  const WAAS_SUPABASE_KEY = (vault && vault.supabaseAnonKey && !vault.supabaseAnonKey.includes('64yf0NZHiOLEylWhspci4A'))
+    ? vault.supabaseAnonKey
+    : (typeof DEFAULT_SUPABASE_KEY !== 'undefined' && !DEFAULT_SUPABASE_KEY.includes('64yf0NZHiOLEylWhspci4A')
+      ? DEFAULT_SUPABASE_KEY
+      : DEFAULT_WAAS_SUPABASE_KEY);
+
   const TENANT_ID = 'tenant_amanda';
   const WEBSITE_SUBDOMAIN = 'amanda';
 
   let waasClient = null;
+  let isCurrentlySuspended = false;
 
-  function createSuspensionOverlay() {
+  function createSuspensionOverlay(reason) {
     let overlay = document.getElementById('waas-suspended-overlay');
     if (overlay) return overlay;
 
+    isCurrentlySuspended = true;
     overlay = document.createElement('div');
     overlay.id = 'waas-suspended-overlay';
     overlay.style.cssText = `
       position: fixed;
       inset: 0;
-      z-index: 999999;
+      z-index: 9999999;
       background: radial-gradient(circle at center, #0f172a, #020617);
       color: #ffffff;
       display: flex;
@@ -29,7 +44,7 @@
       justify-content: center;
       padding: 24px;
       font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
-      backdrop-filter: blur(16px);
+      backdrop-filter: blur(20px);
       animation: fadeIn 0.3s ease-out;
     `;
 
@@ -37,9 +52,9 @@
       <div style="
         max-width: 520px;
         width: 100%;
-        background: rgba(15, 23, 42, 0.85);
-        border: 1px solid rgba(244, 63, 94, 0.3);
-        box-shadow: 0 25px 50px -12px rgba(244, 63, 94, 0.15), 0 0 0 1px rgba(255, 255, 255, 0.05);
+        background: rgba(15, 23, 42, 0.9);
+        border: 1px solid rgba(244, 63, 94, 0.35);
+        box-shadow: 0 25px 50px -12px rgba(244, 63, 94, 0.25), 0 0 0 1px rgba(255, 255, 255, 0.05);
         border-radius: 28px;
         padding: 40px 32px;
         text-align: center;
@@ -92,17 +107,18 @@
           line-height: 1.6;
           margin: 0 0 24px 0;
         ">
-          Website ini sedang dinonaktifkan sementara oleh Super Admin atau masa aktif paket langganan telah berakhir.
+          ${reason || 'Website ini sedang dinonaktifkan sementara oleh Super Admin atau masa aktif paket langganan telah berakhir.'}
         </p>
 
         <div style="
           padding: 16px;
-          background: rgba(2, 6, 23, 0.6);
+          background: rgba(2, 6, 23, 0.7);
           border: 1px solid rgba(255, 255, 255, 0.08);
           border-radius: 16px;
           text-align: left;
           font-size: 12px;
           color: #cbd5e1;
+          margin-bottom: 24px;
         ">
           <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
             <span style="color: #64748b;">Domain:</span>
@@ -112,6 +128,40 @@
             <span style="color: #64748b;">Status Jaringan:</span>
             <span style="color: #f43f5e; font-family: monospace; font-weight: 700;">SUSPENDED (INACTIVE)</span>
           </div>
+        </div>
+
+        <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
+          <a href="http://localhost:5173" target="_blank" rel="noopener noreferrer" style="
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            color: #ffffff;
+            font-size: 12px;
+            font-weight: 700;
+            border-radius: 100px;
+            text-decoration: none;
+            box-shadow: 0 4px 14px rgba(37, 99, 235, 0.4);
+            transition: all 0.2s;
+          ">
+            <i class="fa-solid fa-credit-card"></i> Panel Billing & Perpanjangan
+          </a>
+          <button onclick="window.location.reload()" style="
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 18px;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: #e2e8f0;
+            font-size: 12px;
+            font-weight: 600;
+            border-radius: 100px;
+            cursor: pointer;
+          ">
+            <i class="fa-solid fa-rotate-right"></i> Cek Ulang
+          </button>
         </div>
 
         <div style="
@@ -130,6 +180,7 @@
   }
 
   function removeSuspensionOverlay() {
+    isCurrentlySuspended = false;
     const overlay = document.getElementById('waas-suspended-overlay');
     if (overlay) {
       overlay.remove();
@@ -152,49 +203,51 @@
       // 1. Fetch live status from WAAS Supabase database
       const [
         { data: tenantData },
-        { data: websiteData }
+        { data: websiteDataList },
+        { data: subData }
       ] = await Promise.all([
         waasClient.from('tenants').select('status').eq('id', TENANT_ID).maybeSingle(),
-        waasClient.from('websites').select('status').eq('subdomain', WEBSITE_SUBDOMAIN).maybeSingle()
+        waasClient.from('websites').select('status, subdomain').or(`subdomain.eq.${WEBSITE_SUBDOMAIN},tenant_id.eq.${TENANT_ID}`),
+        waasClient.from('subscriptions').select('status, current_period_end').eq('tenant_id', TENANT_ID).maybeSingle()
       ]);
 
       const isTenantSuspended = tenantData && tenantData.status === 'SUSPENDED';
-      const isWebsiteSuspended = websiteData && websiteData.status === 'SUSPENDED';
+      const isWebsiteSuspended = websiteDataList && websiteDataList.some(w => w.status === 'SUSPENDED');
+      const isSubscriptionSuspended = subData && (subData.status === 'SUSPENDED' || subData.status === 'CANCELLED');
+      const isSubscriptionExpired = subData && subData.current_period_end && (new Date(subData.current_period_end).getTime() < Date.now()) && subData.status !== 'ACTIVE';
 
-      if (isTenantSuspended || isWebsiteSuspended) {
-        console.warn('⚠️ WAAS Notice: Website is currently SUSPENDED by Super Admin.');
-        createSuspensionOverlay();
+      if (isTenantSuspended || isWebsiteSuspended || isSubscriptionSuspended || isSubscriptionExpired) {
+        let reason = 'Website ini sedang dinonaktifkan sementara oleh Super Admin atau masa aktif paket langganan telah berakhir.';
+        if (isTenantSuspended) {
+          reason = 'Tenant organisasi dinonaktifkan oleh administrator platform BorneoLink WAAS.';
+        } else if (isWebsiteSuspended) {
+          reason = 'Website engine dinonaktifkan oleh administrator platform BorneoLink WAAS.';
+        } else if (isSubscriptionSuspended || isSubscriptionExpired) {
+          reason = 'Masa sewa langganan telah habis atau ditangguhkan. Silakan perpanjang sewa melalui dashboard customer.';
+        }
+        createSuspensionOverlay(reason);
       } else {
         removeSuspensionOverlay();
       }
 
-      // 2. Listen to Realtime changes so it immediately reflects when Super Admin toggles
-      waasClient
-        .channel('waas-live-status-enforcer')
-        .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'websites' }, (payload) => {
-          if (payload.new && payload.new.subdomain === WEBSITE_SUBDOMAIN) {
-            if (payload.new.status === 'SUSPENDED') {
-              createSuspensionOverlay();
-            } else {
-              removeSuspensionOverlay();
-            }
-          }
-        })
-        .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'tenants' }, (payload) => {
-          if (payload.new && payload.new.id === TENANT_ID) {
-            if (payload.new.status === 'SUSPENDED') {
-              createSuspensionOverlay();
-            } else {
-              removeSuspensionOverlay();
-            }
-          }
-        })
-        .subscribe();
+      // 2. Setup Realtime subscription if not already subscribed
+      if (!waasClient._hasStatusChannel) {
+        waasClient._hasStatusChannel = true;
+        waasClient
+          .channel('waas-live-status-enforcer')
+          .on('postgres_changes', { event: '*', schema: 'public', table: 'websites' }, () => checkWaasStatus())
+          .on('postgres_changes', { event: '*', schema: 'public', table: 'tenants' }, () => checkWaasStatus())
+          .on('postgres_changes', { event: '*', schema: 'public', table: 'subscriptions' }, () => checkWaasStatus())
+          .subscribe();
+      }
 
     } catch (err) {
       console.warn('WAAS status check error:', err);
     }
   }
+
+  // Fallback Polling every 10 seconds to catch state changes immediately
+  setInterval(checkWaasStatus, 10000);
 
   // Run check on DOM loaded
   if (document.readyState === 'loading') {

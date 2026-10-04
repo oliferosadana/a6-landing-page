@@ -119,7 +119,6 @@
           text-align: left;
           font-size: 12px;
           color: #cbd5e1;
-          margin-bottom: 22px;
         ">
           <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
             <span style="color: #64748b;">Domain</span>
@@ -129,40 +128,6 @@
             <span style="color: #64748b;">Status Jaringan</span>
             <span style="color: #f43f5e; font-weight: 700;">SUSPENDED</span>
           </div>
-        </div>
-
-        <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
-          <a href="http://localhost:5173" target="_blank" rel="noopener noreferrer" style="
-            display: inline-flex;
-            align-items: center;
-            gap: 7px;
-            padding: 9px 18px;
-            background: #2563eb;
-            color: #ffffff;
-            font-size: 12px;
-            font-weight: 600;
-            border-radius: 10px;
-            text-decoration: none;
-            transition: background 0.15s;
-          ">
-            <i class="fa-solid fa-credit-card"></i> Panel Billing & Perpanjangan
-          </a>
-          <button onclick="window.location.reload()" style="
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            padding: 9px 16px;
-            background: rgba(255, 255, 255, 0.06);
-            border: 1px solid rgba(255, 255, 255, 0.12);
-            color: #e2e8f0;
-            font-size: 12px;
-            font-weight: 600;
-            border-radius: 10px;
-            cursor: pointer;
-            transition: background 0.15s;
-          ">
-            <i class="fa-solid fa-rotate-right"></i> Cek Ulang
-          </button>
         </div>
 
         <div style="

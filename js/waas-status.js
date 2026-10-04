@@ -37,54 +37,55 @@
       position: fixed;
       inset: 0;
       z-index: 9999999;
-      background: radial-gradient(circle at center, #0f172a, #020617);
-      color: #ffffff;
+      background: rgba(15, 23, 42, 0.5);
+      color: #f8fafc;
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 24px;
-      font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
-      backdrop-filter: blur(20px);
-      animation: fadeIn 0.3s ease-out;
+      padding: 20px;
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      animation: fadeIn 0.25s ease-out;
     `;
 
     overlay.innerHTML = `
       <div style="
-        max-width: 520px;
+        max-width: 460px;
         width: 100%;
-        background: rgba(15, 23, 42, 0.9);
-        border: 1px solid rgba(244, 63, 94, 0.35);
-        box-shadow: 0 25px 50px -12px rgba(244, 63, 94, 0.25), 0 0 0 1px rgba(255, 255, 255, 0.05);
-        border-radius: 28px;
-        padding: 40px 32px;
+        background: rgba(15, 23, 42, 0.85);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.6);
+        border-radius: 20px;
+        padding: 32px 28px;
         text-align: center;
       ">
         <div style="
-          width: 72px;
-          height: 72px;
-          margin: 0 auto 20px auto;
-          background: rgba(244, 63, 94, 0.12);
-          border: 1px solid rgba(244, 63, 94, 0.3);
-          border-radius: 20px;
+          width: 52px;
+          height: 52px;
+          margin: 0 auto 16px auto;
+          background: rgba(244, 63, 94, 0.1);
+          border: 1px solid rgba(244, 63, 94, 0.25);
+          border-radius: 14px;
           display: flex;
           align-items: center;
           justify-content: center;
           color: #f43f5e;
-          font-size: 32px;
+          font-size: 22px;
         ">
           <i class="fa-solid fa-triangle-exclamation"></i>
         </div>
 
         <div style="
           display: inline-block;
-          padding: 4px 14px;
-          background: rgba(244, 63, 94, 0.15);
-          border: 1px solid rgba(244, 63, 94, 0.4);
+          padding: 3px 12px;
+          background: rgba(244, 63, 94, 0.12);
+          border: 1px solid rgba(244, 63, 94, 0.3);
           border-radius: 100px;
           color: #fda4af;
           font-size: 11px;
-          font-weight: 800;
-          letter-spacing: 0.08em;
+          font-weight: 700;
+          letter-spacing: 0.05em;
           text-transform: uppercase;
           margin-bottom: 12px;
         ">
@@ -92,10 +93,10 @@
         </div>
 
         <h2 style="
-          font-size: 24px;
-          font-weight: 800;
+          font-size: 20px;
+          font-weight: 700;
           color: #ffffff;
-          margin: 0 0 10px 0;
+          margin: 0 0 8px 0;
           letter-spacing: -0.02em;
         ">
           Layanan Website Ditangguhkan
@@ -104,29 +105,29 @@
         <p style="
           font-size: 13px;
           color: #94a3b8;
-          line-height: 1.6;
-          margin: 0 0 24px 0;
+          line-height: 1.55;
+          margin: 0 0 20px 0;
         ">
-          ${reason || 'Website ini sedang dinonaktifkan sementara oleh Super Admin atau masa aktif paket langganan telah berakhir.'}
+          ${reason || 'Website ini sedang dinonaktifkan sementara oleh administrator atau masa aktif paket langganan telah berakhir.'}
         </p>
 
         <div style="
-          padding: 16px;
-          background: rgba(2, 6, 23, 0.7);
-          border: 1px solid rgba(255, 255, 255, 0.08);
-          border-radius: 16px;
+          padding: 12px 16px;
+          background: rgba(2, 6, 23, 0.5);
+          border: 1px solid rgba(255, 255, 255, 0.07);
+          border-radius: 12px;
           text-align: left;
           font-size: 12px;
           color: #cbd5e1;
-          margin-bottom: 24px;
+          margin-bottom: 22px;
         ">
-          <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
-            <span style="color: #64748b;">Domain:</span>
-            <strong style="color: #ffffff;">${window.location.hostname}</strong>
+          <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+            <span style="color: #64748b;">Domain</span>
+            <strong style="color: #ffffff; font-weight: 600;">${window.location.hostname}</strong>
           </div>
           <div style="display: flex; justify-content: space-between;">
-            <span style="color: #64748b;">Status Jaringan:</span>
-            <span style="color: #f43f5e; font-family: monospace; font-weight: 700;">SUSPENDED (INACTIVE)</span>
+            <span style="color: #64748b;">Status Jaringan</span>
+            <span style="color: #f43f5e; font-weight: 700;">SUSPENDED</span>
           </div>
         </div>
 
@@ -134,43 +135,42 @@
           <a href="http://localhost:5173" target="_blank" rel="noopener noreferrer" style="
             display: inline-flex;
             align-items: center;
-            gap: 8px;
-            padding: 10px 20px;
-            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            gap: 7px;
+            padding: 9px 18px;
+            background: #2563eb;
             color: #ffffff;
             font-size: 12px;
-            font-weight: 700;
-            border-radius: 100px;
+            font-weight: 600;
+            border-radius: 10px;
             text-decoration: none;
-            box-shadow: 0 4px 14px rgba(37, 99, 235, 0.4);
-            transition: all 0.2s;
+            transition: background 0.15s;
           ">
             <i class="fa-solid fa-credit-card"></i> Panel Billing & Perpanjangan
           </a>
           <button onclick="window.location.reload()" style="
             display: inline-flex;
             align-items: center;
-            gap: 8px;
-            padding: 10px 18px;
-            background: rgba(255, 255, 255, 0.08);
-            border: 1px solid rgba(255, 255, 255, 0.15);
+            gap: 6px;
+            padding: 9px 16px;
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.12);
             color: #e2e8f0;
             font-size: 12px;
             font-weight: 600;
-            border-radius: 100px;
+            border-radius: 10px;
             cursor: pointer;
+            transition: background 0.15s;
           ">
             <i class="fa-solid fa-rotate-right"></i> Cek Ulang
           </button>
         </div>
 
         <div style="
-          margin-top: 24px;
+          margin-top: 20px;
           font-size: 11px;
           color: #64748b;
-          font-family: monospace;
         ">
-          BorneoLink Cloud Network &bull; HTTP 503 Service Unavailable
+          BorneoLink Cloud Network
         </div>
       </div>
     `;

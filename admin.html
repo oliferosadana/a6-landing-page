@@ -568,7 +568,7 @@
                     </div>
                   </div>
 
-                  <div class="form-grid-2" style="margin-bottom: 20px;">
+                  <div class="form-grid-2" style="margin-bottom: 24px;">
                     <div class="form-group">
                       <label>Cloudflare Pages Deploy Hook / Token (Opsional)</label>
                       <input type="password" id="vault-cf-token" placeholder="Bearer / Hook Token Cloudflare">
@@ -576,6 +576,43 @@
                     <div class="form-group">
                       <label>Webhook Signature Secret (Opsional)</label>
                       <input type="password" id="vault-webhook-secret" placeholder="whsec_...">
+                    </div>
+                  </div>
+
+                  <!-- BorneoLink WAAS Master Platform Integration -->
+                  <div style="border-top: 1px solid var(--ch-sand-border); padding-top: 22px; margin-bottom: 20px;">
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+                      <div>
+                        <h4 style="font-size: 14.5px; font-weight: 700; color: var(--text-main); margin-bottom: 2px;">
+                          <i class="fa-solid fa-network-wired" style="color: var(--primary-olive);"></i> Integrasi Jaringan Platform BorneoLink WAAS
+                        </h4>
+                        <p style="font-size: 12px; color: var(--text-muted);">
+                          Koneksi ke Database Master WAAS untuk validasi status langganan & penegakan suspensi website saat jatuh tempo. (Opsional, sudah memiliki nilai default resmi).
+                        </p>
+                      </div>
+                      <span class="badge-pill gold" style="font-size: 10px;">Master Network</span>
+                    </div>
+
+                    <div class="form-grid-2" style="margin-bottom: 16px;">
+                      <div class="form-group">
+                        <label>WAAS Supabase URL</label>
+                        <input type="url" id="vault-waas-url" placeholder="https://zomkdefqivvbtxqzavpz.supabase.co">
+                      </div>
+                      <div class="form-group">
+                        <label>WAAS Publishable Key</label>
+                        <input type="password" id="vault-waas-key" placeholder="sb_publishable_xG2a15CPnDELITqWHdodiQ__PnNZX8-">
+                      </div>
+                    </div>
+
+                    <div class="form-grid-2">
+                      <div class="form-group">
+                        <label>Tenant ID Platform</label>
+                        <input type="text" id="vault-waas-tenant-id" placeholder="tenant_amanda">
+                      </div>
+                      <div class="form-group">
+                        <label>Subdomain Website</label>
+                        <input type="text" id="vault-waas-subdomain" placeholder="amanda">
+                      </div>
                     </div>
                   </div>
 

@@ -376,22 +376,11 @@ async function pullAllDataFromSupabase() {
       saveStoredData('amanda_ticker', AMANDA_TICKER, false);
     }
 
-    // 5. Fetch Websites & Tenants & Check WAAS Suspension Status
-    const [{ data: dbTenants, error: errTen }, { data: dbWebsites }] = await Promise.all([
-      supabaseClient.from('tenants').select('*').order('created_at', { ascending: false }),
-      supabaseClient.from('websites').select('*')
-    ]);
-
-    let isAnySuspended = false;
-    let tenantDisplayName = 'Amanda Brownies Kalimantan';
-
-    if (dbWebsites && dbWebsites.length > 0) {
-      const amandaSite = dbWebsites.find(w => w.tenant_id === 'tenant_amanda' || w.id === 'site_amanda') || dbWebsites[0];
-      if (amandaSite && (amandaSite.status === 'SUSPENDED' || amandaSite.status === 'suspended')) {
-        isAnySuspended = true;
-        tenantDisplayName = amandaSite.name || tenantDisplayName;
-      }
-    }
+    // 5. Fetch Tenants (Internal CMS Multi-Tenant)
+    const { data: dbTenants, error: errTen } = await supabaseClient
+      .from('tenants')
+      .select('*')
+      .order('created_at', { ascending: false });
 
     if (!errTen && dbTenants && dbTenants.length > 0) {
       const tenants = dbTenants.map(tn => ({
@@ -412,14 +401,6 @@ async function pullAllDataFromSupabase() {
         notes: tn.notes || ''
       }));
       saveTenants(tenants, false);
-
-      const amandaTenant = tenants.find(t => t.id === 'tenant_amanda') || tenants[0];
-      if (amandaTenant) {
-        tenantDisplayName = amandaTenant.name || tenantDisplayName;
-        if (amandaTenant.status === 'SUSPENDED' || amandaTenant.status === 'suspended') {
-          isAnySuspended = true;
-        }
-      }
     }
 
     // 6. Fetch Invoices

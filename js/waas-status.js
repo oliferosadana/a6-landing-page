@@ -1,29 +1,65 @@
 /**
- * BORNEOLINK WAAS - TENANT SUSPENSION CHECKER & REALTIME STATUS ENFORCER
- * Ensures the website respects the WAAS platform Active/Suspended status in real-time.
+ * BORNEOLINK WAAS - DEDICATED TENANT SUSPENSION ENFORCER
+ * Independent client connecting to Master WAAS Database (https://zomkdefqivvbtxqzavpz.supabase.co).
+ * Handles multi-table subscription lifecycle monitoring and realtime suspension overlay.
  */
 
 (function initWaasStatusEnforcer() {
-  const vault = typeof getSecurityVaultData === 'function' ? getSecurityVaultData() : null;
-  const WAAS_SUPABASE_URL = (vault && vault.supabaseUrl) 
-    ? vault.supabaseUrl 
-    : (typeof DEFAULT_SUPABASE_URL !== 'undefined' ? DEFAULT_SUPABASE_URL : 'https://ffzzlertrzfrpuhbspws.supabase.co');
+  const WAAS_CONFIG_KEY = 'amanda_waas_config';
 
-  const WAAS_SUPABASE_KEY = (vault && vault.supabaseAnonKey) 
-    ? vault.supabaseAnonKey 
-    : (typeof DEFAULT_SUPABASE_KEY !== 'undefined' ? DEFAULT_SUPABASE_KEY : 'sb_publishable_64yf0NZHiOLEylWhspci4A_EaOWuVyB');
+  const DEFAULT_WAAS_CONFIG = {
+    waasUrl: 'https://zomkdefqivvbtxqzavpz.supabase.co',
+    waasKey: 'sb_publishable_xG2a15CPnDELITqWHdodiQ__PnNZX8-',
+    tenantId: 'tenant_amanda',
+    subdomain: 'amanda'
+  };
 
-  const TENANT_ID = 'tenant_amanda';
-  const WEBSITE_SUBDOMAIN = 'amanda';
+  function getWaasConfig() {
+    try {
+      const raw = localStorage.getItem(WAAS_CONFIG_KEY);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        return {
+          waasUrl: (parsed.waasUrl || '').trim() || DEFAULT_WAAS_CONFIG.waasUrl,
+          waasKey: (parsed.waasKey || '').trim() || DEFAULT_WAAS_CONFIG.waasKey,
+          tenantId: (parsed.tenantId || '').trim() || DEFAULT_WAAS_CONFIG.tenantId,
+          subdomain: (parsed.subdomain || '').trim() || DEFAULT_WAAS_CONFIG.subdomain
+        };
+      }
+    } catch (e) {
+      console.warn('Gagal membaca amanda_waas_config:', e);
+    }
+    return DEFAULT_WAAS_CONFIG;
+  }
 
   let waasClient = null;
-  let isCurrentlySuspended = false;
+  let activeChannel = null;
+
+  function getWaasClient() {
+    if (typeof supabase === 'undefined' || !supabase.createClient) return null;
+    const config = getWaasConfig();
+
+    if (!waasClient || waasClient._currentUrl !== config.waasUrl || waasClient._currentKey !== config.waasKey) {
+      try {
+        if (activeChannel && waasClient) {
+          waasClient.removeChannel(activeChannel);
+          activeChannel = null;
+        }
+        waasClient = supabase.createClient(config.waasUrl, config.waasKey);
+        waasClient._currentUrl = config.waasUrl;
+        waasClient._currentKey = config.waasKey;
+      } catch (e) {
+        console.warn('WAAS client initialization error:', e);
+        waasClient = null;
+      }
+    }
+    return waasClient;
+  }
 
   function createSuspensionOverlay(reason) {
     let overlay = document.getElementById('waas-suspended-overlay');
     if (overlay) return overlay;
 
-    isCurrentlySuspended = true;
     overlay = document.createElement('div');
     overlay.id = 'waas-suspended-overlay';
     overlay.style.cssText = `
@@ -138,7 +174,6 @@
   }
 
   function removeSuspensionOverlay() {
-    isCurrentlySuspended = false;
     const overlay = document.getElementById('waas-suspended-overlay');
     if (overlay) {
       overlay.remove();
@@ -146,71 +181,69 @@
   }
 
   async function checkWaasStatus() {
-    if (typeof supabase === 'undefined' || !supabase.createClient) return;
-
-    if (!waasClient) {
-      try {
-        waasClient = supabase.createClient(WAAS_SUPABASE_URL, WAAS_SUPABASE_KEY);
-      } catch (e) {
-        console.warn('WAAS client init error:', e);
-        return;
-      }
-    }
+    const client = getWaasClient();
+    if (!client) return;
+    const config = getWaasConfig();
 
     try {
-      // 1. Fetch live status from WAAS Supabase database
+      // Fetch live status from Master WAAS database
       const [
         { data: tenantData },
         { data: websiteDataList },
         { data: subData }
       ] = await Promise.all([
-        waasClient.from('tenants').select('status').eq('id', TENANT_ID).maybeSingle(),
-        waasClient.from('websites').select('status, subdomain').or(`subdomain.eq.${WEBSITE_SUBDOMAIN},tenant_id.eq.${TENANT_ID}`),
-        waasClient.from('subscriptions').select('status, current_period_end').eq('tenant_id', TENANT_ID).maybeSingle()
+        client.from('tenants').select('status').eq('id', config.tenantId).maybeSingle(),
+        client.from('websites').select('status, subdomain').or(`subdomain.eq.${config.subdomain},tenant_id.eq.${config.tenantId}`),
+        client.from('subscriptions').select('status, current_period_end').eq('tenant_id', config.tenantId).maybeSingle()
       ]);
 
-      const isTenantSuspended = tenantData && tenantData.status === 'SUSPENDED';
-      const isWebsiteSuspended = websiteDataList && websiteDataList.some(w => w.status === 'SUSPENDED');
-      const isSubscriptionSuspended = subData && (subData.status === 'SUSPENDED' || subData.status === 'CANCELLED');
-      const isSubscriptionExpired = subData && subData.current_period_end && (new Date(subData.current_period_end).getTime() < Date.now()) && subData.status !== 'ACTIVE';
+      const isTenantSuspended = tenantData && (tenantData.status === 'SUSPENDED' || tenantData.status === 'suspended');
+      const isWebsiteSuspended = websiteDataList && websiteDataList.some(w => w.status === 'SUSPENDED' || w.status === 'suspended');
+      const isSubscriptionSuspended = subData && (subData.status === 'SUSPENDED' || subData.status === 'suspended' || subData.status === 'CANCELLED');
+      const isSubscriptionExpired = subData && subData.current_period_end && (new Date(subData.current_period_end).getTime() < Date.now()) && subData.status !== 'ACTIVE' && subData.status !== 'active';
 
       if (isTenantSuspended || isWebsiteSuspended || isSubscriptionSuspended || isSubscriptionExpired) {
-        let reason = 'Website ini sedang dinonaktifkan sementara oleh Super Admin atau masa aktif paket langganan telah berakhir.';
+        let reason = 'Website ini sedang dinonaktifkan sementara oleh administrator atau masa aktif paket langganan telah berakhir.';
         if (isTenantSuspended) {
           reason = 'Tenant organisasi dinonaktifkan oleh administrator platform BorneoLink WAAS.';
         } else if (isWebsiteSuspended) {
           reason = 'Website engine dinonaktifkan oleh administrator platform BorneoLink WAAS.';
         } else if (isSubscriptionSuspended || isSubscriptionExpired) {
-          reason = 'Masa sewa langganan telah habis atau ditangguhkan. Silakan perpanjang sewa melalui dashboard customer.';
+          reason = 'Masa sewa langganan telah habis atau ditangguhkan. Silakan lakukan perpanjangan sewa pada dashboard platform.';
         }
         createSuspensionOverlay(reason);
       } else {
         removeSuspensionOverlay();
       }
 
-      // 2. Setup Realtime subscription if not already subscribed
-      if (!waasClient._hasStatusChannel) {
-        waasClient._hasStatusChannel = true;
-        waasClient
+      // Attach Realtime listener
+      if (!activeChannel) {
+        activeChannel = client
           .channel('waas-live-status-enforcer')
           .on('postgres_changes', { event: '*', schema: 'public', table: 'websites' }, () => checkWaasStatus())
           .on('postgres_changes', { event: '*', schema: 'public', table: 'tenants' }, () => checkWaasStatus())
           .on('postgres_changes', { event: '*', schema: 'public', table: 'subscriptions' }, () => checkWaasStatus())
           .subscribe();
       }
-
     } catch (err) {
       console.warn('WAAS status check error:', err);
     }
   }
 
-  // Fallback Polling every 10 seconds to catch state changes immediately
+  // Fallback Polling every 10 seconds
   setInterval(checkWaasStatus, 10000);
 
-  // Run check on DOM loaded
+  // Global trigger for CMS updates
+  window.refreshWaasStatusEnforcer = function() {
+    waasClient = null;
+    checkWaasStatus();
+  };
+
+  // Run on load
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', checkWaasStatus);
   } else {
     checkWaasStatus();
   }
 })();
+

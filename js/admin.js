@@ -1402,6 +1402,31 @@ function renderSecurityVault() {
   if (cfTokenInput) cfTokenInput.value = vault.cloudflareToken || '';
   if (webhookInput) webhookInput.value = vault.webhookSecret || '';
 
+  // Load WAAS Master Platform Config
+  const waasRaw = localStorage.getItem('amanda_waas_config');
+  let waasConfig = {
+    waasUrl: 'https://zomkdefqivvbtxqzavpz.supabase.co',
+    waasKey: 'sb_publishable_xG2a15CPnDELITqWHdodiQ__PnNZX8-',
+    tenantId: 'tenant_amanda',
+    subdomain: 'amanda'
+  };
+  if (waasRaw) {
+    try {
+      const parsed = JSON.parse(waasRaw);
+      waasConfig = Object.assign(waasConfig, parsed);
+    } catch (e) {}
+  }
+
+  const waasUrlInput = document.getElementById('vault-waas-url');
+  const waasKeyInput = document.getElementById('vault-waas-key');
+  const waasTenantInput = document.getElementById('vault-waas-tenant-id');
+  const waasSubdomainInput = document.getElementById('vault-waas-subdomain');
+
+  if (waasUrlInput) waasUrlInput.value = waasConfig.waasUrl || '';
+  if (waasKeyInput) waasKeyInput.value = waasConfig.waasKey || '';
+  if (waasTenantInput) waasTenantInput.value = waasConfig.tenantId || '';
+  if (waasSubdomainInput) waasSubdomainInput.value = waasConfig.subdomain || '';
+
   if (lastUpdatedElem) {
     lastUpdatedElem.textContent = vault.lastUpdated 
       ? `Terakhir diperbarui: ${new Date(vault.lastUpdated).toLocaleString('id-ID')}`
@@ -1457,10 +1482,23 @@ async function handleSaveVaultCredentials(event) {
     webhookSecret: document.getElementById('vault-webhook-secret').value
   };
 
+  const waasConfigData = {
+    waasUrl: (document.getElementById('vault-waas-url')?.value || '').trim() || 'https://zomkdefqivvbtxqzavpz.supabase.co',
+    waasKey: (document.getElementById('vault-waas-key')?.value || '').trim() || 'sb_publishable_xG2a15CPnDELITqWHdodiQ__PnNZX8-',
+    tenantId: (document.getElementById('vault-waas-tenant-id')?.value || '').trim() || 'tenant_amanda',
+    subdomain: (document.getElementById('vault-waas-subdomain')?.value || '').trim() || 'amanda'
+  };
+
+  localStorage.setItem('amanda_waas_config', JSON.stringify(waasConfigData));
+
+  if (typeof window.refreshWaasStatusEnforcer === 'function') {
+    window.refreshWaasStatusEnforcer();
+  }
+
   if (typeof saveSecurityVaultData === 'function') {
     const res = await saveSecurityVaultData(vaultData, true);
     if (res.success) {
-      showCmsToast('Kredensial Vault & Secret Key berhasil disimpan dan disinkronkan ke PostgreSQL!', 'Vault Tersimpan');
+      showCmsToast('Kredensial Vault & Integrasi WAAS berhasil disimpan!', 'Vault Tersimpan');
     } else {
       showCmsToast('Gagal menyimpan: ' + res.message, 'Error Vault');
     }

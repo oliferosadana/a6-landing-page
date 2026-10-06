@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pusat Layanan Pelanggan & Pengaduan | Amanda Brownies Balikpapan</title>
+  <meta name="description"
+    content="Formulir Layanan Pelanggan Resmi Amanda Brownies Balikpapan. Sampaikan pesanan katering jumlah besar, pertanyaan stok, atau komplain dengan lampiran foto struk.">
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;0,800;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+    rel="stylesheet">
+
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+  <!-- Stylesheet -->
+  <link rel="stylesheet" href="css/style.css?v=3.1">
+
+  <style>
+    /* CS Page Custom Clean Layout */
+    .cs-page-body {
+      background-color: var(--bg-main);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .cs-navbar {
+      background: rgba(255, 255, 255, 0.92);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border-sand-light);
+      padding: 14px 0;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .cs-nav-container {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .cs-hero-section {
+      padding: 44px 20px 24px 20px;
+      text-align: center;
+      max-width: 760px;
+      margin: 0 auto;
+    }
+
+    .cs-badge-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 16px;
+      border-radius: var(--radius-pill);
+      background: var(--primary-olive-muted);
+      color: var(--primary-olive-dark);
+      font-size: 12.5px;
+      font-weight: 700;
+      margin-bottom: 16px;
+      border: 1px solid rgba(79, 91, 42, 0.2);
+    }
+
+    .cs-hero-title {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: clamp(26px, 4vw, 36px);
+      font-weight: 700;
+      color: var(--primary-olive-dark);
+      line-height: 1.25;
+      margin-bottom: 12px;
+    }
+
+    .cs-hero-desc {
+      font-size: 15px;
+      color: var(--text-muted);
+      line-height: 1.6;
+      margin-bottom: 24px;
+    }
+
+    .cs-trust-grid {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 16px;
+      margin-bottom: 32px;
+    }
+
+    .cs-trust-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: #ffffff;
+      padding: 8px 16px;
+      border-radius: var(--radius-pill);
+      border: 1px solid var(--border-sand-light);
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-main);
+      box-shadow: 0 2px 6px rgba(35, 27, 20, 0.04);
+    }
+
+    .cs-form-wrapper {
+      max-width: 760px;
+      width: 100%;
+      margin: 0 auto 60px auto;
+      padding: 0 20px;
+    }
+
+    .cs-form-card {
+      background: #ffffff;
+      border-radius: 20px;
+      border: 1px solid var(--border-sand);
+      box-shadow: var(--shadow-card);
+      padding: 36px 32px;
+    }
+
+    @media (max-width: 600px) {
+      .cs-form-card {
+        padding: 24px 18px;
+        border-radius: 16px;
+      }
+    }
+
+    .form-group-cs {
+      margin-bottom: 20px;
+    }
+
+    .form-group-cs label {
+      display: block;
+      font-size: 13.5px;
+      font-weight: 700;
+      color: var(--text-main);
+      margin-bottom: 8px;
+    }
+
+    .form-group-cs .label-sub {
+      font-size: 11.5px;
+      font-weight: 500;
+      color: var(--text-dim);
+      margin-left: 4px;
+    }
+
+    .cs-input,
+    .cs-select,
+    .cs-textarea {
+      width: 100%;
+      padding: 13px 16px;
+      border: 1.5px solid var(--border-sand);
+      border-radius: var(--radius-md);
+      font-size: 14px;
+      color: var(--text-main);
+      background-color: #ffffff;
+      transition: all var(--transition-fast);
+      outline: none;
+      font-family: inherit;
+    }
+
+    .cs-input:focus,
+    .cs-select:focus,
+    .cs-textarea:focus {
+      border-color: var(--primary-olive);
+      box-shadow: 0 0 0 3px var(--primary-olive-muted);
+    }
+
+    .cs-upload-zone {
+      border: 2px dashed var(--border-sand-strong);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      text-align: center;
+      background: var(--bg-surface-elevated);
+      cursor: pointer;
+      transition: all var(--transition-fast);
+      position: relative;
+    }
+
+    .cs-upload-zone:hover,
+    .cs-upload-zone.dragover {
+      border-color: var(--primary-olive);
+      background: var(--primary-olive-muted);
+    }
+
+    .cs-upload-icon {
+      font-size: 32px;
+      color: var(--primary-olive);
+      margin-bottom: 8px;
+    }
+
+    .cs-preview-wrap {
+      display: none;
+      margin-top: 14px;
+      position: relative;
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid var(--border-sand);
+      max-width: 220px;
+    }
+
+    .cs-preview-img {
+      width: 100%;
+      max-height: 240px;
+      object-fit: cover;
+      display: block;
+    }
+
+    .btn-remove-preview {
+      position: absolute;
+      top: 6px;
+      right: 6px;
+      background: rgba(192, 57, 43, 0.9);
+      color: #fff;
+      border: none;
+      border-radius: 50%;
+      width: 28px;
+      height: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 12px;
+    }
+
+    .cs-rating-picker {
+      display: flex;
+      gap: 12px;
+      margin-top: 6px;
+    }
+
+    .cs-rating-star {
+      font-size: 24px;
+      color: #d1c7b7;
+      cursor: pointer;
+      transition: color var(--transition-fast);
+    }
+
+    .cs-rating-star.active,
+    .cs-rating-star:hover,
+    .cs-rating-star.hovered {
+      color: var(--primary-gold);
+    }
+
+    .btn-submit-cs {
+      width: 100%;
+      padding: 15px 24px;
+      background: var(--primary-olive);
+      color: #ffffff;
+      border: none;
+      border-radius: var(--radius-pill);
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all var(--transition-normal);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      box-shadow: 0 4px 14px rgba(79, 91, 42, 0.28);
+    }
+
+    .btn-submit-cs:hover {
+      background: var(--primary-olive-dark);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(79, 91, 42, 0.35);
+    }
+
+    .btn-submit-cs:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    /* Modal Success */
+    .cs-modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(35, 27, 20, 0.65);
+      backdrop-filter: blur(8px);
+      z-index: 1000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      animation: fadeIn 0.2s ease-out;
+    }
+
+    .cs-modal-overlay.active {
+      display: flex;
+    }
+
+    .cs-modal-box {
+      background: #ffffff;
+      max-width: 480px;
+      width: 100%;
+      border-radius: 24px;
+      padding: 36px 28px;
+      text-align: center;
+      border: 1px solid var(--border-sand);
+      box-shadow: 0 20px 45px rgba(35, 27, 20, 0.25);
+    }
+
+    .cs-success-icon {
+      width: 64px;
+      height: 64px;
+      background: rgba(37, 211, 102, 0.15);
+      color: #25d366;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      margin: 0 auto 18px auto;
+    }
+  </style>
+</head>
+
+<body class="cs-page-body">
+
+  <!-- ==================== NAVIGATION ==================== -->
+  <header class="cs-navbar">
+    <div class="cs-nav-container">
+      <a href="index.html" class="brand-logo" style="text-decoration: none; display: flex; align-items: center; gap: 10px;">
+        <img src="assets/logo.png" alt="Amanda Brownies Official Logo" style="height: 38px; width: auto; object-fit: contain;">
+        <div class="brand-text">
+          <h1 style="font-size: 15px; margin: 0; color: var(--primary-olive-dark); font-weight: 800;">AMANDA</h1>
+          <span style="font-size: 8.5px; color: var(--primary-gold); font-weight: 700; letter-spacing: 0.05em;">LAYANAN PELANGGAN</span>
+        </div>
+      </a>
+
+      <div style="display: flex; align-items: center; gap: 12px;">
+        <a href="index.html" class="btn-secondary" style="padding: 8px 16px; font-size: 13px; text-decoration: none; border-radius: var(--radius-pill);">
+          <i class="fa-solid fa-arrow-left"></i> Kembali ke Menu
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- ==================== HERO HEADER ==================== -->
+  <section class="cs-hero-section">
+    <div class="cs-badge-pill">
+      <i class="fa-solid fa-headset"></i> Layanan Resmi Pelanggan Amanda Balikpapan
+    </div>
+    <h1 class="cs-hero-title">Pusat Bantuan & Pengaduan Pelanggan</h1>
+    <p class="cs-hero-desc">
+      Kami siap membantu pemesanan katering jumlah besar, pertanyaan ketersediaan varian produk, serta melayani masukan & keluhan kualitas dengan bukti struk.
+    </p>
+
+    <div class="cs-trust-grid">
+      <div class="cs-trust-item">
+        <i class="fa-solid fa-bolt" style="color: var(--primary-gold);"></i> Respon WhatsApp Cepat
+      </div>
+      <div class="cs-trust-item">
+        <i class="fa-solid fa-store" style="color: var(--primary-olive);"></i> Terhubung ke 6 Outlet Balikpapan
+      </div>
+      <div class="cs-trust-item">
+        <i class="fa-solid fa-shield-check" style="color: var(--accent-green);"></i> Garansi Kualitas & Rasa
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== CS INQUIRY FORM ==================== -->
+  <main class="cs-form-wrapper">
+    <div class="cs-form-card">
+      <form id="cs-inquiry-form" onsubmit="handleCsFormSubmit(event)">
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px;">
+          <!-- Nama Pelanggan -->
+          <div class="form-group-cs">
+            <label for="cs-name">Nama Lengkap Anda *</label>
+            <input type="text" id="cs-name" class="cs-input" required placeholder="Contoh: Ibu Rina Marlina" autocomplete="name">
+          </div>
+
+          <!-- No WhatsApp -->
+          <div class="form-group-cs">
+            <label for="cs-phone">Nomor WhatsApp Aktif * <span class="label-sub">(Untuk respon CS)</span></label>
+            <input type="tel" id="cs-phone" class="cs-input" required placeholder="081234567890 / 62812..." autocomplete="tel">
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px;">
+          <!-- Cabang Outlet Terkait -->
+          <div class="form-group-cs">
+            <label for="cs-outlet">Cabang Outlet Amanda Balikpapan *</label>
+            <select id="cs-outlet" class="cs-select" required>
+              <option value="">-- Pilih Cabang Outlet --</option>
+              <!-- Diinjeksi otomatis oleh JS -->
+            </select>
+          </div>
+
+          <!-- Kategori Topik -->
+          <div class="form-group-cs">
+            <label for="cs-category">Kategori Layanan *</label>
+            <select id="cs-category" class="cs-select" required onchange="handleCategoryChange(this.value)">
+              <option value="catering">📦 Pemesanan Jumlah Besar / Katering / Acara</option>
+              <option value="stock">❓ Cek Ketersediaan Stok & Varian Menu</option>
+              <option value="complaint">⚠️ Keluhan / Komplain Mutu & Pelayanan</option>
+              <option value="suggestion">💡 Masukan, Saran & Permintaan Menu</option>
+              <option value="promo">🏷️ Klaim Promo / Undian Resmi</option>
+              <option value="other">💬 Pertanyaan Umum Lainnya</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Nomor Struk Pembelian (Opsional / Ditampilkan saat komplain atau klaim) -->
+        <div class="form-group-cs" id="wrap-receipt-number">
+          <label for="cs-receipt-no">
+            Nomor Struk Pembelian / Nota <span class="label-sub">(Opsional / Jika ada)</span>
+          </label>
+          <input type="text" id="cs-receipt-no" class="cs-input" placeholder="Contoh: STR-BPN-202610-0982">
+        </div>
+
+        <!-- Upload Foto Struk / Bukti Pembelian -->
+        <div class="form-group-cs">
+          <label>
+            Lampirkan Foto Struk / Bukti Pembelian <span class="label-sub">(JPG, PNG, WEBP)</span>
+          </label>
+          
+          <input type="file" id="cs-receipt-file" accept="image/*" style="display: none;" onchange="handleReceiptFileSelect(event)">
+          
+          <div class="cs-upload-zone" id="cs-upload-dropzone" onclick="document.getElementById('cs-receipt-file').click()">
+            <div class="cs-upload-icon">
+              <i class="fa-solid fa-receipt"></i>
+            </div>
+            <div style="font-size: 14px; font-weight: 700; color: var(--text-main); margin-bottom: 4px;">
+              Klik untuk Ambil / Upload Foto Struk
+            </div>
+            <div style="font-size: 12px; color: var(--text-dim);">
+              Mendukung foto langsung dari kamera HP atau galeri (Maks. 5 MB)
+            </div>
+          </div>
+
+          <!-- Image Preview -->
+          <div class="cs-preview-wrap" id="cs-preview-wrap">
+            <img id="cs-preview-img" class="cs-preview-img" alt="Preview Foto Struk">
+            <button type="button" class="btn-remove-preview" onclick="clearReceiptPhoto()" title="Hapus Foto">
+              <i class="fa-solid fa-xmark"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Pesan / Keterangan -->
+        <div class="form-group-cs">
+          <label for="cs-message">Rincian Kebutuhan / Pesan Anda *</label>
+          <textarea id="cs-message" class="cs-textarea" rows="4" required placeholder="Tuliskan secara jelas kebutuhan pesanan katering, varian yang dicari, atau kronologi yang ingin disampaikan..."></textarea>
+        </div>
+
+        <!-- Rating Pelayanan -->
+        <div class="form-group-cs" style="margin-bottom: 28px;">
+          <label>Tingkat Kepuasan Pelayanan Kami <span class="label-sub">(Opsional)</span></label>
+          <div class="cs-rating-picker" id="cs-rating-container">
+            <i class="fa-solid fa-star cs-rating-star active" data-rating="1" onclick="setRating(1)"></i>
+            <i class="fa-solid fa-star cs-rating-star active" data-rating="2" onclick="setRating(2)"></i>
+            <i class="fa-solid fa-star cs-rating-star active" data-rating="3" onclick="setRating(3)"></i>
+            <i class="fa-solid fa-star cs-rating-star active" data-rating="4" onclick="setRating(4)"></i>
+            <i class="fa-solid fa-star cs-rating-star active" data-rating="5" onclick="setRating(5)"></i>
+          </div>
+          <input type="hidden" id="cs-rating-val" value="5">
+        </div>
+
+        <button type="submit" class="btn-submit-cs" id="btn-submit-cs">
+          <i class="fa-solid fa-paper-plane"></i> Kirim Pesan Layanan Pelanggan
+        </button>
+
+      </form>
+    </div>
+  </main>
+
+  <!-- ==================== MODAL SUCCESS ==================== -->
+  <div class="cs-modal-overlay" id="cs-success-modal">
+    <div class="cs-modal-box">
+      <div class="cs-success-icon">
+        <i class="fa-solid fa-check"></i>
+      </div>
+      <h2 style="font-family: 'Playfair Display', Georgia, serif; font-size: 22px; color: var(--primary-olive-dark); margin-bottom: 8px;">
+        Pesan Anda Berhasil Terkirim!
+      </h2>
+      <p style="font-size: 13.5px; color: var(--text-muted); line-height: 1.55; margin-bottom: 20px;">
+        Terima kasih telah menghubungi Customer Service Amanda Brownies Balikpapan. Tim outlet kami telah menerima pesan Anda dan akan segera merespon via WhatsApp.
+      </p>
+
+      <div style="background: var(--bg-surface-elevated); border: 1px solid var(--border-sand-light); border-radius: 12px; padding: 12px; margin-bottom: 24px; font-size: 12.5px;">
+        <span style="color: var(--text-dim);">Nomor Tiket Layanan:</span>
+        <strong id="modal-ticket-id" style="color: var(--primary-olive); display: block; font-size: 15px; margin-top: 2px;">#CS-BPN-0000</strong>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 10px;">
+        <a id="btn-modal-wa" href="#" target="_blank" class="btn-primary" style="text-decoration: none; padding: 12px; border-radius: var(--radius-pill); font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 8px; background: #25d366; box-shadow: 0 4px 12px rgba(37,211,102,0.3);">
+          <i class="fa-brands fa-whatsapp" style="font-size: 18px;"></i> Lanjut Hubungi WhatsApp Cabang
+        </a>
+        <a href="index.html" class="btn-secondary" style="text-decoration: none; padding: 11px; border-radius: var(--radius-pill); font-size: 13px;">
+          Kembali ke Halaman Menu
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/data.js?v=2.6"></script>
+  <script src="js/supabase.js?v=1.1"></script>
+  <script src="js/waas-status.js?v=1.1"></script>
+
+  <script>
+    let uploadedReceiptDataUri = '';
+    let currentSelectedRating = 5;
+
+    document.addEventListener('DOMContentLoaded', () => {
+      populateOutletDropdown();
+      setupRatingHover();
+    });
+
+    function populateOutletDropdown() {
+      const select = document.getElementById('cs-outlet');
+      if (!select) return;
+      const outlets = (typeof getOutlets === 'function') ? getOutlets() : (typeof AMANDA_OUTLETS !== 'undefined' ? AMANDA_OUTLETS : []);
+
+      select.innerHTML = '<option value="">-- Pilih Cabang Outlet Balikpapan --</option>';
+      outlets.forEach(out => {
+        const opt = document.createElement('option');
+        opt.value = out.id;
+        opt.textContent = `${out.name} (${out.city || 'Balikpapan'})`;
+        opt.dataset.wa = out.wa || '6281322119988';
+        opt.dataset.name = out.name;
+        select.appendChild(opt);
+      });
+    }
+
+    function setRating(val) {
+      currentSelectedRating = val;
+      document.getElementById('cs-rating-val').value = val;
+      const stars = document.querySelectorAll('.cs-rating-star');
+      stars.forEach(s => {
+        const rating = parseInt(s.dataset.rating, 10);
+        if (rating <= val) {
+          s.classList.add('active');
+        } else {
+          s.classList.remove('active');
+        }
+      });
+    }
+
+    function setupRatingHover() {
+      const stars = document.querySelectorAll('.cs-rating-star');
+      stars.forEach(s => {
+        s.addEventListener('mouseenter', () => {
+          const rating = parseInt(s.dataset.rating, 10);
+          stars.forEach(st => {
+            if (parseInt(st.dataset.rating, 10) <= rating) {
+              st.classList.add('hovered');
+            } else {
+              st.classList.remove('hovered');
+            }
+          });
+        });
+        s.addEventListener('mouseleave', () => {
+          stars.forEach(st => st.classList.remove('hovered'));
+        });
+      });
+    }
+
+    function handleCategoryChange(val) {
+      const receiptWrap = document.getElementById('wrap-receipt-number');
+      if (val === 'complaint' || val === 'promo') {
+        if (receiptWrap) receiptWrap.style.display = 'block';
+      }
+    }
+
+    // Receipt File Compression & Upload to Data URI
+    function handleReceiptFileSelect(event) {
+      const file = event.target.files && event.target.files[0];
+      if (!file) return;
+
+      if (file.size > 5 * 1024 * 1024) {
+        alert('Ukuran foto terlalu besar. Maksimal 5 MB.');
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const img = new Image();
+        img.onload = function() {
+          // Compress with canvas
+          const canvas = document.createElement('canvas');
+          const maxDim = 1200;
+          let width = img.width;
+          let height = img.height;
+
+          if (width > height && width > maxDim) {
+            height = Math.round((height * maxDim) / width);
+            width = maxDim;
+          } else if (height > maxDim) {
+            width = Math.round((width * maxDim) / height);
+            height = maxDim;
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, width, height);
+
+          uploadedReceiptDataUri = canvas.toDataURL('image/jpeg', 0.82);
+
+          const previewWrap = document.getElementById('cs-preview-wrap');
+          const previewImg = document.getElementById('cs-preview-img');
+          previewImg.src = uploadedReceiptDataUri;
+          previewWrap.style.display = 'block';
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function clearReceiptPhoto() {
+      uploadedReceiptDataUri = '';
+      document.getElementById('cs-receipt-file').value = '';
+      document.getElementById('cs-preview-wrap').style.display = 'none';
+      document.getElementById('cs-preview-img').src = '';
+    }
+
+    async function handleCsFormSubmit(event) {
+      event.preventDefault();
+      const btn = document.getElementById('btn-submit-cs');
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Mengirimkan Pesan...';
+
+      const outletSelect = document.getElementById('cs-outlet');
+      const selectedOption = outletSelect.options[outletSelect.selectedIndex];
+      const outletName = selectedOption ? (selectedOption.dataset.name || selectedOption.textContent) : 'Amanda Balikpapan';
+      const outletWa = selectedOption ? (selectedOption.dataset.wa || '6281322119988') : '6281322119988';
+
+      const ticketId = 'CS-BPN-' + Date.now().toString(36).toUpperCase();
+      const rawPhone = document.getElementById('cs-phone').value.trim();
+      let cleanPhone = rawPhone.replace(/\D/g, '');
+      if (cleanPhone.startsWith('0')) cleanPhone = '62' + cleanPhone.substring(1);
+
+      const payload = {
+        id: ticketId,
+        name: document.getElementById('cs-name').value.trim(),
+        phone: cleanPhone,
+        outlet_id: outletSelect.value,
+        outlet_name: outletName,
+        category: document.getElementById('cs-category').value,
+        receipt_number: document.getElementById('cs-receipt-no').value.trim(),
+        receipt_image: uploadedReceiptDataUri || null,
+        message: document.getElementById('cs-message').value.trim(),
+        rating: parseInt(document.getElementById('cs-rating-val').value, 10) || 5,
+        status: 'NEW',
+        created_at: new Date().toISOString()
+      };
+
+      // 1. Save to Supabase Cloud if connected
+      if (typeof pushToSupabase === 'function' && typeof isSupabaseActive === 'function' && isSupabaseActive()) {
+        try {
+          await pushToSupabase('cs_inquiries', payload, 'upsert');
+        } catch (e) {
+          console.warn('Supabase cs_inquiries sync error:', e);
+        }
+      }
+
+      // 2. Save to LocalStorage cache
+      if (typeof saveLocalCsInquiry === 'function') {
+        saveLocalCsInquiry(payload);
+      } else {
+        const localList = JSON.parse(localStorage.getItem('amanda_cs_inquiries') || '[]');
+        localList.unshift(payload);
+        localStorage.setItem('amanda_cs_inquiries', JSON.stringify(localList));
+      }
+
+      // 3. Prepare direct WhatsApp Link
+      const waText = encodeURIComponent(
+        `Halo Tim CS Amanda Brownies Balikpapan (${outletName}),\n\n` +
+        `Saya ingin menindaklanjuti pesan layanan pelanggan:\n` +
+        `• No Tiket: *#${ticketId}*\n` +
+        `• Nama: *${payload.name}*\n` +
+        `• Kategori: *${payload.category.toUpperCase()}*\n` +
+        `• Pesan: "${payload.message}"\n\n` +
+        `Mohon dibantu informasinya ya kak. Terima kasih!`
+      );
+      const waLink = `https://wa.me/${outletWa}?text=${waText}`;
+
+      // 4. Show Success Modal
+      document.getElementById('modal-ticket-id').textContent = '#' + ticketId;
+      document.getElementById('btn-modal-wa').href = waLink;
+      document.getElementById('cs-success-modal').classList.add('active');
+
+      // Reset form
+      document.getElementById('cs-inquiry-form').reset();
+      clearReceiptPhoto();
+      btn.disabled = false;
+      btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Kirim Pesan Layanan Pelanggan';
+    }
+  </script>
+</body>
+
+</html>

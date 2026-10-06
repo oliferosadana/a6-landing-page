@@ -1,2 +1,5 @@
 # Cloudflare Pages Redirects
 # Catatan: Cloudflare Pages otomatis menangani Pretty URLs (/login -> login.html & /admin -> admin.html).
+/cs /cs.html 200
+/layanan-pelanggan /cs.html 200
+

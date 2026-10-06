@@ -79,6 +79,13 @@
             </button>
           </li>
           <li>
+            <button class="nav-item" onclick="switchTab('cs', this)">
+              <i class="fa-solid fa-headset"></i>
+              <span>Layanan CS & Analisis Data</span>
+              <span class="badge-count" id="badge-cs-count" style="background:#dc2626; color:#fff;">0</span>
+            </button>
+          </li>
+          <li>
             <button class="nav-item" onclick="switchTab('ticker', this)">
               <i class="fa-solid fa-bullhorn"></i>
               <span>Running Promo Ticker</span>
@@ -123,11 +130,6 @@
         </div>
 
         <div class="topbar-actions">
-          <a href="billing.html" class="topbar-sub-pill" id="topbar-sub-pill" title="Kelola masa sewa website">
-            <span class="sub-dot"></span>
-            <span id="topbar-sub-text">Sewa Aktif: 30 Hari</span>
-            <i class="fa-solid fa-chevron-right" style="font-size: 10px; opacity: 0.7;"></i>
-          </a>
           <span class="sync-status-pill">
             <i class="fa-solid fa-circle-check"></i> Tersinkronisasi Realtime
           </span>
@@ -338,12 +340,14 @@
           <div class="section-toolbar">
             <div class="toolbar-left">
               <h2>Manajemen Kategori & Wilayah Outlet</h2>
-              <p>Kelola zona wilayah cabang (Balikpapan Selatan, Kota, Utara, Barat, IKN) untuk filter landing page & pengelompokan outlet.</p>
+              <p>Kelola zona wilayah cabang (Balikpapan Selatan, Kota, Utara, Barat, IKN) untuk filter landing page &
+                pengelompokan outlet.</p>
             </div>
             <div class="toolbar-actions-row">
               <div class="search-box-cms">
                 <i class="fa-solid fa-magnifying-glass"></i>
-                <input type="text" id="search-outlet-cat-input" placeholder="Cari kategori wilayah..." oninput="filterOutletCategoriesList(this.value)">
+                <input type="text" id="search-outlet-cat-input" placeholder="Cari kategori wilayah..."
+                  oninput="filterOutletCategoriesList(this.value)">
               </div>
               <button class="btn-primary" onclick="openOutletCategoryModal()">
                 <i class="fa-solid fa-plus"></i> Tambah Kategori Wilayah
@@ -381,7 +385,8 @@
               <div class="stat-icon sand"><i class="fa-solid fa-network-wired"></i></div>
               <div>
                 <span class="stat-label">Sinkronisasi Cloud</span>
-                <span class="stat-value" style="font-size: 18px; color: #1b7a42;"><i class="fa-solid fa-bolt"></i> Realtime</span>
+                <span class="stat-value" style="font-size: 18px; color: #1b7a42;"><i class="fa-solid fa-bolt"></i>
+                  Realtime</span>
                 <span class="stat-desc">Supabase PostgreSQL</span>
               </div>
             </div>
@@ -489,7 +494,8 @@
           <div class="section-toolbar">
             <div class="toolbar-left">
               <h2>Vault Kunci API, Database & Keamanan Kredensial</h2>
-              <p>Kelola Service Role Secret Key, Anon Key Supabase, integrasi Cloudflare, dan keamanan akun admin dalam satu brankas terpusat.</p>
+              <p>Kelola Service Role Secret Key, Anon Key Supabase, integrasi Cloudflare, dan keamanan akun admin dalam
+                satu brankas terpusat.</p>
             </div>
             <button class="btn-secondary" onclick="refreshSecurityVaultUI()">
               <i class="fa-solid fa-arrows-rotate"></i> Muat Ulang Vault
@@ -497,14 +503,19 @@
           </div>
 
           <!-- Security Status Banner -->
-          <div class="vault-status-banner" id="vault-status-banner" style="background: rgba(79, 91, 42, 0.08); border: 1px solid rgba(79, 91, 42, 0.25); border-radius: var(--radius-lg); padding: 18px 22px; margin-bottom: 24px; display: flex; align-items: center; justify-content: space-between; gap: 16px;">
+          <div class="vault-status-banner" id="vault-status-banner"
+            style="background: rgba(79, 91, 42, 0.08); border: 1px solid rgba(79, 91, 42, 0.25); border-radius: var(--radius-lg); padding: 18px 22px; margin-bottom: 24px; display: flex; align-items: center; justify-content: space-between; gap: 16px;">
             <div style="display: flex; align-items: center; gap: 14px;">
-              <div style="width: 44px; height: 44px; border-radius: 12px; background: var(--ch-olive); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 20px;">
+              <div
+                style="width: 44px; height: 44px; border-radius: 12px; background: var(--ch-olive); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 20px;">
                 <i class="fa-solid fa-shield-check"></i>
               </div>
               <div>
-                <h4 style="font-size: 15px; font-weight: 700; color: var(--text-main); margin-bottom: 2px;">Status Vault Database Cloud: <span id="vault-status-label" style="color: var(--ch-olive-dark);">Tersambung</span></h4>
-                <p style="font-size: 12.5px; color: var(--text-muted);" id="vault-last-updated">Terakhir disinkronkan ke PostgreSQL: Baru saja</p>
+                <h4 style="font-size: 15px; font-weight: 700; color: var(--text-main); margin-bottom: 2px;">Status Vault
+                  Database Cloud: <span id="vault-status-label" style="color: var(--ch-olive-dark);">Tersambung</span>
+                </h4>
+                <p style="font-size: 12.5px; color: var(--text-muted);" id="vault-last-updated">Terakhir disinkronkan ke
+                  PostgreSQL: Baru saja</p>
               </div>
             </div>
             <button class="btn-primary-sm" onclick="testCloudVaultConnection()" id="btn-test-vault">
@@ -521,48 +532,62 @@
                   <i class="fa-solid fa-database" style="color: var(--primary-olive);"></i>
                   <h3>Kredensial Database Supabase Cloud</h3>
                 </div>
-                <span class="badge-pill olive" id="vault-badge-env"><i class="fa-solid fa-lock"></i> Terisolasi Aman</span>
+                <span class="badge-pill olive" id="vault-badge-env"><i class="fa-solid fa-lock"></i> Terisolasi
+                  Aman</span>
               </div>
               <div class="panel-body">
                 <form id="vault-credentials-form" onsubmit="handleSaveVaultCredentials(event)">
-                  
+
                   <div class="form-group" style="margin-bottom: 18px;">
                     <label style="display: flex; justify-content: space-between; align-items: center;">
                       <span>Supabase Project URL *</span>
-                      <span style="font-size: 11px; color: var(--text-dim);">Format: https://[project-id].supabase.co</span>
+                      <span style="font-size: 11px; color: var(--text-dim);">Format:
+                        https://[project-id].supabase.co</span>
                     </label>
                     <div class="input-with-icon">
                       <i class="fa-solid fa-globe"></i>
-                      <input type="url" id="vault-supabase-url" required placeholder="https://zomkdefqivvbtxqzavpz.supabase.co">
+                      <input type="url" id="vault-supabase-url" required
+                        placeholder="https://zomkdefqivvbtxqzavpz.supabase.co">
                     </div>
                   </div>
 
                   <div class="form-group" style="margin-bottom: 18px;">
                     <label style="display: flex; justify-content: space-between; align-items: center;">
                       <span>Supabase Publishable / Anon Key *</span>
-                      <span style="font-size: 11px; color: var(--text-dim);"><i class="fa-solid fa-eye"></i> Kunci Publik Frontend</span>
+                      <span style="font-size: 11px; color: var(--text-dim);"><i class="fa-solid fa-eye"></i> Kunci
+                        Publik Frontend</span>
                     </label>
                     <div class="input-with-icon" style="position: relative;">
                       <i class="fa-solid fa-key"></i>
-                      <input type="password" id="vault-supabase-anon-key" required placeholder="sb_publishable_..." style="padding-right: 42px;">
-                      <button type="button" class="btn-toggle-eye" onclick="toggleVaultInputMask('vault-supabase-anon-key', this)" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: var(--text-dim);">
+                      <input type="password" id="vault-supabase-anon-key" required placeholder="sb_publishable_..."
+                        style="padding-right: 42px;">
+                      <button type="button" class="btn-toggle-eye"
+                        onclick="toggleVaultInputMask('vault-supabase-anon-key', this)"
+                        style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: var(--text-dim);">
                         <i class="fa-regular fa-eye"></i>
                       </button>
                     </div>
                   </div>
 
-                  <div class="form-group" style="margin-bottom: 20px; background: rgba(192, 57, 43, 0.04); border: 1px dashed rgba(192, 57, 43, 0.25); border-radius: var(--radius-md); padding: 14px 16px;">
-                    <label style="display: flex; justify-content: space-between; align-items: center; color: var(--accent-red); font-weight: 700;">
-                      <span><i class="fa-solid fa-triangle-exclamation"></i> Supabase Service Role Secret Key (Kunci Rahasia Admin)</span>
+                  <div class="form-group"
+                    style="margin-bottom: 20px; background: rgba(192, 57, 43, 0.04); border: 1px dashed rgba(192, 57, 43, 0.25); border-radius: var(--radius-md); padding: 14px 16px;">
+                    <label
+                      style="display: flex; justify-content: space-between; align-items: center; color: var(--accent-red); font-weight: 700;">
+                      <span><i class="fa-solid fa-triangle-exclamation"></i> Supabase Service Role Secret Key (Kunci
+                        Rahasia Admin)</span>
                       <span style="font-size: 11px; color: var(--accent-red);">Disimpan Terenkripsi ke Database</span>
                     </label>
                     <p style="font-size: 12px; color: var(--text-muted); margin: 6px 0 10px 0;">
-                      Kunci ini memiliki hak akses root / bypass RLS. Dimasukkan melalui form ini agar tersimpan aman di tabel pengaturan database PostgreSQL (bukan di-hardcode pada file kode frontend).
+                      Kunci ini memiliki hak akses root / bypass RLS. Dimasukkan melalui form ini agar tersimpan aman di
+                      tabel pengaturan database PostgreSQL (bukan di-hardcode pada file kode frontend).
                     </p>
                     <div class="input-with-icon" style="position: relative;">
                       <i class="fa-solid fa-user-shield" style="color: var(--accent-red);"></i>
-                      <input type="password" id="vault-supabase-secret-key" placeholder="sb_secret_..." style="padding-right: 42px;">
-                      <button type="button" class="btn-toggle-eye" onclick="toggleVaultInputMask('vault-supabase-secret-key', this)" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: var(--text-dim);">
+                      <input type="password" id="vault-supabase-secret-key" placeholder="sb_secret_..."
+                        style="padding-right: 42px;">
+                      <button type="button" class="btn-toggle-eye"
+                        onclick="toggleVaultInputMask('vault-supabase-secret-key', this)"
+                        style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: var(--text-dim);">
                         <i class="fa-regular fa-eye"></i>
                       </button>
                     </div>
@@ -581,13 +606,16 @@
 
                   <!-- BorneoLink WAAS Master Platform Integration -->
                   <div style="border-top: 1px solid var(--ch-sand-border); padding-top: 22px; margin-bottom: 20px;">
-                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+                    <div
+                      style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
                       <div>
                         <h4 style="font-size: 14.5px; font-weight: 700; color: var(--text-main); margin-bottom: 2px;">
-                          <i class="fa-solid fa-network-wired" style="color: var(--primary-olive);"></i> Integrasi Jaringan Platform BorneoLink WAAS
+                          <i class="fa-solid fa-network-wired" style="color: var(--primary-olive);"></i> Integrasi
+                          Jaringan Platform BorneoLink WAAS
                         </h4>
                         <p style="font-size: 12px; color: var(--text-muted);">
-                          Koneksi ke Database Master WAAS untuk validasi status langganan & penegakan suspensi website saat jatuh tempo. (Opsional, sudah memiliki nilai default resmi).
+                          Koneksi ke Database Master WAAS untuk validasi status langganan & penegakan suspensi website
+                          saat jatuh tempo. (Opsional, sudah memiliki nilai default resmi).
                         </p>
                       </div>
                       <span class="badge-pill gold" style="font-size: 10px;">Master Network</span>
@@ -600,7 +628,8 @@
                       </div>
                       <div class="form-group">
                         <label>WAAS Publishable Key</label>
-                        <input type="password" id="vault-waas-key" placeholder="sb_publishable_xG2a15CPnDELITqWHdodiQ__PnNZX8-">
+                        <input type="password" id="vault-waas-key"
+                          placeholder="sb_publishable_xG2a15CPnDELITqWHdodiQ__PnNZX8-">
                       </div>
                     </div>
 
@@ -635,7 +664,8 @@
               </div>
               <div class="panel-body">
                 <p style="font-size: 12.5px; color: var(--text-muted); margin-bottom: 16px;">
-                  Ganti email dan password login panel CMS. Password otomatis dienkripsi dengan standar hash <strong>SHA-256</strong> sebelum disimpan.
+                  Ganti email dan password login panel CMS. Password otomatis dienkripsi dengan standar hash
+                  <strong>SHA-256</strong> sebelum disimpan.
                 </p>
                 <form id="admin-credentials-form" onsubmit="handleUpdateAdminCredentials(event)">
                   <div class="form-group" style="margin-bottom: 14px;">
@@ -650,8 +680,11 @@
                     <label>Kata Sandi Baru (Kosongkan jika tidak ingin diubah)</label>
                     <div class="input-with-icon" style="position: relative;">
                       <i class="fa-solid fa-lock"></i>
-                      <input type="password" id="admin-user-password" placeholder="••••••••••••" style="padding-right: 42px;">
-                      <button type="button" class="btn-toggle-eye" onclick="toggleVaultInputMask('admin-user-password', this)" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: var(--text-dim);">
+                      <input type="password" id="admin-user-password" placeholder="••••••••••••"
+                        style="padding-right: 42px;">
+                      <button type="button" class="btn-toggle-eye"
+                        onclick="toggleVaultInputMask('admin-user-password', this)"
+                        style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: var(--text-dim);">
                         <i class="fa-regular fa-eye"></i>
                       </button>
                     </div>
@@ -672,23 +705,188 @@
                 </div>
               </div>
               <div class="panel-body">
-                <ul style="list-style: none; padding: 0; display: flex; flex-direction: column; gap: 12px; font-size: 13px; color: var(--text-muted);">
+                <ul
+                  style="list-style: none; padding: 0; display: flex; flex-direction: column; gap: 12px; font-size: 13px; color: var(--text-muted);">
                   <li style="display: flex; gap: 10px; align-items: flex-start;">
                     <i class="fa-solid fa-circle-check" style="color: var(--accent-green); margin-top: 3px;"></i>
-                    <span><strong>Anon Key Terisolasi:</strong> Pengunjung publik hanya memiliki izin baca (SELECT) untuk menu, promo, dan outlet.</span>
+                    <span><strong>Anon Key Terisolasi:</strong> Pengunjung publik hanya memiliki izin baca (SELECT)
+                      untuk menu, promo, dan outlet.</span>
                   </li>
                   <li style="display: flex; gap: 10px; align-items: flex-start;">
                     <i class="fa-solid fa-circle-check" style="color: var(--accent-green); margin-top: 3px;"></i>
-                    <span><strong>Proteksi Tabel Settings:</strong> Tabel <code>platform_settings</code> diproteksi dan hanya bisa diakses via otentikasi admin.</span>
+                    <span><strong>Proteksi Tabel Settings:</strong> Tabel <code>platform_settings</code> diproteksi dan
+                      hanya bisa diakses via otentikasi admin.</span>
                   </li>
                   <li style="display: flex; gap: 10px; align-items: flex-start;">
                     <i class="fa-solid fa-circle-check" style="color: var(--accent-green); margin-top: 3px;"></i>
-                    <span><strong>Nol Plain-Text Secret di Git:</strong> Kunci rahasia dikelola secara dinamis via Cloud Vault.</span>
+                    <span><strong>Nol Plain-Text Secret di Git:</strong> Kunci rahasia dikelola secara dinamis via Cloud
+                      Vault.</span>
                   </li>
                 </ul>
               </div>
             </div>
 
+          </div>
+
+        </section>
+
+        <!-- ==================== SECTION: CUSTOMER SERVICE & ANALISIS DATA ==================== -->
+        <section id="section-cs" class="cms-section">
+
+          <!-- Section Head -->
+          <div class="section-head">
+            <div>
+              <h2>Layanan CS & Pengaduan Pelanggan</h2>
+              <p class="section-desc">Pantau pesanan katering, pertanyaan ketersediaan stok, bukti struk, dan ekspor data ke Excel untuk analisa performa outlet.</p>
+            </div>
+            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+              <a href="cs.html" target="_blank" class="btn-secondary" style="text-decoration:none; display:inline-flex; align-items:center; gap:8px;">
+                <i class="fa-solid fa-arrow-up-right-from-square"></i> Buka Halaman CS Publik
+              </a>
+              <button class="btn-primary" onclick="exportCsToExcel()" style="background: #16a34a; border-color: #16a34a;">
+                <i class="fa-solid fa-file-excel"></i> Ekspor ke Excel (CSV)
+              </button>
+            </div>
+          </div>
+
+          <!-- CS KPI Stats Grid -->
+          <div class="stats-grid" style="margin-bottom: 24px;">
+            <div class="stat-card">
+              <div class="stat-icon olive">
+                <i class="fa-solid fa-inbox"></i>
+              </div>
+              <div class="stat-info">
+                <span class="stat-label">Total Pesan & Tiket</span>
+                <h3 class="stat-value" id="cs-stat-total">0</h3>
+                <span class="stat-desc">Seluruh masukan pelanggan</span>
+              </div>
+            </div>
+
+            <div class="stat-card">
+              <div class="stat-icon red" style="background: #fee2e2; color: #dc2626;">
+                <i class="fa-solid fa-bell"></i>
+              </div>
+              <div class="stat-info">
+                <span class="stat-label">Tiket Baru (Belum Dibalas)</span>
+                <h3 class="stat-value" id="cs-stat-new" style="color: #dc2626;">0</h3>
+                <span class="stat-desc">Perlu segera ditindaklanjuti</span>
+              </div>
+            </div>
+
+            <div class="stat-card">
+              <div class="stat-icon gold">
+                <i class="fa-solid fa-spinner"></i>
+              </div>
+              <div class="stat-info">
+                <span class="stat-label">Sedang Diproses</span>
+                <h3 class="stat-value" id="cs-stat-inprogress">0</h3>
+                <span class="stat-desc">Dalam koordinasi outlet</span>
+              </div>
+            </div>
+
+            <div class="stat-card">
+              <div class="stat-icon green">
+                <i class="fa-solid fa-circle-check"></i>
+              </div>
+              <div class="stat-info">
+                <span class="stat-label">Selesai Ditangani</span>
+                <h3 class="stat-value" id="cs-stat-resolved">0</h3>
+                <span class="stat-desc">Tiket terselesaikan</span>
+              </div>
+            </div>
+
+            <div class="stat-card">
+              <div class="stat-icon sand" style="background: #fef3c7; color: #d97706;">
+                <i class="fa-solid fa-star"></i>
+              </div>
+              <div class="stat-info">
+                <span class="stat-label">Rata-rata Rating</span>
+                <h3 class="stat-value" id="cs-stat-rating">5.0</h3>
+                <span class="stat-desc">Indeks kepuasan pembeli</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Filter & Search Toolbar -->
+          <div class="panel-card" style="margin-bottom: 20px; padding: 16px 20px;">
+            <div style="display: flex; gap: 14px; flex-wrap: wrap; align-items: center; justify-content: space-between;">
+              <div style="display: flex; gap: 12px; flex-wrap: wrap; align-items: center; flex: 1;">
+                <div style="min-width: 180px;">
+                  <label style="font-size: 11.5px; font-weight: 700; color: var(--text-muted); display: block; margin-bottom: 4px;">Filter Outlet:</label>
+                  <select id="cs-filter-outlet" onchange="renderCsManager()" class="form-control" style="width: 100%; padding: 8px 12px; font-size: 13px; border-radius: 8px; border: 1px solid var(--border-sand);">
+                    <option value="all">Semua Outlet Balikpapan</option>
+                  </select>
+                </div>
+
+                <div style="min-width: 160px;">
+                  <label style="font-size: 11.5px; font-weight: 700; color: var(--text-muted); display: block; margin-bottom: 4px;">Filter Kategori:</label>
+                  <select id="cs-filter-category" onchange="renderCsManager()" class="form-control" style="width: 100%; padding: 8px 12px; font-size: 13px; border-radius: 8px; border: 1px solid var(--border-sand);">
+                    <option value="all">Semua Kategori</option>
+                    <option value="catering">Pesanan Katering / Jumlah Besar</option>
+                    <option value="stock">Tanya Ketersediaan Stok</option>
+                    <option value="complaint">Pengaduan / Komplain Produk</option>
+                    <option value="promo">Konfirmasi Promo & Voucher</option>
+                    <option value="partnership">Kerjasama / Reseller</option>
+                    <option value="other">Pertanyaan Lainnya</option>
+                  </select>
+                </div>
+
+                <div style="min-width: 150px;">
+                  <label style="font-size: 11.5px; font-weight: 700; color: var(--text-muted); display: block; margin-bottom: 4px;">Filter Status:</label>
+                  <select id="cs-filter-status" onchange="renderCsManager()" class="form-control" style="width: 100%; padding: 8px 12px; font-size: 13px; border-radius: 8px; border: 1px solid var(--border-sand);">
+                    <option value="all">Semua Status</option>
+                    <option value="NEW">Baru (Belum Ditanggapi)</option>
+                    <option value="IN_PROGRESS">Sedang Diproses</option>
+                    <option value="RESOLVED">Selesai (Resolved)</option>
+                  </select>
+                </div>
+              </div>
+
+              <div style="min-width: 240px;">
+                <label style="font-size: 11.5px; font-weight: 700; color: var(--text-muted); display: block; margin-bottom: 4px;">Pencarian Data:</label>
+                <div style="position: relative;">
+                  <input type="text" id="cs-search-input" oninput="renderCsManager()" placeholder="Cari nama, WhatsApp, no tiket, struk..." style="width: 100%; padding: 8px 12px 8px 32px; font-size: 13px; border-radius: 8px; border: 1px solid var(--border-sand);">
+                  <i class="fa-solid fa-magnifying-glass" style="position: absolute; left: 10px; top: 11px; color: var(--text-dim); font-size: 12px;"></i>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Inquiries Data Table -->
+          <div class="panel-card" style="padding: 0; overflow: hidden;">
+            <div class="panel-head" style="padding: 16px 20px; border-bottom: 1px solid var(--border-sand-light);">
+              <div class="panel-head-title">
+                <i class="fa-solid fa-table-list" style="color: var(--primary-olive);"></i>
+                <h3>Daftar Tiket & Pengaduan Pelanggan</h3>
+              </div>
+              <span id="cs-table-count-badge" class="badge-count" style="background: var(--primary-olive); color: #fff; font-size: 12px; padding: 4px 10px; border-radius: 20px;">0 Data</span>
+            </div>
+
+            <div class="table-responsive" style="overflow-x: auto;">
+              <table class="cms-table" style="width: 100%; border-collapse: collapse;">
+                <thead>
+                  <tr style="background: var(--bg-sand-light, #f8f7f4); text-align: left; font-size: 12.5px; border-bottom: 1px solid var(--border-sand);">
+                    <th style="padding: 12px 16px;">No Tiket & Tanggal</th>
+                    <th style="padding: 12px 16px;">Pelanggan & Kontak</th>
+                    <th style="padding: 12px 16px;">Outlet Tujuan</th>
+                    <th style="padding: 12px 16px;">Kategori & Rating</th>
+                    <th style="padding: 12px 16px; min-width: 200px;">Pesan & Kendala</th>
+                    <th style="padding: 12px 16px; text-align: center;">Foto Struk</th>
+                    <th style="padding: 12px 16px; text-align: center;">Status</th>
+                    <th style="padding: 12px 16px; text-align: right;">Aksi</th>
+                  </tr>
+                </thead>
+                <tbody id="cs-inquiries-tbody">
+                  <!-- Injected via renderCsManager() -->
+                </tbody>
+              </table>
+            </div>
+
+            <div id="cs-empty-state" style="display: none; padding: 48px 20px; text-align: center;">
+              <div style="font-size: 40px; color: var(--text-dim); margin-bottom: 12px;"><i class="fa-solid fa-inbox"></i></div>
+              <h4 style="font-size: 16px; font-weight: 700; color: var(--text-main); margin-bottom: 6px;">Belum Ada Tiket Masuk</h4>
+              <p style="font-size: 13.5px; color: var(--text-muted); max-width: 420px; margin: 0 auto;">Pesan pengaduan atau pesanan katering dari halaman form CS publik akan otomatis tercatat di sini.</p>
+            </div>
           </div>
 
         </section>
@@ -1075,11 +1273,13 @@
   </div>
 
   <!-- ==================== MODAL: KATEGORI WILAYAH OUTLET ==================== -->
-  <div class="cms-modal-overlay" id="outlet-category-modal" onclick="closeModalOnOverlay(event, 'outlet-category-modal')">
+  <div class="cms-modal-overlay" id="outlet-category-modal"
+    onclick="closeModalOnOverlay(event, 'outlet-category-modal')">
     <div class="cms-modal-card">
       <div class="modal-head">
         <h3 id="outlet-category-modal-title">Tambah Kategori Wilayah Baru</h3>
-        <button class="modal-close-btn" onclick="closeModal('outlet-category-modal')"><i class="fa-solid fa-xmark"></i></button>
+        <button class="modal-close-btn" onclick="closeModal('outlet-category-modal')"><i
+            class="fa-solid fa-xmark"></i></button>
       </div>
       <form id="outlet-category-form" onsubmit="saveOutletCategoryForm(event)">
         <input type="hidden" id="category-form-id">
@@ -1087,11 +1287,13 @@
         <div class="form-grid-2">
           <div class="form-group">
             <label>Nama Kategori / Wilayah *</label>
-            <input type="text" id="category-form-name" required placeholder="Contoh: Balikpapan Selatan" oninput="autoGenerateCategorySlug(this.value)">
+            <input type="text" id="category-form-name" required placeholder="Contoh: Balikpapan Selatan"
+              oninput="autoGenerateCategorySlug(this.value)">
           </div>
           <div class="form-group">
             <label>Wilayah Induk / Provinsi *</label>
-            <input type="text" id="category-form-region" required placeholder="Contoh: Kota Balikpapan / IKN Nusantara" value="Kota Balikpapan">
+            <input type="text" id="category-form-region" required placeholder="Contoh: Kota Balikpapan / IKN Nusantara"
+              value="Kota Balikpapan">
           </div>
         </div>
 
@@ -1102,7 +1304,8 @@
           </div>
           <div class="form-group">
             <label>Ikon FontAwesome</label>
-            <input type="text" id="category-form-icon" placeholder="fa-solid fa-location-dot" value="fa-solid fa-location-dot">
+            <input type="text" id="category-form-icon" placeholder="fa-solid fa-location-dot"
+              value="fa-solid fa-location-dot">
           </div>
           <div class="form-group">
             <label>Warna Tema Badge</label>
@@ -1133,14 +1336,70 @@
 
         <div class="form-group">
           <label>Deskripsi & Area Cakupan Wilayah</label>
-          <textarea id="category-form-desc" rows="3" placeholder="Contoh: Mencakup area MT Haryono, Sepinggan, Damai, Ruhui Rahayu & Akses Bandara SAMS"></textarea>
+          <textarea id="category-form-desc" rows="3"
+            placeholder="Contoh: Mencakup area MT Haryono, Sepinggan, Damai, Ruhui Rahayu & Akses Bandara SAMS"></textarea>
         </div>
 
         <div class="modal-actions">
           <button type="button" class="btn-secondary" onclick="closeModal('outlet-category-modal')">Batal</button>
-          <button type="submit" class="btn-primary"><i class="fa-solid fa-floppy-disk"></i> Simpan Kategori Wilayah</button>
+          <button type="submit" class="btn-primary"><i class="fa-solid fa-floppy-disk"></i> Simpan Kategori
+            Wilayah</button>
         </div>
       </form>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL: LIHAT FOTO STRUK CS ==================== -->
+  <div class="cms-modal-overlay" id="cs-receipt-modal" onclick="closeModalOnOverlay(event, 'cs-receipt-modal')">
+    <div class="cms-modal-card" style="max-width: 620px;">
+      <div class="modal-head">
+        <div>
+          <h3 id="cs-modal-ticket-title">Bukti Lampiran Struk Pembelian</h3>
+          <span id="cs-modal-ticket-sub" style="font-size: 12px; color: var(--text-muted);">No Tiket CS</span>
+        </div>
+        <button class="modal-close-btn" onclick="closeModal('cs-receipt-modal')"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+
+      <div style="padding: 16px 20px;">
+        <!-- Meta Details Box -->
+        <div style="background: var(--bg-sand-light, #f8f7f4); border: 1px solid var(--border-sand); border-radius: 10px; padding: 12px 16px; margin-bottom: 16px; font-size: 13px;">
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px;">
+            <div>
+              <span style="font-size: 11px; color: var(--text-dim); display: block;">Pelanggan:</span>
+              <strong id="cs-modal-customer-name">-</strong>
+            </div>
+            <div>
+              <span style="font-size: 11px; color: var(--text-dim); display: block;">No Struk Pembelian:</span>
+              <strong id="cs-modal-receipt-no" style="color: var(--primary-olive);">-</strong>
+            </div>
+            <div>
+              <span style="font-size: 11px; color: var(--text-dim); display: block;">Outlet Transaksi:</span>
+              <span id="cs-modal-outlet-name">-</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Receipt Image Container -->
+        <div style="text-align: center; background: #1a1a1a; border-radius: 10px; padding: 12px; min-height: 260px; display: flex; align-items: center; justify-content: center; position: relative;">
+          <img id="cs-modal-receipt-img" src="" alt="Foto Struk Pembelian" style="max-width: 100%; max-height: 480px; object-fit: contain; border-radius: 6px; box-shadow: 0 4px 16px rgba(0,0,0,0.4);">
+          <div id="cs-modal-receipt-empty" style="display: none; color: #aaa; font-size: 13px;">
+            <i class="fa-solid fa-image-slash" style="font-size: 32px; display: block; margin-bottom: 8px;"></i>
+            <span>Tidak ada foto struk dilampirkan oleh pelanggan</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-actions" style="justify-content: space-between; padding: 14px 20px; background: #fff; border-top: 1px solid var(--border-sand-light);">
+        <a id="cs-modal-wa-btn" href="#" target="_blank" class="btn-secondary" style="color: #16a34a; border-color: #86efac; text-decoration: none; display: inline-flex; align-items: center; gap: 6px;">
+          <i class="fa-brands fa-whatsapp"></i> Chat Pelanggan
+        </a>
+        <div style="display: flex; gap: 8px;">
+          <a id="cs-modal-download-btn" href="#" target="_blank" download="struk-amanda.jpg" class="btn-secondary">
+            <i class="fa-solid fa-download"></i> Unduh Foto
+          </a>
+          <button type="button" class="btn-primary" onclick="closeModal('cs-receipt-modal')">Tutup</button>
+        </div>
+      </div>
     </div>
   </div>
 

@@ -9,6 +9,7 @@ document.addEventListener('DOMContentLoaded', () => {
   renderProductsManager();
   renderOutletsManager();
   renderOutletCategoriesManager();
+  renderCsManager();
   renderTickerManager();
   renderSubscriptionManager();
 
@@ -21,6 +22,7 @@ document.addEventListener('DOMContentLoaded', () => {
       renderProductsManager();
       renderOutletsManager();
       renderOutletCategoriesManager();
+      renderCsManager();
       renderTickerManager();
       renderSubscriptionManager();
     }
@@ -34,6 +36,7 @@ document.addEventListener('DOMContentLoaded', () => {
     renderProductsManager();
     renderOutletsManager();
     renderOutletCategoriesManager();
+    renderCsManager();
     renderTickerManager();
     renderSubscriptionManager();
   });
@@ -57,6 +60,7 @@ function switchTab(tabName, btnElement) {
     'products': 'Katalog Produk & Ketersediaan Stok',
     'outlets': 'Cabang Outlet Resmi Balikpapan',
     'outlet-categories': 'Manajemen Kategori & Wilayah Outlet',
+    'cs': 'Layanan CS & Analisis Data Pelanggan',
     'ticker': 'Pengumuman Running Promo Ticker',
     'settings': 'Cadangan, Impor & Reset Data',
     'security': 'Vault Kunci API & Keamanan Database'
@@ -76,6 +80,7 @@ function switchTab(tabName, btnElement) {
   if (tabName === 'products') renderProductsManager();
   if (tabName === 'outlets') renderOutletsManager();
   if (tabName === 'outlet-categories') renderOutletCategoriesManager();
+  if (tabName === 'cs') renderCsManager();
   if (tabName === 'ticker') renderTickerManager();
   if (tabName === 'security') renderSecurityVault();
 }
@@ -99,6 +104,13 @@ function renderDashboard() {
   const badgeOutletCat = document.getElementById('badge-outlet-cat-count');
   if (badgeOutletCat && typeof AMANDA_OUTLET_CATEGORIES !== 'undefined') {
     badgeOutletCat.textContent = AMANDA_OUTLET_CATEGORIES.length;
+  }
+  const badgeCs = document.getElementById('badge-cs-count');
+  if (badgeCs) {
+    const csList = typeof getCsInquiries === 'function' ? getCsInquiries() : (typeof AMANDA_CS_INQUIRIES !== 'undefined' ? AMANDA_CS_INQUIRIES : []);
+    const newCount = csList.filter(c => c.status === 'NEW').length;
+    badgeCs.textContent = newCount;
+    badgeCs.style.display = newCount > 0 ? 'inline-block' : 'none';
   }
 
   // Render Promo Mini Previews
@@ -1555,5 +1567,364 @@ async function handleUpdateAdminCredentials(event) {
     }
   }
 }
+
+// ===================================================================
+// CUSTOMER SERVICE (CS) MANAGEMENT & DATA ANALYTICS
+// ===================================================================
+const CS_CATEGORY_LABELS = {
+  'catering': { label: 'Pesanan Katering', icon: 'fa-solid fa-utensils', badgeColor: '#3b82f6' },
+  'stock': { label: 'Tanya Stok Outlet', icon: 'fa-solid fa-boxes-stacked', badgeColor: '#8b5cf6' },
+  'complaint': { label: 'Komplain / Pengaduan', icon: 'fa-solid fa-triangle-exclamation', badgeColor: '#ef4444' },
+  'promo': { label: 'Klaim Promo', icon: 'fa-solid fa-tags', badgeColor: '#f59e0b' },
+  'partnership': { label: 'Kerjasama / B2B', icon: 'fa-solid fa-handshake', badgeColor: '#10b981' },
+  'other': { label: 'Lainnya', icon: 'fa-solid fa-comment-dots', badgeColor: '#6b7280' }
+};
+
+function renderCsManager() {
+  const tbody = document.getElementById('cs-inquiries-tbody');
+  const emptyState = document.getElementById('cs-empty-state');
+  if (!tbody) return;
+
+  const rawList = typeof getCsInquiries === 'function' ? getCsInquiries() : (typeof AMANDA_CS_INQUIRIES !== 'undefined' ? AMANDA_CS_INQUIRIES : []);
+  const allInquiries = Array.isArray(rawList) ? rawList : [];
+
+  // 1. Populate Outlet Filter Dropdown if needed
+  const outletFilter = document.getElementById('cs-filter-outlet');
+  if (outletFilter && outletFilter.options.length <= 1 && typeof AMANDA_OUTLETS !== 'undefined' && AMANDA_OUTLETS.length > 0) {
+    const currentVal = outletFilter.value;
+    outletFilter.innerHTML = '<option value="all">Semua Outlet Balikpapan</option>' +
+      AMANDA_OUTLETS.map(o => `<option value="${o.id}">${o.name}</option>`).join('');
+    outletFilter.value = currentVal;
+  }
+
+  // 2. Compute KPI Metrics
+  const totalCount = allInquiries.length;
+  const newCount = allInquiries.filter(i => i.status === 'NEW').length;
+  const inProgressCount = allInquiries.filter(i => i.status === 'IN_PROGRESS').length;
+  const resolvedCount = allInquiries.filter(i => i.status === 'RESOLVED').length;
+
+  const ratingSum = allInquiries.reduce((acc, curr) => acc + (Number(curr.rating) || 5), 0);
+  const avgRating = totalCount > 0 ? (ratingSum / totalCount).toFixed(1) : '5.0';
+
+  // Update KPI counters
+  const elTotal = document.getElementById('cs-stat-total');
+  const elNew = document.getElementById('cs-stat-new');
+  const elInProg = document.getElementById('cs-stat-inprogress');
+  const elResolved = document.getElementById('cs-stat-resolved');
+  const elRating = document.getElementById('cs-stat-rating');
+  const elBadgeCount = document.getElementById('badge-cs-count');
+
+  if (elTotal) elTotal.textContent = totalCount;
+  if (elNew) elNew.textContent = newCount;
+  if (elInProg) elInProg.textContent = inProgressCount;
+  if (elResolved) elResolved.textContent = resolvedCount;
+  if (elRating) elRating.textContent = avgRating + ' ★';
+  if (elBadgeCount) {
+    elBadgeCount.textContent = newCount;
+    elBadgeCount.style.display = newCount > 0 ? 'inline-block' : 'none';
+  }
+
+  // 3. Filter Inquiries
+  const filterOutlet = document.getElementById('cs-filter-outlet') ? document.getElementById('cs-filter-outlet').value : 'all';
+  const filterCategory = document.getElementById('cs-filter-category') ? document.getElementById('cs-filter-category').value : 'all';
+  const filterStatus = document.getElementById('cs-filter-status') ? document.getElementById('cs-filter-status').value : 'all';
+  const searchKeyword = (document.getElementById('cs-search-input') ? document.getElementById('cs-search-input').value : '').toLowerCase().trim();
+
+  const filtered = allInquiries.filter(item => {
+    if (filterOutlet !== 'all' && item.outlet_id !== filterOutlet) return false;
+    if (filterCategory !== 'all' && item.category !== filterCategory) return false;
+    if (filterStatus !== 'all' && item.status !== filterStatus) return false;
+    if (searchKeyword) {
+      const matchName = (item.name || '').toLowerCase().includes(searchKeyword);
+      const matchPhone = (item.phone || '').toLowerCase().includes(searchKeyword);
+      const matchId = (item.id || '').toLowerCase().includes(searchKeyword);
+      const matchReceipt = (item.receipt_number || '').toLowerCase().includes(searchKeyword);
+      const matchMsg = (item.message || '').toLowerCase().includes(searchKeyword);
+      const matchOutlet = (item.outlet_name || '').toLowerCase().includes(searchKeyword);
+      if (!matchName && !matchPhone && !matchId && !matchReceipt && !matchMsg && !matchOutlet) return false;
+    }
+    return true;
+  });
+
+  const tableCountBadge = document.getElementById('cs-table-count-badge');
+  if (tableCountBadge) tableCountBadge.textContent = `${filtered.length} Data`;
+
+  // 4. Render Table or Empty State
+  if (filtered.length === 0) {
+    tbody.innerHTML = '';
+    if (emptyState) emptyState.style.display = 'block';
+    return;
+  }
+
+  if (emptyState) emptyState.style.display = 'none';
+
+  tbody.innerHTML = filtered.map(item => {
+    const catMeta = CS_CATEGORY_LABELS[item.category] || CS_CATEGORY_LABELS['other'];
+    const dateObj = item.created_at ? new Date(item.created_at) : new Date();
+    const dateFormatted = dateObj.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) + ' WITA';
+    
+    // Rating Stars
+    const ratingStars = '★'.repeat(Math.max(1, Math.min(5, Number(item.rating) || 5)));
+
+    // WhatsApp Direct Link
+    const waReplyText = encodeURIComponent(
+      `Halo Kak ${item.name},\n\nTerima kasih telah menghubungi Customer Service Amanda Brownies Balikpapan terkait tiket *#${item.id}*.\n\nKami siap membantu kendala / pesanan Kakak...`
+    );
+    const waLink = `https://wa.me/${item.phone}?text=${waReplyText}`;
+
+    // Receipt Column
+    let receiptCell = '<span style="color: var(--text-dim); font-size: 12px;">-</span>';
+    if (item.receipt_image) {
+      receiptCell = `
+        <div style="display: flex; flex-direction: column; align-items: center; gap: 4px;">
+          <button type="button" onclick="openCsReceiptModal('${item.id}')" title="Klik untuk memperbesar struk" style="background: none; border: 1px solid var(--border-sand); padding: 2px; border-radius: 6px; cursor: pointer;">
+            <img src="${item.receipt_image}" alt="Thumbnail Struk" style="width: 44px; height: 44px; object-fit: cover; border-radius: 4px; display: block;">
+          </button>
+          <span style="font-size: 10.5px; font-weight: 700; color: var(--primary-olive); cursor: pointer;" onclick="openCsReceiptModal('${item.id}')">
+            <i class="fa-solid fa-magnifying-glass-plus"></i> Lihat
+          </span>
+        </div>
+      `;
+    } else if (item.receipt_number) {
+      receiptCell = `<span style="font-size: 11.5px; font-weight: 600; color: var(--text-muted); background: #f3f4f6; padding: 2px 6px; border-radius: 4px;">#${item.receipt_number}</span>`;
+    }
+
+    // Status Badge Color & Select
+    let statusBadgeStyle = 'background: #fee2e2; color: #dc2626; border-color: #fca5a5;';
+    if (item.status === 'IN_PROGRESS') {
+      statusBadgeStyle = 'background: #fef3c7; color: #d97706; border-color: #fde68a;';
+    } else if (item.status === 'RESOLVED') {
+      statusBadgeStyle = 'background: #dcfce7; color: #16a34a; border-color: #86efac;';
+    }
+
+    return `
+      <tr style="border-bottom: 1px solid var(--border-sand-light); font-size: 13px;">
+        <td style="padding: 12px 16px; vertical-align: top;">
+          <div style="font-weight: 700; color: var(--primary-olive); font-family: monospace; font-size: 13px;">#${item.id}</div>
+          <div style="font-size: 11px; color: var(--text-dim); margin-top: 2px;">${dateFormatted}</div>
+        </td>
+        
+        <td style="padding: 12px 16px; vertical-align: top;">
+          <div style="font-weight: 700; color: var(--text-main);">${escapeHtml(item.name)}</div>
+          <a href="${waLink}" target="_blank" style="display: inline-flex; align-items: center; gap: 4px; font-size: 12px; color: #16a34a; font-weight: 600; text-decoration: none; margin-top: 2px;">
+            <i class="fa-brands fa-whatsapp"></i> +${item.phone}
+          </a>
+        </td>
+
+        <td style="padding: 12px 16px; vertical-align: top;">
+          <div style="font-size: 12.5px; font-weight: 600; color: var(--text-main);">${escapeHtml(item.outlet_name || 'Amanda Balikpapan')}</div>
+          ${item.receipt_number ? `<div style="font-size: 11px; color: var(--text-dim); margin-top: 2px;">No Struk: <strong>${escapeHtml(item.receipt_number)}</strong></div>` : ''}
+        </td>
+
+        <td style="padding: 12px 16px; vertical-align: top;">
+          <span style="display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 700; color: #fff; background: ${catMeta.badgeColor}; padding: 3px 8px; border-radius: 12px;">
+            <i class="${catMeta.icon}"></i> ${catMeta.label}
+          </span>
+          <div style="color: #eab308; font-size: 12px; margin-top: 4px;" title="Rating: ${item.rating || 5} dari 5 Bintang">
+            ${ratingStars} <span style="font-size: 11px; color: var(--text-dim); font-weight: 600;">(${item.rating || 5}/5)</span>
+          </div>
+        </td>
+
+        <td style="padding: 12px 16px; vertical-align: top; max-width: 280px;">
+          <div style="font-size: 12.5px; line-height: 1.5; color: var(--text-main); background: #fdfbf7; padding: 8px 10px; border-radius: 6px; border: 1px solid var(--border-sand-light);">
+            ${escapeHtml(item.message)}
+          </div>
+        </td>
+
+        <td style="padding: 12px 16px; text-align: center; vertical-align: top;">
+          ${receiptCell}
+        </td>
+
+        <td style="padding: 12px 16px; text-align: center; vertical-align: top;">
+          <select onchange="changeCsStatus('${item.id}', this.value)" style="padding: 4px 8px; font-size: 11.5px; font-weight: 700; border-radius: 8px; border: 1px solid; cursor: pointer; ${statusBadgeStyle}">
+            <option value="NEW" ${item.status === 'NEW' ? 'selected' : ''}>🔴 Baru</option>
+            <option value="IN_PROGRESS" ${item.status === 'IN_PROGRESS' ? 'selected' : ''}>🟡 Diproses</option>
+            <option value="RESOLVED" ${item.status === 'RESOLVED' ? 'selected' : ''}>🟢 Selesai</option>
+          </select>
+        </td>
+
+        <td style="padding: 12px 16px; text-align: right; vertical-align: top;">
+          <div style="display: inline-flex; gap: 6px;">
+            <a href="${waLink}" target="_blank" class="btn-secondary-sm" style="color: #16a34a; border-color: #86efac; text-decoration: none; padding: 5px 9px;" title="Balas via WhatsApp">
+              <i class="fa-brands fa-whatsapp"></i>
+            </a>
+            <button type="button" class="btn-secondary-sm" onclick="deleteCsInquiry('${item.id}')" style="color: #dc2626; border-color: #fca5a5; padding: 5px 9px;" title="Hapus Tiket">
+              <i class="fa-solid fa-trash-can"></i>
+            </button>
+          </div>
+        </td>
+      </tr>
+    `;
+  }).join('');
+}
+
+function openCsReceiptModal(inquiryId) {
+  const rawList = typeof getCsInquiries === 'function' ? getCsInquiries() : (typeof AMANDA_CS_INQUIRIES !== 'undefined' ? AMANDA_CS_INQUIRIES : []);
+  const item = rawList.find(i => i.id === inquiryId);
+  if (!item) return;
+
+  document.getElementById('cs-modal-ticket-title').textContent = `Bukti Struk Pembelian - #${item.id}`;
+  document.getElementById('cs-modal-customer-name').textContent = item.name || '-';
+  document.getElementById('cs-modal-receipt-no').textContent = item.receipt_number || 'Tidak Ada Nomor Struk';
+  document.getElementById('cs-modal-outlet-name').textContent = item.outlet_name || 'Amanda Brownies';
+
+  const waReplyText = encodeURIComponent(
+    `Halo Kak ${item.name}, kami menindaklanjuti foto struk yang telah Kakak kirimkan pada tiket *#${item.id}*...`
+  );
+  document.getElementById('cs-modal-wa-btn').href = `https://wa.me/${item.phone}?text=${waReplyText}`;
+
+  const imgElem = document.getElementById('cs-modal-receipt-img');
+  const emptyElem = document.getElementById('cs-modal-receipt-empty');
+  const downloadBtn = document.getElementById('cs-modal-download-btn');
+
+  if (item.receipt_image) {
+    imgElem.src = item.receipt_image;
+    imgElem.style.display = 'block';
+    emptyElem.style.display = 'none';
+    downloadBtn.href = item.receipt_image;
+    downloadBtn.download = `Struk_${item.receipt_number || item.id}.jpg`;
+    downloadBtn.style.display = 'inline-flex';
+  } else {
+    imgElem.src = '';
+    imgElem.style.display = 'none';
+    emptyElem.style.display = 'block';
+    downloadBtn.style.display = 'none';
+  }
+
+  openModal('cs-receipt-modal');
+}
+
+async function changeCsStatus(inquiryId, newStatus) {
+  if (typeof updateCsInquiryStatus === 'function') {
+    updateCsInquiryStatus(inquiryId, newStatus);
+    
+    // Sync to Supabase Cloud if active
+    if (typeof isSupabaseActive === 'function' && isSupabaseActive() && typeof supabaseClient !== 'undefined' && supabaseClient) {
+      try {
+        await supabaseClient.from('cs_inquiries').update({ status: newStatus }).eq('id', inquiryId);
+      } catch (e) {
+        console.warn('Supabase status update error:', e);
+      }
+    }
+    
+    showCmsToast(`Status tiket #${inquiryId} diperbarui menjadi ${newStatus}.`, 'Status Diperbarui');
+    renderCsManager();
+    renderDashboard();
+  }
+}
+
+async function deleteCsInquiry(inquiryId) {
+  if (!confirm(`Apakah Anda yakin ingin menghapus tiket #${inquiryId}? Tindakan ini tidak dapat dibatalkan.`)) return;
+
+  const rawList = typeof getCsInquiries === 'function' ? getCsInquiries() : (typeof AMANDA_CS_INQUIRIES !== 'undefined' ? AMANDA_CS_INQUIRIES : []);
+  const updatedList = rawList.filter(i => i.id !== inquiryId);
+
+  if (typeof saveCsInquiries === 'function') {
+    saveCsInquiries(updatedList, true);
+  }
+
+  // Delete from Supabase if connected
+  if (typeof pushToSupabase === 'function' && typeof isSupabaseActive === 'function' && isSupabaseActive()) {
+    try {
+      await pushToSupabase('cs_inquiries', inquiryId, 'delete');
+    } catch (e) {
+      console.warn('Supabase delete inquiry error:', e);
+    }
+  }
+
+  showCmsToast(`Tiket #${inquiryId} berhasil dihapus.`, 'Tiket Dihapus');
+  renderCsManager();
+  renderDashboard();
+}
+
+// ===================================================================
+// EXCEL / CSV EXPORT ENGINE FOR CS DATA ANALYTICS
+// ===================================================================
+function exportCsToExcel() {
+  const rawList = typeof getCsInquiries === 'function' ? getCsInquiries() : (typeof AMANDA_CS_INQUIRIES !== 'undefined' ? AMANDA_CS_INQUIRIES : []);
+  if (!rawList || rawList.length === 0) {
+    alert('Belum ada data tiket CS untuk diekspor.');
+    return;
+  }
+
+  // Prepare CSV Headers
+  const headers = [
+    'No Tiket',
+    'Tanggal & Waktu (WITA)',
+    'Nama Pelanggan',
+    'Nomor WhatsApp',
+    'Outlet Amanda',
+    'Kategori Pengaduan',
+    'No Struk Pembelian',
+    'Ada Lampiran Foto Struk',
+    'Rating Kepuasan (1-5)',
+    'Pesan & Keterangan',
+    'Status Tiket'
+  ];
+
+  // Map rows
+  const rows = rawList.map(item => {
+    const catMeta = CS_CATEGORY_LABELS[item.category] || CS_CATEGORY_LABELS['other'];
+    const dateObj = item.created_at ? new Date(item.created_at) : new Date();
+    const dateStr = dateObj.toLocaleDateString('id-ID', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+    
+    return [
+      item.id || '',
+      dateStr,
+      item.name || '',
+      '\'' + (item.phone || ''), // Leading apostrophe to preserve WhatsApp numbers as string in Excel
+      item.outlet_name || 'Amanda Balikpapan',
+      catMeta.label,
+      item.receipt_number || '-',
+      item.receipt_image ? 'YA (Foto Terlampir)' : 'TIDAK',
+      item.rating || 5,
+      (item.message || '').replace(/\r?\n/g, ' '),
+      item.status || 'NEW'
+    ];
+  });
+
+  // Build CSV String with UTF-8 BOM
+  const csvContent = '\uFEFF' + [
+    headers.map(escapeCsvCell).join(','),
+    ...rows.map(row => row.map(escapeCsvCell).join(','))
+  ].join('\r\n');
+
+  // Trigger download as CSV/Excel compatible file
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const now = new Date();
+  const timestamp = now.toISOString().slice(0, 10).replace(/-/g, '') + '_' + String(now.getHours()).padStart(2, '0') + String(now.getMinutes()).padStart(2, '0');
+  const filename = `Laporan_CS_Amanda_Balikpapan_${timestamp}.csv`;
+
+  const link = document.createElement('a');
+  link.setAttribute('href', url);
+  link.setAttribute('download', filename);
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+
+  showCmsToast(`Laporan data CS berhasil diekspor ke format Excel (${filename})!`, 'Ekspor Selesai');
+}
+
+function escapeCsvCell(cell) {
+  if (cell === null || cell === undefined) return '""';
+  const str = String(cell);
+  if (str.includes(',') || str.includes('"') || str.includes('\n') || str.includes('\r')) {
+    return `"${str.replace(/"/g, '""')}"`;
+  }
+  return `"${str}"`;
+}
+
+function escapeHtml(text) {
+  if (!text) return '';
+  return String(text)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
 
 

@@ -531,7 +531,8 @@ function saveStoredData(key, data, syncCloud = true) {
         'amanda_outlet_categories': 'outlet_categories',
         'amanda_ticker': 'ticker',
         'amanda_platform_tenants': 'tenants',
-        'amanda_invoices': 'invoices'
+        'amanda_invoices': 'invoices',
+        'amanda_cs_inquiries': 'cs_inquiries'
       };
       const tableName = tableMap[key];
       if (tableName && Array.isArray(data)) {
@@ -554,6 +555,38 @@ function notifyAmandaDataChanged() {
   }, 120);
 }
 
+// Default Customer Service Sample Inquiries
+const DEFAULT_CS_INQUIRIES = [
+  {
+    id: "CS-BPN-K8F91A",
+    name: "Hendra Wijaya",
+    phone: "6281234567890",
+    outlet_id: "out-bpn-01",
+    outlet_name: "Amanda Brownies Outlet MT Haryono",
+    category: "catering",
+    receipt_number: "RCP-202610-0012",
+    receipt_image: null,
+    message: "Saya ingin memesan 40 box Brownies Kukus Original & Cheese Cream untuk acara syukuran kantor hari Sabtu depan.",
+    rating: 5,
+    status: "NEW",
+    created_at: "2026-10-06T09:30:00.000Z"
+  },
+  {
+    id: "CS-BPN-L2X77B",
+    name: "Siti Rahmawati",
+    phone: "6285299887766",
+    outlet_id: "out-bpn-04",
+    outlet_name: "Amanda Brownies Cabang Sepinggan (Akses Bandara)",
+    category: "complaint",
+    receipt_number: "RCP-202610-0089",
+    receipt_image: null,
+    message: "Tadi beli varian Sarikaya Pandan di booth bandara jam 14.00, struk terlampir. Mohon konfirmasi ketersediaan box oleh-oleh tambahan.",
+    rating: 4,
+    status: "IN_PROGRESS",
+    created_at: "2026-10-05T14:15:00.000Z"
+  }
+];
+
 // Global active datasets loaded from localStorage or defaults
 let AMANDA_OUTLETS = [];
 let AMANDA_OUTLET_CATEGORIES = [];
@@ -561,6 +594,7 @@ let AMANDA_PROMOS = [];
 let AMANDA_PRICELISTS = [];
 let AMANDA_PRODUCTS = [];
 let AMANDA_TICKER = [];
+let AMANDA_CS_INQUIRIES = [];
 
 function reloadAmandaData() {
   AMANDA_OUTLET_CATEGORIES = getStoredData('amanda_outlet_categories', DEFAULT_OUTLET_CATEGORIES);
@@ -574,6 +608,7 @@ function reloadAmandaData() {
   AMANDA_PRICELISTS = getStoredData('amanda_pricelists', DEFAULT_PRICELISTS);
   AMANDA_PRODUCTS = getStoredData('amanda_products', DEFAULT_PRODUCTS);
   AMANDA_TICKER = getStoredData('amanda_ticker', DEFAULT_TICKER);
+  AMANDA_CS_INQUIRIES = getStoredData('amanda_cs_inquiries', DEFAULT_CS_INQUIRIES);
 }
 
 // Initial data load
@@ -589,6 +624,7 @@ function resetAmandaDataToDefault() {
   localStorage.removeItem('amanda_ticker');
   localStorage.removeItem('amanda_rental_sub');
   localStorage.removeItem('amanda_invoices');
+  localStorage.removeItem('amanda_cs_inquiries');
   reloadAmandaData();
   notifyAmandaDataChanged();
 }
@@ -894,5 +930,39 @@ function getPaymentMethods() {
 
 function savePaymentMethods(methods, syncCloud = true) {
   saveStoredData('amanda_platform_payments', methods, syncCloud);
+}
+
+// ===================================================================
+// CUSTOMER SERVICE (CS) DATA HELPERS
+// ===================================================================
+function getCsInquiries() {
+  return getStoredData('amanda_cs_inquiries', DEFAULT_CS_INQUIRIES);
+}
+
+function saveCsInquiries(list, syncCloud = true) {
+  saveStoredData('amanda_cs_inquiries', list, syncCloud);
+}
+
+function saveLocalCsInquiry(inquiry) {
+  const current = getCsInquiries();
+  const existingIdx = current.findIndex(i => i.id === inquiry.id);
+  if (existingIdx >= 0) {
+    current[existingIdx] = inquiry;
+  } else {
+    current.unshift(inquiry);
+  }
+  saveCsInquiries(current, true);
+}
+
+function updateCsInquiryStatus(id, newStatus) {
+  const current = getCsInquiries();
+  const item = current.find(i => i.id === id);
+  if (item) {
+    item.status = newStatus;
+    item.updated_at = new Date().toISOString();
+    saveCsInquiries(current, true);
+    return true;
+  }
+  return false;
 }
 

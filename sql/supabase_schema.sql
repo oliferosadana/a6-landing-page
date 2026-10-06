@@ -120,6 +120,24 @@ CREATE TABLE IF NOT EXISTS public.platform_settings (
     updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
+-- 8. TABEL LAYANAN PELANGGAN & PENGADUAN CS (CS INQUIRIES)
+CREATE TABLE IF NOT EXISTS public.cs_inquiries (
+    id TEXT PRIMARY KEY,
+    name TEXT NOT NULL,
+    phone TEXT NOT NULL,
+    outlet_id TEXT,
+    outlet_name TEXT,
+    category TEXT NOT NULL, -- catering, stock, complaint, suggestion, promo, other
+    receipt_number TEXT,
+    receipt_image TEXT,
+    message TEXT NOT NULL,
+    rating INT DEFAULT 5,
+    status TEXT NOT NULL DEFAULT 'NEW', -- NEW, IN_PROGRESS, RESOLVED, CLOSED
+    admin_notes TEXT,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
 -- ===================================================================
 -- ROW LEVEL SECURITY (RLS) POLICIES
 -- Aktifkan RLS dengan akses publik anon untuk prototype/production
@@ -132,6 +150,7 @@ ALTER TABLE public.outlet_categories ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.ticker ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.invoices ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.platform_settings ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.cs_inquiries ENABLE ROW LEVEL SECURITY;
 
 -- Izinkan SELECT / INSERT / UPDATE / DELETE untuk Anon Key (Frontend Web)
 DROP POLICY IF EXISTS "Public full access to tenants" ON public.tenants;
@@ -157,6 +176,9 @@ CREATE POLICY "Public full access to invoices" ON public.invoices FOR ALL USING 
 
 DROP POLICY IF EXISTS "Public full access to settings" ON public.platform_settings;
 CREATE POLICY "Public full access to settings" ON public.platform_settings FOR ALL USING (true) WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Public full access to cs_inquiries" ON public.cs_inquiries;
+CREATE POLICY "Public full access to cs_inquiries" ON public.cs_inquiries FOR ALL USING (true) WITH CHECK (true);
 
 -- Enable Realtime for all tables (Aman dijalankan berulang kali)
 DO $$
@@ -185,4 +207,8 @@ BEGIN
   IF NOT EXISTS (SELECT 1 FROM pg_publication_tables WHERE pubname = 'supabase_realtime' AND tablename = 'platform_settings') THEN
     ALTER PUBLICATION supabase_realtime ADD TABLE public.platform_settings;
   END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_publication_tables WHERE pubname = 'supabase_realtime' AND tablename = 'cs_inquiries') THEN
+    ALTER PUBLICATION supabase_realtime ADD TABLE public.cs_inquiries;
+  END IF;
 END $$;
+

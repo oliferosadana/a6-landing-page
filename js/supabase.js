@@ -432,6 +432,32 @@ async function pullAllDataFromSupabase() {
       saveInvoiceHistory(invoices, false);
     }
 
+    // 7. Fetch Customer Service Inquiries (cs_inquiries)
+    const { data: dbCs, error: errCs } = await supabaseClient
+      .from('cs_inquiries')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (!errCs && dbCs && dbCs.length > 0) {
+      AMANDA_CS_INQUIRIES = dbCs.map(cs => ({
+        id: cs.id,
+        name: cs.name,
+        phone: cs.phone,
+        outlet_id: cs.outlet_id,
+        outlet_name: cs.outlet_name,
+        category: cs.category,
+        receipt_number: cs.receipt_number,
+        receipt_image: cs.receipt_image,
+        message: cs.message,
+        rating: Number(cs.rating) || 5,
+        status: cs.status || 'NEW',
+        created_at: cs.created_at
+      }));
+      if (typeof saveCsInquiries === 'function') {
+        saveCsInquiries(AMANDA_CS_INQUIRIES, false);
+      }
+    }
+
     isInitialSupabaseSyncDone = true;
     notifyAmandaDataChanged();
     console.log('✅ Data berhasil dimuat langsung dari Supabase PostgreSQL!');
@@ -564,6 +590,22 @@ async function pushToSupabase(tableName, payload, operation = 'upsert') {
         payment_method_name: inv.paymentMethodName || inv.payment_method_name,
         status: inv.status || 'PENDING',
         paid_at: inv.paidAt || inv.paid_at || null
+      }));
+    } else if (tableName === 'cs_inquiries') {
+      const list = Array.isArray(payload) ? payload : [payload];
+      dbPayload = list.map(cs => ({
+        id: cs.id,
+        name: cs.name,
+        phone: cs.phone,
+        outlet_id: cs.outlet_id || cs.outletId,
+        outlet_name: cs.outlet_name || cs.outletName,
+        category: cs.category,
+        receipt_number: cs.receipt_number || cs.receiptNumber || '',
+        receipt_image: cs.receipt_image || cs.receiptImage || null,
+        message: cs.message,
+        rating: Number(cs.rating) || 5,
+        status: cs.status || 'NEW',
+        created_at: cs.created_at || new Date().toISOString()
       }));
     }
 

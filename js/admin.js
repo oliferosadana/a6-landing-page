@@ -1672,16 +1672,26 @@ function renderCsManager() {
     );
     const waLink = `https://wa.me/${item.phone}?text=${waReplyText}`;
 
-    // Receipt Column
+    // Receipt Column with Multi-Image Support
+    const imagesList = Array.isArray(item.receipt_images) && item.receipt_images.length > 0
+      ? item.receipt_images
+      : (item.receipt_image ? [item.receipt_image] : []);
+
     let receiptCell = '<span style="color: var(--text-dim); font-size: 12px;">-</span>';
-    if (item.receipt_image) {
+    if (imagesList.length > 0) {
+      const thumbHtml = imagesList.map((imgSrc, idx) => `
+        <button type="button" onclick="openCsReceiptModal('${item.id}', ${idx})" title="Foto ${idx + 1} (Klik untuk perbesar)" style="background: none; border: 1px solid var(--border-sand); padding: 2px; border-radius: 6px; cursor: pointer;">
+          <img src="${imgSrc}" alt="Foto ${idx + 1}" style="width: 36px; height: 36px; object-fit: cover; border-radius: 4px; display: block;">
+        </button>
+      `).join('');
+
       receiptCell = `
         <div style="display: flex; flex-direction: column; align-items: center; gap: 4px;">
-          <button type="button" onclick="openCsReceiptModal('${item.id}')" title="Klik untuk memperbesar struk" style="background: none; border: 1px solid var(--border-sand); padding: 2px; border-radius: 6px; cursor: pointer;">
-            <img src="${item.receipt_image}" alt="Thumbnail Struk" style="width: 44px; height: 44px; object-fit: cover; border-radius: 4px; display: block;">
-          </button>
-          <span style="font-size: 10.5px; font-weight: 700; color: var(--primary-olive); cursor: pointer;" onclick="openCsReceiptModal('${item.id}')">
-            <i class="fa-solid fa-magnifying-glass-plus"></i> Lihat
+          <div style="display: flex; gap: 4px; justify-content: center; flex-wrap: wrap;">
+            ${thumbHtml}
+          </div>
+          <span style="font-size: 10.5px; font-weight: 700; color: var(--primary-olive); cursor: pointer;" onclick="openCsReceiptModal('${item.id}', 0)">
+            <i class="fa-solid fa-images"></i> ${imagesList.length} Foto Bukti
           </span>
         </div>
       `;
@@ -1758,40 +1768,80 @@ function renderCsManager() {
   }).join('');
 }
 
-function openCsReceiptModal(inquiryId) {
+let activeCsModalImages = [];
+let activeCsModalIndex = 0;
+let activeCsModalItem = null;
+
+function openCsReceiptModal(inquiryId, initialIndex = 0) {
   const rawList = typeof getCsInquiries === 'function' ? getCsInquiries() : (typeof AMANDA_CS_INQUIRIES !== 'undefined' ? AMANDA_CS_INQUIRIES : []);
   const item = rawList.find(i => i.id === inquiryId);
   if (!item) return;
 
-  document.getElementById('cs-modal-ticket-title').textContent = `Bukti Struk Pembelian - #${item.id}`;
+  activeCsModalItem = item;
+  activeCsModalImages = Array.isArray(item.receipt_images) && item.receipt_images.length > 0
+    ? item.receipt_images
+    : (item.receipt_image ? [item.receipt_image] : []);
+  activeCsModalIndex = initialIndex >= 0 && initialIndex < activeCsModalImages.length ? initialIndex : 0;
+
+  document.getElementById('cs-modal-ticket-title').textContent = `Bukti Lampiran Foto - #${item.id}`;
   document.getElementById('cs-modal-customer-name').textContent = item.name || '-';
   document.getElementById('cs-modal-receipt-no').textContent = item.receipt_number || 'Tidak Ada Nomor Struk';
   document.getElementById('cs-modal-outlet-name').textContent = item.outlet_name || 'Amanda Brownies';
 
   const waReplyText = encodeURIComponent(
-    `Halo Kak ${item.name}, kami menindaklanjuti foto struk yang telah Kakak kirimkan pada tiket *#${item.id}*...`
+    `Halo Kak ${item.name}, kami menindaklanjuti foto bukti / struk yang telah Kakak kirimkan pada tiket *#${item.id}*...`
   );
   document.getElementById('cs-modal-wa-btn').href = `https://wa.me/${item.phone}?text=${waReplyText}`;
 
+  updateCsReceiptModalView();
+  openModal('cs-receipt-modal');
+}
+
+function selectCsModalImage(idx) {
+  if (idx >= 0 && idx < activeCsModalImages.length) {
+    activeCsModalIndex = idx;
+    updateCsReceiptModalView();
+  }
+}
+
+function updateCsReceiptModalView() {
   const imgElem = document.getElementById('cs-modal-receipt-img');
   const emptyElem = document.getElementById('cs-modal-receipt-empty');
   const downloadBtn = document.getElementById('cs-modal-download-btn');
+  const galleryStrip = document.getElementById('cs-modal-gallery-strip');
 
-  if (item.receipt_image) {
-    imgElem.src = item.receipt_image;
+  if (activeCsModalImages.length > 0) {
+    const currentSrc = activeCsModalImages[activeCsModalIndex] || activeCsModalImages[0];
+    imgElem.src = currentSrc;
     imgElem.style.display = 'block';
     emptyElem.style.display = 'none';
-    downloadBtn.href = item.receipt_image;
-    downloadBtn.download = `Struk_${item.receipt_number || item.id}.jpg`;
+    downloadBtn.href = currentSrc;
+    downloadBtn.download = `Bukti_${activeCsModalItem ? activeCsModalItem.id : 'foto'}_${activeCsModalIndex + 1}.jpg`;
     downloadBtn.style.display = 'inline-flex';
+
+    if (galleryStrip) {
+      if (activeCsModalImages.length > 1) {
+        galleryStrip.innerHTML = activeCsModalImages.map((src, idx) => `
+          <button type="button" onclick="selectCsModalImage(${idx})" style="border: 2px solid ${idx === activeCsModalIndex ? 'var(--primary-gold)' : 'rgba(255,255,255,0.3)'}; border-radius: 6px; padding: 2px; background: none; cursor: pointer; transform: ${idx === activeCsModalIndex ? 'scale(1.08)' : 'none'}; transition: all 0.15s;" title="Lihat Foto ${idx + 1}">
+            <img src="${src}" alt="Thumb ${idx + 1}" style="width: 46px; height: 46px; object-fit: cover; border-radius: 4px; display: block;">
+          </button>
+        `).join('');
+        galleryStrip.style.display = 'flex';
+      } else {
+        galleryStrip.innerHTML = '';
+        galleryStrip.style.display = 'none';
+      }
+    }
   } else {
     imgElem.src = '';
     imgElem.style.display = 'none';
     emptyElem.style.display = 'block';
     downloadBtn.style.display = 'none';
+    if (galleryStrip) {
+      galleryStrip.innerHTML = '';
+      galleryStrip.style.display = 'none';
+    }
   }
-
-  openModal('cs-receipt-modal');
 }
 
 async function changeCsStatus(inquiryId, newStatus) {

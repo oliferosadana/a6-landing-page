@@ -130,6 +130,7 @@ CREATE TABLE IF NOT EXISTS public.cs_inquiries (
     category TEXT NOT NULL, -- catering, stock, complaint, suggestion, promo, other
     receipt_number TEXT,
     receipt_image TEXT,
+    receipt_images JSONB DEFAULT '[]'::jsonb,
     message TEXT NOT NULL,
     rating INT DEFAULT 5,
     status TEXT NOT NULL DEFAULT 'NEW', -- NEW, IN_PROGRESS, RESOLVED, CLOSED

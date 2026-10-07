@@ -1380,12 +1380,16 @@
         </div>
 
         <!-- Receipt Image Container -->
-        <div style="text-align: center; background: #1a1a1a; border-radius: 10px; padding: 12px; min-height: 260px; display: flex; align-items: center; justify-content: center; position: relative;">
-          <img id="cs-modal-receipt-img" src="" alt="Foto Struk Pembelian" style="max-width: 100%; max-height: 480px; object-fit: contain; border-radius: 6px; box-shadow: 0 4px 16px rgba(0,0,0,0.4);">
+        <div style="text-align: center; background: #1a1a1a; border-radius: 10px; padding: 12px; min-height: 260px; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative;">
+          <img id="cs-modal-receipt-img" src="" alt="Foto Struk Pembelian" style="max-width: 100%; max-height: 440px; object-fit: contain; border-radius: 6px; box-shadow: 0 4px 16px rgba(0,0,0,0.4);">
+          
           <div id="cs-modal-receipt-empty" style="display: none; color: #aaa; font-size: 13px;">
             <i class="fa-solid fa-image-slash" style="font-size: 32px; display: block; margin-bottom: 8px;"></i>
-            <span>Tidak ada foto struk dilampirkan oleh pelanggan</span>
+            <span>Tidak ada foto bukti dilampirkan oleh pelanggan</span>
           </div>
+
+          <!-- Multi-Image Thumbnails / Tab Switcher -->
+          <div id="cs-modal-gallery-strip" style="display: flex; gap: 8px; margin-top: 12px; justify-content: center; flex-wrap: wrap;"></div>
         </div>
       </div>
 

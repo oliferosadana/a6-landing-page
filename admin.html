@@ -1351,11 +1351,11 @@
 
   <!-- ==================== MODAL: LIHAT FOTO STRUK CS ==================== -->
   <div class="cms-modal-overlay" id="cs-receipt-modal" onclick="closeModalOnOverlay(event, 'cs-receipt-modal')">
-    <div class="cms-modal-card" style="max-width: 620px;">
+    <div class="cms-modal-card" style="max-width: 760px;">
       <div class="modal-head">
         <div>
-          <h3 id="cs-modal-ticket-title">Bukti Lampiran Struk Pembelian</h3>
-          <span id="cs-modal-ticket-sub" style="font-size: 12px; color: var(--text-muted);">No Tiket CS</span>
+          <h3 id="cs-modal-ticket-title">Bukti Lampiran Foto Pengaduan</h3>
+          <span id="cs-modal-ticket-sub" style="font-size: 12px; color: var(--text-muted);">Klik foto untuk memperbesar / zoom</span>
         </div>
         <button class="modal-close-btn" onclick="closeModal('cs-receipt-modal')"><i class="fa-solid fa-xmark"></i></button>
       </div>
@@ -1380,9 +1380,15 @@
         </div>
 
         <!-- Receipt Image Container -->
-        <div style="text-align: center; background: #1a1a1a; border-radius: 10px; padding: 12px; min-height: 260px; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative;">
-          <img id="cs-modal-receipt-img" src="" alt="Foto Struk Pembelian" style="max-width: 100%; max-height: 440px; object-fit: contain; border-radius: 6px; box-shadow: 0 4px 16px rgba(0,0,0,0.4);">
+        <div style="text-align: center; background: #18181b; border-radius: 10px; padding: 14px; min-height: 280px; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; overflow: hidden;">
+          <div id="cs-modal-img-viewport" style="max-height: 520px; overflow: auto; width: 100%; display: flex; align-items: center; justify-content: center;">
+            <img id="cs-modal-receipt-img" src="" alt="Foto Struk / Bukti" onclick="toggleCsReceiptZoom()" title="Klik untuk Zoom In / Out" style="max-width: 100%; max-height: 460px; object-fit: contain; border-radius: 6px; box-shadow: 0 4px 20px rgba(0,0,0,0.5); cursor: zoom-in; transition: transform 0.25s ease, max-height 0.25s ease;">
+          </div>
           
+          <div id="cs-modal-zoom-hint" style="font-size: 11.5px; color: #a1a1aa; margin-top: 8px;">
+            <i class="fa-solid fa-magnifying-glass-plus"></i> Klik foto untuk memperbesar (Zoom In / Out)
+          </div>
+
           <div id="cs-modal-receipt-empty" style="display: none; color: #aaa; font-size: 13px;">
             <i class="fa-solid fa-image-slash" style="font-size: 32px; display: block; margin-bottom: 8px;"></i>
             <span>Tidak ada foto bukti dilampirkan oleh pelanggan</span>

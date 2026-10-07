@@ -1362,13 +1362,22 @@ function confirmResetDefault() {
 // ===================================================================
 // MODAL & TOAST HELPERS
 // ===================================================================
+function openModal(modalId) {
+  const modal = document.getElementById(modalId);
+  if (modal) {
+    modal.classList.add('active');
+  }
+}
+
 function closeModal(modalId) {
   const modal = document.getElementById(modalId);
-  if (modal) modal.classList.remove('active');
+  if (modal) {
+    modal.classList.remove('active');
+  }
 }
 
 function closeModalOnOverlay(e, modalId) {
-  if (e.target.id === modalId) {
+  if (e.target.id === modalId || e.target.classList.contains('cms-modal-overlay')) {
     closeModal(modalId);
   }
 }
@@ -1771,6 +1780,40 @@ function renderCsManager() {
 let activeCsModalImages = [];
 let activeCsModalIndex = 0;
 let activeCsModalItem = null;
+let isCsReceiptZoomed = false;
+
+function toggleCsReceiptZoom() {
+  const imgElem = document.getElementById('cs-modal-receipt-img');
+  const hintElem = document.getElementById('cs-modal-zoom-hint');
+  if (!imgElem) return;
+
+  isCsReceiptZoomed = !isCsReceiptZoomed;
+  if (isCsReceiptZoomed) {
+    imgElem.style.transform = 'scale(1.85)';
+    imgElem.style.cursor = 'zoom-out';
+    imgElem.style.maxHeight = 'none';
+    if (hintElem) hintElem.innerHTML = '<i class="fa-solid fa-magnifying-glass-minus"></i> Klik foto lagi untuk mengecilkan ke ukuran normal';
+  } else {
+    imgElem.style.transform = 'none';
+    imgElem.style.cursor = 'zoom-in';
+    imgElem.style.maxHeight = '460px';
+    if (hintElem) hintElem.innerHTML = '<i class="fa-solid fa-magnifying-glass-plus"></i> Klik foto untuk memperbesar (Zoom In / Out)';
+  }
+}
+
+function resetCsReceiptZoom() {
+  isCsReceiptZoomed = false;
+  const imgElem = document.getElementById('cs-modal-receipt-img');
+  const hintElem = document.getElementById('cs-modal-zoom-hint');
+  if (imgElem) {
+    imgElem.style.transform = 'none';
+    imgElem.style.cursor = 'zoom-in';
+    imgElem.style.maxHeight = '460px';
+  }
+  if (hintElem) {
+    hintElem.innerHTML = '<i class="fa-solid fa-magnifying-glass-plus"></i> Klik foto untuk memperbesar (Zoom In / Out)';
+  }
+}
 
 function openCsReceiptModal(inquiryId, initialIndex = 0) {
   const rawList = typeof getCsInquiries === 'function' ? getCsInquiries() : (typeof AMANDA_CS_INQUIRIES !== 'undefined' ? AMANDA_CS_INQUIRIES : []);
@@ -1783,16 +1826,25 @@ function openCsReceiptModal(inquiryId, initialIndex = 0) {
     : (item.receipt_image ? [item.receipt_image] : []);
   activeCsModalIndex = initialIndex >= 0 && initialIndex < activeCsModalImages.length ? initialIndex : 0;
 
-  document.getElementById('cs-modal-ticket-title').textContent = `Bukti Lampiran Foto - #${item.id}`;
-  document.getElementById('cs-modal-customer-name').textContent = item.name || '-';
-  document.getElementById('cs-modal-receipt-no').textContent = item.receipt_number || 'Tidak Ada Nomor Struk';
-  document.getElementById('cs-modal-outlet-name').textContent = item.outlet_name || 'Amanda Brownies';
+  const titleEl = document.getElementById('cs-modal-ticket-title');
+  const nameEl = document.getElementById('cs-modal-customer-name');
+  const receiptNoEl = document.getElementById('cs-modal-receipt-no');
+  const outletEl = document.getElementById('cs-modal-outlet-name');
+  const waBtn = document.getElementById('cs-modal-wa-btn');
 
-  const waReplyText = encodeURIComponent(
-    `Halo Kak ${item.name}, kami menindaklanjuti foto bukti / struk yang telah Kakak kirimkan pada tiket *#${item.id}*...`
-  );
-  document.getElementById('cs-modal-wa-btn').href = `https://wa.me/${item.phone}?text=${waReplyText}`;
+  if (titleEl) titleEl.textContent = `Bukti Lampiran Foto - #${item.id}`;
+  if (nameEl) nameEl.textContent = item.name || '-';
+  if (receiptNoEl) receiptNoEl.textContent = item.receipt_number || 'Tidak Ada Nomor Struk';
+  if (outletEl) outletEl.textContent = item.outlet_name || 'Amanda Brownies';
 
+  if (waBtn) {
+    const waReplyText = encodeURIComponent(
+      `Halo Kak ${item.name}, kami menindaklanjuti foto bukti / struk yang telah Kakak kirimkan pada tiket *#${item.id}*...`
+    );
+    waBtn.href = `https://wa.me/${item.phone}?text=${waReplyText}`;
+  }
+
+  resetCsReceiptZoom();
   updateCsReceiptModalView();
   openModal('cs-receipt-modal');
 }
@@ -1800,6 +1852,7 @@ function openCsReceiptModal(inquiryId, initialIndex = 0) {
 function selectCsModalImage(idx) {
   if (idx >= 0 && idx < activeCsModalImages.length) {
     activeCsModalIndex = idx;
+    resetCsReceiptZoom();
     updateCsReceiptModalView();
   }
 }

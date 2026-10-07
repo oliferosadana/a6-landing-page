@@ -182,10 +182,11 @@ function renderProductGrid() {
 
   gridContainer.innerHTML = filtered.map(product => {
     return `
-      <div class="product-card" id="card-${product.id}" data-id="${product.id}">
-        <!-- Media Header: Image with Name Overlay (No Description) -->
+      <div class="product-card" id="card-${product.id}" data-id="${product.id}" title="${product.name}">
+        <!-- Media Header: Image with Name Overlay & Badge -->
         <div class="card-header-media">
           <img src="${product.image}" alt="${product.name}" loading="lazy" />
+          ${product.badge ? `<span class="product-card-badge">${product.badge}</span>` : ''}
           <div class="card-media-overlay">
             <h3 class="card-media-title font-serif">${product.name}</h3>
           </div>
@@ -503,9 +504,14 @@ function renderPromoFlyers() {
            id="promo-card-${idx}" 
            data-index="${idx}" 
            onclick="handlePromoCardClick('${promo.id}', ${idx})" 
-           title="${idx === currentPromoSlide ? 'Klik untuk memperbesar gambar' : 'Klik untuk melihat promo ini'}">
+           title="${promo.title || 'Promo Amanda'}">
         <div class="promo-coverflow-media">
           <img src="${promo.image}" alt="${promo.title || 'Promo Amanda'}" class="promo-coverflow-img" loading="lazy" />
+          ${promo.badge ? `<span class="promo-badge-tag">${promo.badge}</span>` : ''}
+          <div class="promo-coverflow-overlay-title">
+            <h4>${promo.title}</h4>
+            ${promo.period ? `<span><i class="fa-regular fa-clock"></i> ${promo.period}</span>` : ''}
+          </div>
         </div>
       </div>
     `;
@@ -745,9 +751,17 @@ function renderPriceListCards() {
 
   track.innerHTML = AMANDA_PRICELISTS.map(item => {
     return `
-      <div class="pricelist-card" id="card-${item.id}" onclick="openPriceListModal('${item.id}')" title="Klik untuk memperbesar price list">
+      <div class="pricelist-card" id="card-${item.id}" onclick="openPriceListModal('${item.id}')" title="Klik untuk memperbesar: ${item.title}">
         <div class="pricelist-media-box">
           <img src="${item.image}" alt="${item.title}" class="pricelist-img" loading="lazy" />
+          ${item.badge ? `<span class="pricelist-card-badge"><i class="fa-solid fa-tag"></i> ${item.badge}</span>` : ''}
+          <div class="pricelist-zoom-indicator">
+            <i class="fa-solid fa-magnifying-glass-plus"></i> Perbesar
+          </div>
+        </div>
+        <div class="pricelist-card-footer">
+          <h3 class="pricelist-card-title">${item.title}</h3>
+          ${item.caption ? `<p class="pricelist-card-caption">${item.caption}</p>` : ''}
         </div>
       </div>
     `;

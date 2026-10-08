@@ -527,6 +527,7 @@ function saveStoredData(key, data, syncCloud = true) {
       const tableMap = {
         'amanda_products': 'products',
         'amanda_promos': 'promos',
+        'amanda_pricelists': 'pricelists',
         'amanda_outlets': 'outlets',
         'amanda_outlet_categories': 'outlet_categories',
         'amanda_ticker': 'ticker',

@@ -52,6 +52,16 @@ CREATE TABLE IF NOT EXISTS public.promos (
     created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
+-- 3B. TABEL POSTER DAFTAR HARGA RESMI (PRICELISTS)
+CREATE TABLE IF NOT EXISTS public.pricelists (
+    id TEXT PRIMARY KEY,
+    title TEXT NOT NULL,
+    badge TEXT DEFAULT 'Price List',
+    image TEXT NOT NULL,
+    caption TEXT,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
 -- 4. TABEL CABANG OUTLET & BOOTH (OUTLETS)
 CREATE TABLE IF NOT EXISTS public.outlets (
     id TEXT PRIMARY KEY,
@@ -146,6 +156,7 @@ CREATE TABLE IF NOT EXISTS public.cs_inquiries (
 ALTER TABLE public.tenants ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.products ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.promos ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.pricelists ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.outlets ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.outlet_categories ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.ticker ENABLE ROW LEVEL SECURITY;
@@ -162,6 +173,9 @@ CREATE POLICY "Public full access to products" ON public.products FOR ALL USING 
 
 DROP POLICY IF EXISTS "Public full access to promos" ON public.promos;
 CREATE POLICY "Public full access to promos" ON public.promos FOR ALL USING (true) WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Public full access to pricelists" ON public.pricelists;
+CREATE POLICY "Public full access to pricelists" ON public.pricelists FOR ALL USING (true) WITH CHECK (true);
 
 DROP POLICY IF EXISTS "Public full access to outlets" ON public.outlets;
 CREATE POLICY "Public full access to outlets" ON public.outlets FOR ALL USING (true) WITH CHECK (true);

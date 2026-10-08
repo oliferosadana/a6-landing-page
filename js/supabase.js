@@ -360,6 +360,23 @@ async function pullAllDataFromSupabase() {
       saveStoredData('amanda_promos', AMANDA_PROMOS, false);
     }
 
+    // 3B. Fetch Pricelists (Daftar Harga Poster Resmi)
+    const { data: dbPrice, error: errPrice } = await supabaseClient
+      .from('pricelists')
+      .select('*')
+      .order('id', { ascending: true });
+
+    if (!errPrice && dbPrice && dbPrice.length > 0) {
+      AMANDA_PRICELISTS = dbPrice.map(pr => ({
+        id: pr.id,
+        title: pr.title,
+        badge: pr.badge || 'Price List',
+        image: pr.image,
+        caption: pr.caption || ''
+      }));
+      saveStoredData('amanda_pricelists', AMANDA_PRICELISTS, false);
+    }
+
     // 4. Fetch Ticker
     const { data: dbTicker, error: errTick } = await supabaseClient
       .from('ticker')
@@ -608,6 +625,16 @@ async function pushToSupabase(tableName, payload, operation = 'upsert') {
         rating: Number(cs.rating) || 5,
         status: cs.status || 'NEW',
         created_at: cs.created_at || new Date().toISOString()
+      }));
+    } else if (tableName === 'pricelists') {
+      const list = Array.isArray(payload) ? payload : [payload];
+      dbPayload = list.map(pr => ({
+        id: pr.id,
+        title: pr.title,
+        badge: pr.badge || 'Price List',
+        image: pr.image,
+        caption: pr.caption || '',
+        created_at: pr.created_at || new Date().toISOString()
       }));
     }
 

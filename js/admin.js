@@ -964,11 +964,12 @@ function populateOutletFormCitySelect(selectedCity = '') {
 // ===================================================================
 // 3A-2. BULK ADD & IMPORT OUTLETS & BOOTHS
 // ===================================================================
-let currentBulkTab = 'text';
+let currentBulkTab = 'excel';
+let uploadedExcelOutlets = [];
 
 function openBulkOutletModal() {
-  currentBulkTab = 'text';
-  switchBulkOutletTab('text');
+  currentBulkTab = 'excel';
+  switchBulkOutletTab('excel');
   
   // Reset table container if empty
   const tableContainer = document.getElementById('bulk-table-rows-container');
@@ -978,6 +979,9 @@ function openBulkOutletModal() {
 
   const previewBox = document.getElementById('bulk-outlet-preview-box');
   if (previewBox) previewBox.style.display = 'none';
+
+  const statusElem = document.getElementById('bulk-excel-upload-status');
+  if (statusElem) statusElem.style.display = 'none';
 
   openModal('bulk-outlet-modal');
 }
@@ -991,6 +995,181 @@ function switchBulkOutletTab(tab) {
   const activeContent = document.getElementById(`bulk-outlet-content-${tab}`);
   if (activeBtn) activeBtn.classList.add('active');
   if (activeContent) activeContent.style.display = 'block';
+}
+
+function downloadOutletExcelTemplate() {
+  if (typeof XLSX === 'undefined') {
+    showCmsToast('Library Excel sedang dimuat, coba beberapa saat lagi.', 'Info');
+    return;
+  }
+
+  const headers = ['Tipe', 'Nama Cabang / Booth', 'Kota / Wilayah', 'Nomor WhatsApp', 'Jam Operasional', 'Alamat Lengkap / Lokasi', 'Link Google Maps'];
+  const sampleData = [
+    headers,
+    ['Outlet', 'Amanda Brownies Cabang MT Haryono (Pusat)', 'Balikpapan', '6281322119988', '07.30 - 21.30 WITA', 'Jl. MT Haryono No. 15, RT. 45, Kel. Damai, Balikpapan Selatan', 'https://maps.app.goo.gl/mt-haryono'],
+    ['Booth', 'Booth Living Plaza Balikpapan', 'Balikpapan', '6281322119988', '10.00 - 22.00 WITA', 'Lantai Dasar Depan Informa / ACE Hardware', 'https://maps.app.goo.gl/living-plaza'],
+    ['Booth', 'Booth SPBU MT Haryono Damai', 'Balikpapan', '6281322119988', '08.00 - 21.00 WITA', 'Rest Area & Convenience SPBU', 'https://maps.app.goo.gl/spbu-damai'],
+    ['Outlet', 'Amanda Brownies Rapak Balikpapan', 'Balikpapan', '6282148048956', '07.00 - 22.00 WITA', 'Jl. Soekarno Hatta Km.2,5 No.96, Batu Ampar, Balikpapan Utara', 'https://maps.app.goo.gl/rapak'],
+    ['Booth', 'Point Sales SPBU Karang Anyar', 'Balikpapan', '6289675668175', '07.00 - 22.00 WITA', 'Rest Area SPBU Karang Anyar', 'https://maps.app.goo.gl/karang-anyar'],
+    ['Booth', 'Point Sales Manggar', 'Balikpapan', '62895385964263', '07.00 - 22.00 WITA', 'Jl. Mulawarman Manggar Baru', 'https://maps.app.goo.gl/manggar'],
+    ['Outlet', 'Amanda Brownies Samarinda', 'Samarinda', '6282155108713', '07.00 - 22.00 WITA', 'Jl. Jenderal Ahmad Yani No.11, Sungai Pinang', 'https://maps.app.goo.gl/samarinda'],
+    ['Booth', 'Booth Big Mall Samarinda', 'Samarinda', '6282155108713', '10.00 - 22.00 WITA', 'Lantai Ground LG-21', 'https://maps.app.goo.gl/big-mall'],
+    ['Outlet', 'Amanda Brownies Tanah Grogot', 'Tanah Grogot', '6282358037883', '07.00 - 22.00 WITA', 'Jl. Gajah Mada, Tanah Grogot, Paser', 'https://maps.app.goo.gl/tanah-grogot'],
+    ['Outlet', 'Amanda Brownies Banjarmasin', 'Banjarmasin', '6281255333876', '07.00 - 22.00 WITA', 'Jl. Kuripan No.2, Banjarmasin Timur', 'https://maps.app.goo.gl/banjarmasin']
+  ];
+
+  const wb = XLSX.utils.book_new();
+  const ws = XLSX.utils.aoa_to_sheet(sampleData);
+
+  // Set column widths
+  ws['!cols'] = [
+    { wch: 10 }, // Tipe
+    { wch: 38 }, // Nama
+    { wch: 18 }, // Kota
+    { wch: 18 }, // WA
+    { wch: 22 }, // Jam
+    { wch: 48 }, // Alamat
+    { wch: 35 }  // Maps
+  ];
+
+  XLSX.utils.book_append_sheet(wb, ws, 'Daftar Outlet & Booth');
+  XLSX.writeFile(wb, 'Template_Impor_Outlet_Amanda.xlsx');
+
+  showCmsToast('Template Excel (.xlsx) berhasil diunduh! Silakan buka & isi di Microsoft Excel.', 'Download Sukses');
+}
+
+function handleExcelFileUpload(event) {
+  const file = event.target.files && event.target.files[0];
+  if (!file) return;
+
+  if (typeof XLSX === 'undefined') {
+    showCmsToast('Library pembaca Excel sedang dimuat. Harap coba lagi dalam 1 detik.', 'Info');
+    return;
+  }
+
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const data = new Uint8Array(e.target.result);
+      const workbook = XLSX.read(data, { type: 'array' });
+      const firstSheetName = workbook.SheetNames[0];
+      const worksheet = workbook.Sheets[firstSheetName];
+      const rows = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+
+      if (!rows || rows.length <= 1) {
+        showCmsToast('File Excel kosong atau tidak memiliki baris data.', 'File Kosong');
+        return;
+      }
+
+      uploadedExcelOutlets = parseExcelRowsToOutlets(rows);
+      
+      const statusElem = document.getElementById('bulk-excel-upload-status');
+      if (statusElem) {
+        let totalBooths = 0;
+        uploadedExcelOutlets.forEach(o => totalBooths += (o.booths ? o.booths.length : 0));
+        statusElem.innerHTML = `<i class="fa-solid fa-circle-check"></i> File <strong>${file.name}</strong> berhasil dibaca: <strong>${uploadedExcelOutlets.length} Cabang Outlet</strong> dan <strong>${totalBooths} Titik Booth</strong> terdeteksi!`;
+        statusElem.style.display = 'block';
+      }
+
+      previewBulkOutletData();
+    } catch (err) {
+      console.error('Error parsing Excel file:', err);
+      showCmsToast('Gagal membaca file Excel: ' + err.message, 'Format Error');
+    }
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+function parseExcelRowsToOutlets(rows) {
+  if (!rows || rows.length <= 1) return [];
+
+  const headerRow = rows[0].map(h => String(h || '').toLowerCase().trim());
+  
+  // Find column indices
+  let typeIdx = headerRow.findIndex(h => h.includes('tipe') || h.includes('type') || h.includes('kategori'));
+  let nameIdx = headerRow.findIndex(h => h.includes('nama') || h.includes('outlet') || h.includes('cabang'));
+  let cityIdx = headerRow.findIndex(h => h.includes('kota') || h.includes('wilayah') || h.includes('city') || h.includes('region'));
+  let waIdx = headerRow.findIndex(h => h.includes('wa') || h.includes('whatsapp') || h.includes('telp') || h.includes('telepon') || h.includes('phone') || h.includes('nomor'));
+  let hoursIdx = headerRow.findIndex(h => h.includes('jam') || h.includes('operasional') || h.includes('hours') || h.includes('buka'));
+  let addressIdx = headerRow.findIndex(h => h.includes('alamat') || h.includes('lokasi') || h.includes('address') || h.includes('location'));
+  let mapsIdx = headerRow.findIndex(h => h.includes('maps') || h.includes('peta') || h.includes('link') || h.includes('url') || h.includes('rute'));
+
+  // Fallbacks if header names differ
+  if (nameIdx === -1) nameIdx = 1;
+  if (cityIdx === -1) cityIdx = 2;
+  if (waIdx === -1) waIdx = 3;
+  if (hoursIdx === -1) hoursIdx = 4;
+  if (addressIdx === -1) addressIdx = 5;
+  if (mapsIdx === -1) mapsIdx = 6;
+
+  const outlets = [];
+  let currentOutlet = null;
+
+  for (let i = 1; i < rows.length; i++) {
+    const row = rows[i];
+    if (!row || row.length === 0) continue;
+
+    const rowType = typeIdx !== -1 ? String(row[typeIdx] || '').toLowerCase().trim() : '';
+    const name = String(row[nameIdx] || '').trim();
+    if (!name) continue;
+
+    const city = String(row[cityIdx] || (AMANDA_OUTLET_CATEGORIES[0]?.name) || 'Balikpapan').trim();
+    let wa = String(row[waIdx] || '6281241075981').trim().replace(/[^0-9]/g, '');
+    if (!wa) wa = '6281241075981';
+    const hours = String(row[hoursIdx] || '07.00 - 22.00 WITA').trim();
+    const address = String(row[addressIdx] || `Kota ${city}`).trim();
+    const mapsUrl = String(row[mapsIdx] || `https://maps.google.com/?q=${encodeURIComponent(name + ' ' + city)}`).trim();
+
+    const isBooth = rowType.includes('booth') || rowType.includes('point') || rowType.includes('counter') || name.toLowerCase().startsWith('booth') || name.toLowerCase().startsWith('point');
+
+    if (isBooth) {
+      if (!currentOutlet) {
+        currentOutlet = {
+          id: 'out-bpn-' + (Date.now() + i),
+          name: 'Outlet Pusat',
+          city: city,
+          region: 'Kota Balikpapan',
+          image: 'assets/outlet_mt_haryono.jpg',
+          hours: '07.00 - 22.00 WITA',
+          wa: wa,
+          phone: '+' + wa,
+          address: `Kota ${city}`,
+          mapsUrl: `https://maps.google.com/?q=${encodeURIComponent('Amanda ' + city)}`,
+          distance: '1.0 km',
+          booths: []
+        };
+        outlets.push(currentOutlet);
+      }
+
+      currentOutlet.booths.push({
+        id: 'bth-' + (Date.now() + i * 100 + currentOutlet.booths.length),
+        name: name,
+        location: address,
+        hours: hours,
+        status: 'Tersedia',
+        wa: wa || currentOutlet.wa,
+        mapsUrl: mapsUrl || `https://maps.google.com/?q=${encodeURIComponent(name + ' ' + currentOutlet.city)}`
+      });
+    } else {
+      currentOutlet = {
+        id: 'out-bpn-' + (Date.now() + i),
+        name: name,
+        city: city,
+        region: 'Kota Balikpapan',
+        image: 'assets/outlet_mt_haryono.jpg',
+        hours: hours,
+        wa: wa,
+        phone: '+' + wa,
+        address: address,
+        mapsUrl: mapsUrl,
+        distance: '1.0 km',
+        booths: []
+      };
+      outlets.push(currentOutlet);
+    }
+  }
+
+  return outlets;
 }
 
 function loadBulkOutletTemplate() {
@@ -1081,7 +1260,8 @@ function parseBulkOutletText(text) {
         outlets.push(currentOutlet);
       }
 
-      const boothParts = line.replace(/^[-*+>]\s*/, '').split('|').map(s => s.trim());
+      const boothSep = line.includes('\t') ? '\t' : (line.includes('|') ? '|' : ',');
+      const boothParts = line.replace(/^[-*+>]\s*/, '').split(boothSep).map(s => s.trim());
       const bName = boothParts[0] || `Booth ${currentOutlet.booths.length + 1}`;
       const bLoc = boothParts[1] || '';
       let bWa = boothParts[2] ? boothParts[2].replace(/[^0-9]/g, '') : currentOutlet.wa;
@@ -1099,8 +1279,9 @@ function parseBulkOutletText(text) {
         mapsUrl: bMaps
       });
     } else {
-      // Main Outlet Line
-      const parts = line.split('|').map(s => s.trim());
+      // Main Outlet Line (Supports Tab \t, Pipe |, or Comma ,)
+      const sep = line.includes('\t') ? '\t' : (line.includes('|') ? '|' : ',');
+      const parts = line.split(sep).map(s => s.trim());
       const name = parts[0] || 'Cabang Amanda Brownies';
       const city = parts[1] || (AMANDA_OUTLET_CATEGORIES[0]?.name) || 'Balikpapan';
       let wa = parts[2] ? parts[2].replace(/[^0-9]/g, '') : '6281241075981';
@@ -1291,7 +1472,12 @@ function collectBulkTableRows() {
 
 function getParsedBulkOutlets() {
   let list = [];
-  if (currentBulkTab === 'text') {
+  if (currentBulkTab === 'excel') {
+    list = uploadedExcelOutlets;
+    if (list.length === 0) {
+      return { success: false, outlets: [], error: 'Belum ada file Excel yang dipilih. Silakan klik "Pilih File Excel" atau gunakan tab Copy-Paste Teks.' };
+    }
+  } else if (currentBulkTab === 'text') {
     const raw = document.getElementById('bulk-outlet-textarea')?.value || '';
     list = parseBulkOutletText(raw);
   } else if (currentBulkTab === 'table') {

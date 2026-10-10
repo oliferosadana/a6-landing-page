@@ -1202,19 +1202,60 @@
       <div class="bulk-modal-body" style="overflow-y: auto; flex: 1; padding: 18px 24px;">
         <!-- Bulk Mode Selector Tabs -->
         <div class="bulk-tab-nav" style="display: flex; gap: 8px; margin-bottom: 18px; border-bottom: 2px solid var(--ch-sand-border); padding-bottom: 10px; flex-wrap: wrap;">
-          <button type="button" class="bulk-tab-btn active" id="bulk-tab-btn-text" onclick="switchBulkOutletTab('text')">
-            <i class="fa-solid fa-file-lines"></i> Mode 1: Format Teks / Spreadsheet (Cepat)
+          <button type="button" class="bulk-tab-btn active" id="bulk-tab-btn-excel" onclick="switchBulkOutletTab('excel')">
+            <i class="fa-solid fa-file-excel" style="color: #27ae60;"></i> Mode 1: File Excel (.xlsx / .csv)
+          </button>
+          <button type="button" class="bulk-tab-btn" id="bulk-tab-btn-text" onclick="switchBulkOutletTab('text')">
+            <i class="fa-solid fa-file-lines"></i> Mode 2: Copy-Paste Teks Spreadsheet
           </button>
           <button type="button" class="bulk-tab-btn" id="bulk-tab-btn-table" onclick="switchBulkOutletTab('table')">
-            <i class="fa-solid fa-table-list"></i> Mode 2: Multi-Row Form Builder
+            <i class="fa-solid fa-table-list"></i> Mode 3: Multi-Row Form Builder
           </button>
           <button type="button" class="bulk-tab-btn" id="bulk-tab-btn-json" onclick="switchBulkOutletTab('json')">
-            <i class="fa-solid fa-code"></i> Mode 3: Impor JSON
+            <i class="fa-solid fa-code"></i> Mode 4: Impor JSON
           </button>
         </div>
 
-        <!-- TAB CONTENT: MODE 1 (TEXT / SPREADSHEET PASTE) -->
-        <div id="bulk-outlet-content-text" class="bulk-tab-content">
+        <!-- TAB CONTENT: MODE 1 (EXCEL FILE UPLOAD & TEMPLATE DOWNLOAD) -->
+        <div id="bulk-outlet-content-excel" class="bulk-tab-content">
+          <div style="background: linear-gradient(135deg, #f3faf5, #e8f5e9); border: 1.5px dashed #27ae60; border-radius: var(--radius-md); padding: 24px; text-align: center; margin-bottom: 16px;">
+            <div style="width: 52px; height: 52px; background: #27ae60; color: #fff; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 24px; margin-bottom: 12px; box-shadow: 0 4px 12px rgba(39, 174, 96, 0.25);">
+              <i class="fa-solid fa-file-excel"></i>
+            </div>
+            <h4 style="margin: 0 0 6px; font-size: 16px; color: #1e7e34;">Upload File Excel / Spreadsheet (.xlsx, .xls, .csv)</h4>
+            <p style="font-size: 13px; color: var(--text-muted); max-width: 540px; margin: 0 auto 16px;">
+              Pilih file Excel dari komputer/laptop Anda. Sistem akan otomatis mengekstrak seluruh cabang outlet beserta titik booth counter.
+            </p>
+
+            <div style="display: flex; justify-content: center; gap: 12px; flex-wrap: wrap;">
+              <label class="btn-primary" style="cursor: pointer; background: #27ae60; border-color: #1e7e34; display: inline-flex; align-items: center; gap: 8px;">
+                <i class="fa-solid fa-upload"></i> Pilih File Excel (.xlsx / .csv)
+                <input type="file" id="bulk-excel-file-input" accept=".xlsx, .xls, .csv" style="display: none;" onchange="handleExcelFileUpload(event)">
+              </label>
+              <button type="button" class="btn-outline" onclick="downloadOutletExcelTemplate()" style="display: inline-flex; align-items: center; gap: 8px; border-color: #27ae60; color: #1e7e34;">
+                <i class="fa-solid fa-download"></i> Unduh Template Excel (.xlsx)
+              </button>
+            </div>
+
+            <div id="bulk-excel-upload-status" style="margin-top: 14px; font-size: 12.5px; font-weight: 600; color: #1e7e34; display: none;">
+              <!-- Upload status message -->
+            </div>
+          </div>
+
+          <div style="background: var(--bg-elevated); border: 1px solid var(--ch-sand-border); border-radius: var(--radius-sm); padding: 12px 16px; font-size: 12px; color: var(--text-muted); line-height: 1.6;">
+            <strong>Format Kolom Excel yang Didukung:</strong><br>
+            • <code>Tipe</code>: Isi <strong>Outlet</strong> untuk cabang utama, atau <strong>Booth</strong> untuk titik booth counter.<br>
+            • <code>Nama Cabang / Booth</code>: Nama resmi outlet / counter.<br>
+            • <code>Kota / Wilayah</code>: Balikpapan, Samarinda, Tanah Grogot, Banjarmasin, Banjarbaru, dll.<br>
+            • <code>Nomor WhatsApp</code>: Nomor WA aktif (contoh: 6281241075981).<br>
+            • <code>Jam Operasional</code>: Contoh: 07.00 - 22.00 WITA.<br>
+            • <code>Alamat / Lokasi</code>: Alamat cabang atau letak booth.<br>
+            • <code>Link Google Maps</code>: Link titik lokasi (opsional).
+          </div>
+        </div>
+
+        <!-- TAB CONTENT: MODE 2 (TEXT / SPREADSHEET PASTE) -->
+        <div id="bulk-outlet-content-text" class="bulk-tab-content" style="display: none;">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-wrap: wrap; gap: 8px;">
             <label style="font-size: 13px; font-weight: 700; color: var(--text-main);">
               <i class="fa-solid fa-paste"></i> Tempel Data Baris Outlet & Booth:
@@ -1561,10 +1602,11 @@
 
   <!-- Scripts -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="js/data.js?v=3.3"></script>
-  <script src="js/supabase.js?v=3.3"></script>
-  <script src="js/waas-status.js?v=3.3"></script>
-  <script src="js/admin.js?v=3.3"></script>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <script src="js/data.js?v=3.4"></script>
+  <script src="js/supabase.js?v=3.4"></script>
+  <script src="js/waas-status.js?v=3.4"></script>
+  <script src="js/admin.js?v=3.4"></script>
 </body>
 
 </html>

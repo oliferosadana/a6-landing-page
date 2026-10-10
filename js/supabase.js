@@ -513,18 +513,18 @@ async function pushToSupabase(tableName, payload, operation = 'upsert') {
     if (tableName === 'outlets') {
       const list = Array.isArray(payload) ? payload : [payload];
       dbPayload = list.map(o => ({
-        id: o.id,
-        name: o.name,
-        city: o.city,
+        id: o.id || ('out-bpn-' + Date.now()),
+        name: o.name || 'Cabang Amanda',
+        city: o.city || 'Balikpapan',
         region: o.region || 'Kota Balikpapan',
-        image: o.image,
-        address: o.address,
+        image: o.image || 'assets/outlet_mt_haryono.jpg',
+        address: o.address || 'Kota Balikpapan',
         phone: o.phone || '',
-        wa: o.wa,
-        hours: o.hours,
+        wa: (o.wa ? String(o.wa).replace(/[^0-9]/g, '') : '6281241075981'),
+        hours: o.hours || '07.00 - 22.00 WITA',
         maps_url: o.mapsUrl || o.maps_url || '',
         distance: o.distance || '1.0 km',
-        booths: o.booths || []
+        booths: Array.isArray(o.booths) ? o.booths : []
       }));
     } else if (tableName === 'products') {
       const list = Array.isArray(payload) ? payload : [payload];

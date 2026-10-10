@@ -275,7 +275,7 @@ function savePriceListForm(e) {
 }
 
 // ==================== IMAGE UPLOAD HELPER (FILE FROM DEVICE / SMARTPHONE) ====================
-function handleImageFileUpload(event, targetInputId, targetPreviewId, maxDim = 1200) {
+function handleImageFileUpload(event, targetInputId, targetPreviewId, maxDim = 960) {
   const file = event.target.files && event.target.files[0];
   if (!file) return;
 
@@ -310,8 +310,8 @@ function handleImageFileUpload(event, targetInputId, targetPreviewId, maxDim = 1
       const ctx = canvas.getContext('2d');
       ctx.drawImage(img, 0, 0, width, height);
 
-      // Export as optimized JPEG for crisp display and compact storage
-      const optimizedDataUrl = canvas.toDataURL('image/jpeg', 0.88);
+      // Export as optimized JPEG for crisp display and compact storage (~60KB-100KB)
+      const optimizedDataUrl = canvas.toDataURL('image/jpeg', 0.80);
 
       const targetInput = document.getElementById(targetInputId);
       const targetPreview = document.getElementById(targetPreviewId);
@@ -885,13 +885,14 @@ function deleteSingleBooth(outletId, boothId) {
 function saveOutletForm(e) {
   e.preventDefault();
   const id = document.getElementById('outlet-form-id').value;
-  const name = document.getElementById('outlet-form-name').value.trim();
-  const city = document.getElementById('outlet-form-city').value;
-  const hours = document.getElementById('outlet-form-hours').value.trim();
-  const wa = document.getElementById('outlet-form-wa').value.trim().replace(/[^0-9]/g, '');
-  const phone = document.getElementById('outlet-form-phone').value.trim();
-  const address = document.getElementById('outlet-form-address').value.trim();
-  const image = document.getElementById('outlet-form-image').value.trim();
+  const name = document.getElementById('outlet-form-name').value.trim() || 'Cabang Amanda';
+  const city = document.getElementById('outlet-form-city').value || 'Balikpapan';
+  const hours = document.getElementById('outlet-form-hours').value.trim() || '07.00 - 22.00 WITA';
+  let wa = document.getElementById('outlet-form-wa').value.trim().replace(/[^0-9]/g, '');
+  if (!wa) wa = '6281241075981';
+  const phone = document.getElementById('outlet-form-phone').value.trim() || wa;
+  const address = document.getElementById('outlet-form-address').value.trim() || 'Kota Balikpapan';
+  const image = document.getElementById('outlet-form-image').value.trim() || 'assets/outlet_mt_haryono.jpg';
   const mapsUrl = document.getElementById('outlet-form-maps').value.trim() || `https://maps.google.com/?q=${encodeURIComponent(name + ' Balikpapan')}`;
 
   // Collect booth counter rows

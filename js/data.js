@@ -520,28 +520,29 @@ function getStoredData(key, fallback) {
 function saveStoredData(key, data, syncCloud = true) {
   try {
     localStorage.setItem(key, JSON.stringify(data));
-    notifyAmandaDataChanged();
-
-    // Auto-sync to Supabase Cloud if connected and syncCloud is true
-    if (syncCloud && typeof pushToSupabase === 'function' && typeof isSupabaseActive === 'function' && isSupabaseActive()) {
-      const tableMap = {
-        'amanda_products': 'products',
-        'amanda_promos': 'promos',
-        'amanda_pricelists': 'pricelists',
-        'amanda_outlets': 'outlets',
-        'amanda_outlet_categories': 'outlet_categories',
-        'amanda_ticker': 'ticker',
-        'amanda_platform_tenants': 'tenants',
-        'amanda_invoices': 'invoices',
-        'amanda_cs_inquiries': 'cs_inquiries'
-      };
-      const tableName = tableMap[key];
-      if (tableName && Array.isArray(data)) {
-        pushToSupabase(tableName, data);
-      }
-    }
   } catch (e) {
-    console.error(`LocalStorage save error for ${key}:`, e);
+    console.warn(`LocalStorage quota/write warning for ${key}:`, e);
+  }
+
+  notifyAmandaDataChanged();
+
+  // Auto-sync to Supabase Cloud if connected and syncCloud is true (Runs unconditionally)
+  if (syncCloud && typeof pushToSupabase === 'function' && typeof isSupabaseActive === 'function' && isSupabaseActive()) {
+    const tableMap = {
+      'amanda_products': 'products',
+      'amanda_promos': 'promos',
+      'amanda_pricelists': 'pricelists',
+      'amanda_outlets': 'outlets',
+      'amanda_outlet_categories': 'outlet_categories',
+      'amanda_ticker': 'ticker',
+      'amanda_platform_tenants': 'tenants',
+      'amanda_invoices': 'invoices',
+      'amanda_cs_inquiries': 'cs_inquiries'
+    };
+    const tableName = tableMap[key];
+    if (tableName && Array.isArray(data)) {
+      pushToSupabase(tableName, data);
+    }
   }
 }
 

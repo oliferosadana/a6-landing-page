@@ -17,11 +17,11 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
   <!-- CMS Stylesheet -->
-  <link rel="stylesheet" href="css/admin.css?v=2.5">
+  <link rel="stylesheet" href="css/admin.css?v=3.3">
   <link rel="stylesheet" href="css/login.css?v=1.0">
 
   <!-- Strict Auth Guard (Executes before page renders) -->
-  <script src="js/auth.js?v=3.2"></script>
+  <script src="js/auth.js?v=3.3"></script>
   <script>
     enforceAuth(['tenant_admin', 'superadmin']);
   </script>
@@ -323,9 +323,14 @@
               <h2>Jaringan Outlet Resmi Kota Balikpapan</h2>
               <p>Edit alamat cabang, nomor WhatsApp operasional, jam buka WITA, link rute peta, dan foto storefront.</p>
             </div>
-            <button class="btn-primary" onclick="openOutletModal()">
-              <i class="fa-solid fa-plus"></i> Tambah Cabang Outlet
-            </button>
+            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+              <button class="btn-outline" onclick="openBulkOutletModal()" style="display: inline-flex; align-items: center; gap: 8px;">
+                <i class="fa-solid fa-layer-group" style="color: var(--ch-gold);"></i> Bulk Add / Impor Massal
+              </button>
+              <button class="btn-primary" onclick="openOutletModal()">
+                <i class="fa-solid fa-plus"></i> Tambah Cabang Outlet
+              </button>
+            </div>
           </div>
 
           <div class="outlets-management-grid" id="outlets-management-grid">
@@ -1178,6 +1183,136 @@
     </div>
   </div>
 
+  <!-- ==================== MODAL: BULK ADD OUTLETS & BOOTHS ==================== -->
+  <div class="cms-modal-overlay" id="bulk-outlet-modal" onclick="closeModalOnOverlay(event, 'bulk-outlet-modal')">
+    <div class="cms-modal-card" style="max-width: 960px; width: 95%; max-height: 90vh; display: flex; flex-direction: column;">
+      <div class="modal-head" style="flex-shrink: 0;">
+        <div>
+          <h3 style="display: flex; align-items: center; gap: 8px; margin: 0;">
+            <i class="fa-solid fa-layer-group" style="color: var(--ch-gold);"></i>
+            Bulk Add / Impor Massal Outlet & Booth Counter
+          </h3>
+          <p style="font-size: 12.5px; color: var(--text-muted); margin-top: 4px; margin-bottom: 0;">
+            Tambahkan banyak cabang outlet dan titik booth counter sekaligus dengan cepat ke database.
+          </p>
+        </div>
+        <button class="modal-close-btn" onclick="closeModal('bulk-outlet-modal')"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+
+      <div class="bulk-modal-body" style="overflow-y: auto; flex: 1; padding: 18px 24px;">
+        <!-- Bulk Mode Selector Tabs -->
+        <div class="bulk-tab-nav" style="display: flex; gap: 8px; margin-bottom: 18px; border-bottom: 2px solid var(--ch-sand-border); padding-bottom: 10px; flex-wrap: wrap;">
+          <button type="button" class="bulk-tab-btn active" id="bulk-tab-btn-text" onclick="switchBulkOutletTab('text')">
+            <i class="fa-solid fa-file-lines"></i> Mode 1: Format Teks / Spreadsheet (Cepat)
+          </button>
+          <button type="button" class="bulk-tab-btn" id="bulk-tab-btn-table" onclick="switchBulkOutletTab('table')">
+            <i class="fa-solid fa-table-list"></i> Mode 2: Multi-Row Form Builder
+          </button>
+          <button type="button" class="bulk-tab-btn" id="bulk-tab-btn-json" onclick="switchBulkOutletTab('json')">
+            <i class="fa-solid fa-code"></i> Mode 3: Impor JSON
+          </button>
+        </div>
+
+        <!-- TAB CONTENT: MODE 1 (TEXT / SPREADSHEET PASTE) -->
+        <div id="bulk-outlet-content-text" class="bulk-tab-content">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-wrap: wrap; gap: 8px;">
+            <label style="font-size: 13px; font-weight: 700; color: var(--text-main);">
+              <i class="fa-solid fa-paste"></i> Tempel Data Baris Outlet & Booth:
+            </label>
+            <div style="display: flex; gap: 8px;">
+              <button type="button" class="btn-secondary-sm" onclick="loadBulkOutletTemplate()">
+                <i class="fa-solid fa-wand-magic-sparkles"></i> Muat Contoh Format
+              </button>
+              <button type="button" class="btn-secondary-sm" onclick="clearBulkOutletText()">
+                <i class="fa-solid fa-eraser"></i> Bersihkan
+              </button>
+            </div>
+          </div>
+
+          <div style="background: var(--bg-elevated); border: 1px solid var(--ch-sand-border); border-radius: var(--radius-sm); padding: 10px 14px; margin-bottom: 10px; font-size: 12px; color: var(--text-muted); line-height: 1.6;">
+            <strong>Petunjuk Format:</strong><br>
+            • <strong>Baris Cabang Outlet:</strong> <code>Nama Cabang | Kota/Wilayah | No. WhatsApp | Jam Buka | Alamat Lengkap | Link Maps (opsional)</code><br>
+            • <strong>Baris Titik Booth:</strong> Awali baris dengan tanda minus <code>-</code> tepat di bawah cabang terkait:<br>
+            &nbsp;&nbsp;<code>- Nama Booth | Lokasi Detail | No. WA (opsional) | Jam Buka | Link Maps (opsional)</code><br>
+            • Pisahkan antar cabang dengan 1 baris kosong (Enter).
+          </div>
+
+          <textarea id="bulk-outlet-textarea" rows="9" placeholder="Tempel baris data outlet & booth Anda di sini..." style="width: 100%; font-family: monospace; font-size: 12.5px; padding: 12px; border: 1.5px solid var(--ch-sand-border); border-radius: var(--radius-sm); resize: vertical; line-height: 1.5; background: #fff;"></textarea>
+        </div>
+
+        <!-- TAB CONTENT: MODE 2 (MULTI-ROW FORM BUILDER) -->
+        <div id="bulk-outlet-content-table" class="bulk-tab-content" style="display: none;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+            <label style="font-size: 13px; font-weight: 700; color: var(--text-main);">
+              <i class="fa-solid fa-list-check"></i> Daftar Baris Cabang Outlet Baru:
+            </label>
+            <button type="button" class="btn-secondary-sm" onclick="addBulkTableRow()">
+              <i class="fa-solid fa-plus"></i> Tambah Baris Cabang
+            </button>
+          </div>
+          <div id="bulk-table-rows-container" style="display: flex; flex-direction: column; gap: 14px; max-height: 380px; overflow-y: auto; padding-right: 4px;">
+            <!-- Injected by JS -->
+          </div>
+        </div>
+
+        <!-- TAB CONTENT: MODE 3 (JSON IMPORT) -->
+        <div id="bulk-outlet-content-json" class="bulk-tab-content" style="display: none;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+            <label style="font-size: 13px; font-weight: 700; color: var(--text-main);">
+              <i class="fa-solid fa-code"></i> Tempel JSON Array Objek Outlet:
+            </label>
+            <button type="button" class="btn-secondary-sm" onclick="loadBulkOutletJsonTemplate()">
+              <i class="fa-solid fa-wand-magic-sparkles"></i> Contoh JSON
+            </button>
+          </div>
+          <textarea id="bulk-outlet-json-textarea" rows="10" placeholder='[&#10;  {&#10;    "name": "Amanda Brownies Rapak",&#10;    "city": "Balikpapan",&#10;    "wa": "6282148048956",&#10;    "hours": "07.00 - 22.00 WITA",&#10;    "address": "Jl. Soekarno Hatta Km.2,5",&#10;    "booths": [&#10;      { "name": "Booth SPBU", "location": "Rest Area", "wa": "6289675668175" }&#10;    ]&#10;  }&#10;]' style="width: 100%; font-family: monospace; font-size: 12px; padding: 12px; border: 1.5px solid var(--ch-sand-border); border-radius: var(--radius-sm); resize: vertical; line-height: 1.4; background: #fff;"></textarea>
+        </div>
+
+        <!-- BULK IMPORT SETTINGS (APPEND VS REPLACE) -->
+        <div style="margin-top: 16px; padding: 14px; background: var(--bg-elevated); border: 1px solid var(--ch-sand-border); border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
+          <div>
+            <div style="font-size: 13px; font-weight: 700; color: var(--text-main); margin-bottom: 4px;">
+              <i class="fa-solid fa-sliders"></i> Opsi Penyimpanan:
+            </div>
+            <div style="display: flex; gap: 18px; font-size: 13px; flex-wrap: wrap;">
+              <label style="display: flex; align-items: center; gap: 6px; cursor: pointer;">
+                <input type="radio" name="bulk-outlet-mode" value="append" checked>
+                <span><strong>Tambahkan (Append)</strong> — Gabungkan dengan data cabang yang sudah ada</span>
+              </label>
+              <label style="display: flex; align-items: center; gap: 6px; cursor: pointer;">
+                <input type="radio" name="bulk-outlet-mode" value="replace">
+                <span style="color: var(--accent-red);"><strong>Gantikan Semua (Replace)</strong> — Timpa semua cabang dengan data baru</span>
+              </label>
+            </div>
+          </div>
+          <button type="button" class="btn-outline" onclick="previewBulkOutletData()" style="font-size: 12.5px; padding: 7px 14px;">
+            <i class="fa-solid fa-eye"></i> Uji & Preview Data
+          </button>
+        </div>
+
+        <!-- PREVIEW BOX -->
+        <div id="bulk-outlet-preview-box" style="margin-top: 16px; display: none;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+            <h4 style="margin: 0; font-size: 13.5px; color: var(--ch-olive-dark);">
+              <i class="fa-solid fa-clipboard-check"></i> Hasil Validasi & Preview Data:
+            </h4>
+            <span id="bulk-preview-badge" style="font-size: 12px; font-weight: 700; background: var(--ch-olive-subtle); color: var(--ch-olive-dark); padding: 4px 10px; border-radius: var(--radius-pill);">0 Outlet Terdeteksi</span>
+          </div>
+          <div id="bulk-preview-list" style="max-height: 220px; overflow-y: auto; border: 1px solid var(--ch-sand-border); border-radius: var(--radius-sm); background: #fff; padding: 10px;">
+            <!-- Injected by previewBulkOutletData -->
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-actions" style="flex-shrink: 0; padding: 14px 24px; border-top: 1px solid var(--ch-sand-border); background: var(--bg-elevated); margin: 0;">
+        <button type="button" class="btn-secondary" onclick="closeModal('bulk-outlet-modal')">Batal</button>
+        <button type="button" class="btn-primary" id="btn-save-bulk-outlets" onclick="executeBulkOutletSave()" style="padding: 10px 20px;">
+          <i class="fa-solid fa-cloud-arrow-up"></i> Simpan Semua Outlet & Booth ke Database
+        </button>
+      </div>
+    </div>
+  </div>
+
   <!-- ==================== MODAL: PRICELIST ==================== -->
   <div class="cms-modal-overlay" id="pricelist-modal" onclick="closeModalOnOverlay(event, 'pricelist-modal')">
     <div class="cms-modal-card">
@@ -1426,10 +1561,10 @@
 
   <!-- Scripts -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="js/data.js?v=3.2"></script>
-  <script src="js/supabase.js?v=3.2"></script>
-  <script src="js/waas-status.js?v=3.2"></script>
-  <script src="js/admin.js?v=3.2"></script>
+  <script src="js/data.js?v=3.3"></script>
+  <script src="js/supabase.js?v=3.3"></script>
+  <script src="js/waas-status.js?v=3.3"></script>
+  <script src="js/admin.js?v=3.3"></script>
 </body>
 
 </html>

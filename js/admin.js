@@ -962,6 +962,501 @@ function populateOutletFormCitySelect(selectedCity = '') {
 }
 
 // ===================================================================
+// 3A-2. BULK ADD & IMPORT OUTLETS & BOOTHS
+// ===================================================================
+let currentBulkTab = 'text';
+
+function openBulkOutletModal() {
+  currentBulkTab = 'text';
+  switchBulkOutletTab('text');
+  
+  // Reset table container if empty
+  const tableContainer = document.getElementById('bulk-table-rows-container');
+  if (tableContainer && tableContainer.children.length === 0) {
+    addBulkTableRow();
+  }
+
+  const previewBox = document.getElementById('bulk-outlet-preview-box');
+  if (previewBox) previewBox.style.display = 'none';
+
+  openModal('bulk-outlet-modal');
+}
+
+function switchBulkOutletTab(tab) {
+  currentBulkTab = tab;
+  document.querySelectorAll('.bulk-tab-btn').forEach(btn => btn.classList.remove('active'));
+  document.querySelectorAll('.bulk-tab-content').forEach(c => c.style.display = 'none');
+
+  const activeBtn = document.getElementById(`bulk-tab-btn-${tab}`);
+  const activeContent = document.getElementById(`bulk-outlet-content-${tab}`);
+  if (activeBtn) activeBtn.classList.add('active');
+  if (activeContent) activeContent.style.display = 'block';
+}
+
+function loadBulkOutletTemplate() {
+  const textarea = document.getElementById('bulk-outlet-textarea');
+  if (!textarea) return;
+
+  textarea.value = `Amanda Brownies Cabang MT Haryono | Balikpapan | 6281322119988 | 07.30 - 21.30 WITA | Jl. MT Haryono No. 15, RT. 45, Kel. Damai, Balikpapan Selatan | https://maps.app.goo.gl/mt-haryono
+- Booth Living Plaza Balikpapan | Lantai Dasar Depan Informa | 6281322119988 | 10.00 - 22.00 WITA | https://maps.app.goo.gl/living-plaza
+- Booth SPBU MT Haryono | Rest Area & Convenience SPBU | 6281322119988 | 08.00 - 21.00 WITA | https://maps.app.goo.gl/spbu-damai
+
+Amanda Brownies Cabang Rapak Plaza | Balikpapan | 6282148048956 | 07.00 - 22.00 WITA | Jl. Soekarno Hatta Km.2,5 No.96, Batu Ampar, Balikpapan Utara | https://maps.app.goo.gl/rapak
+- Point Sales SPBU Karang Anyar | Rest Area SPBU Karang Anyar | 6289675668175 | 07.00 - 22.00 WITA | https://maps.app.goo.gl/karang-anyar
+- Point Sales Manggar | Jl. Mulawarman Manggar Baru | 62895385964263 | 07.00 - 22.00 WITA | https://maps.app.goo.gl/manggar
+
+Amanda Brownies Samarinda Seberang | Samarinda | 6282155108714 | 07.00 - 22.00 WITA | Jl. Bung Tomo No.7, Sungai Keledang, Samarinda Seberang | https://maps.app.goo.gl/samarinda-seberang
+- Booth Big Mall Samarinda | Lantai Ground LG-21 | 6282155108714 | 10.00 - 22.00 WITA | https://maps.app.goo.gl/big-mall`;
+
+  showCmsToast('Contoh template baris berhasil dimuat! Klik "Uji & Preview Data" untuk melihat hasilnya.');
+}
+
+function clearBulkOutletText() {
+  const textarea = document.getElementById('bulk-outlet-textarea');
+  if (textarea) textarea.value = '';
+  const previewBox = document.getElementById('bulk-outlet-preview-box');
+  if (previewBox) previewBox.style.display = 'none';
+}
+
+function loadBulkOutletJsonTemplate() {
+  const textarea = document.getElementById('bulk-outlet-json-textarea');
+  if (!textarea) return;
+
+  const sampleJson = [
+    {
+      name: "Amanda Brownies Outlet Sepinggan",
+      city: "Balikpapan",
+      region: "Kota Balikpapan",
+      wa: "6287872639025",
+      phone: "+6287872639025",
+      hours: "07.00 - 22.00 WITA",
+      address: "Jl. Marsma R. Iswahyudi No. 12, Sepinggan, Balikpapan Selatan",
+      mapsUrl: "https://maps.google.com/?q=Amanda+Brownies+Sepinggan",
+      booths: [
+        {
+          name: "Point Sales Bandara Sepinggan",
+          location: "Gate 4 Ruang Tunggu Keberangkatan",
+          wa: "6287872639025",
+          hours: "06.00 - 21.00 WITA",
+          status: "Tersedia",
+          mapsUrl: "https://maps.google.com/?q=Bandara+Sepinggan"
+        }
+      ]
+    }
+  ];
+
+  textarea.value = JSON.stringify(sampleJson, null, 2);
+  showCmsToast('Format contoh JSON berhasil dimuat!');
+}
+
+function parseBulkOutletText(text) {
+  if (!text || !text.trim()) return [];
+
+  const lines = text.split('\n');
+  const outlets = [];
+  let currentOutlet = null;
+
+  lines.forEach((rawLine, lineIdx) => {
+    const line = rawLine.trim();
+    if (!line) return;
+
+    // Check if line is a Booth (starts with -, *, +, or >)
+    if (line.startsWith('-') || line.startsWith('*') || line.startsWith('+') || line.startsWith('>')) {
+      if (!currentOutlet) {
+        // Create an implicit outlet if booth appears before any outlet
+        currentOutlet = {
+          id: 'out-bpn-' + (Date.now() + lineIdx),
+          name: 'Outlet Pusat',
+          city: (AMANDA_OUTLET_CATEGORIES[0]?.name) || 'Balikpapan',
+          region: 'Kota Balikpapan',
+          image: 'assets/outlet_mt_haryono.jpg',
+          hours: '07.00 - 22.00 WITA',
+          wa: '6281241075981',
+          phone: '+6281241075981',
+          address: 'Kota Balikpapan',
+          mapsUrl: 'https://maps.google.com',
+          distance: '1.0 km',
+          booths: []
+        };
+        outlets.push(currentOutlet);
+      }
+
+      const boothParts = line.replace(/^[-*+>]\s*/, '').split('|').map(s => s.trim());
+      const bName = boothParts[0] || `Booth ${currentOutlet.booths.length + 1}`;
+      const bLoc = boothParts[1] || '';
+      let bWa = boothParts[2] ? boothParts[2].replace(/[^0-9]/g, '') : currentOutlet.wa;
+      if (!bWa) bWa = currentOutlet.wa;
+      const bHours = boothParts[3] || '10.00 - 22.00 WITA';
+      const bMaps = boothParts[4] || `https://maps.google.com/?q=${encodeURIComponent(bName + ' ' + currentOutlet.city)}`;
+
+      currentOutlet.booths.push({
+        id: 'bth-' + (Date.now() + lineIdx + currentOutlet.booths.length),
+        name: bName,
+        location: bLoc,
+        hours: bHours,
+        status: 'Tersedia',
+        wa: bWa,
+        mapsUrl: bMaps
+      });
+    } else {
+      // Main Outlet Line
+      const parts = line.split('|').map(s => s.trim());
+      const name = parts[0] || 'Cabang Amanda Brownies';
+      const city = parts[1] || (AMANDA_OUTLET_CATEGORIES[0]?.name) || 'Balikpapan';
+      let wa = parts[2] ? parts[2].replace(/[^0-9]/g, '') : '6281241075981';
+      if (!wa) wa = '6281241075981';
+      const hours = parts[3] || '07.00 - 22.00 WITA';
+      const address = parts[4] || `Jl. Utama ${city}`;
+      const mapsUrl = parts[5] || `https://maps.google.com/?q=${encodeURIComponent(name + ' ' + city)}`;
+
+      currentOutlet = {
+        id: 'out-bpn-' + (Date.now() + lineIdx),
+        name,
+        city,
+        region: 'Kota Balikpapan',
+        image: 'assets/outlet_mt_haryono.jpg',
+        hours,
+        wa,
+        phone: '+' + wa,
+        address,
+        mapsUrl,
+        distance: '1.0 km',
+        booths: []
+      };
+      outlets.push(currentOutlet);
+    }
+  });
+
+  return outlets;
+}
+
+function addBulkTableRow(data = null) {
+  const container = document.getElementById('bulk-table-rows-container');
+  if (!container) return;
+
+  const rowIdx = container.children.length;
+  const categories = (typeof AMANDA_OUTLET_CATEGORIES !== 'undefined' && AMANDA_OUTLET_CATEGORIES.length > 0)
+    ? AMANDA_OUTLET_CATEGORIES
+    : DEFAULT_OUTLET_CATEGORIES;
+
+  const defaultCity = data?.city || categories[0]?.name || 'Balikpapan';
+  const cityOptions = categories.map(c => `
+    <option value="${c.name}" ${defaultCity === c.name ? 'selected' : ''}>${c.name}</option>
+  `).join('');
+
+  const rowCard = document.createElement('div');
+  rowCard.className = 'bulk-row-card';
+  rowCard.setAttribute('data-bulk-row-idx', rowIdx);
+
+  rowCard.innerHTML = `
+    <div class="bulk-row-header">
+      <div style="font-weight: 700; font-size: 13.5px; color: var(--ch-olive-dark); display: flex; align-items: center; gap: 6px;">
+        <i class="fa-solid fa-store"></i> Cabang Outlet #${rowIdx + 1}
+      </div>
+      <div style="display: flex; gap: 8px;">
+        <button type="button" class="btn-secondary-sm" onclick="addBulkBoothToTableRow(this)" style="font-size: 11px; padding: 4px 8px;">
+          <i class="fa-solid fa-plus"></i> Tambah Booth
+        </button>
+        <button type="button" class="btn-del-booth" onclick="this.closest('.bulk-row-card').remove(); refreshBulkRowIndices();" title="Hapus Baris Ini">
+          <i class="fa-solid fa-trash"></i>
+        </button>
+      </div>
+    </div>
+
+    <div class="bulk-row-grid">
+      <div>
+        <label style="font-size: 11px; font-weight: 700; color: var(--text-dim); display: block; margin-bottom: 3px;">Nama Cabang Outlet *</label>
+        <input type="text" class="bulk-input-name" placeholder="Contoh: Amanda Brownies MT Haryono" value="${data?.name || ''}" style="width: 100%; padding: 7px 10px; font-size: 12.5px; border: 1px solid var(--ch-sand-border); border-radius: var(--radius-sm);">
+      </div>
+      <div>
+        <label style="font-size: 11px; font-weight: 700; color: var(--text-dim); display: block; margin-bottom: 3px;">Kota / Wilayah *</label>
+        <select class="bulk-input-city" style="width: 100%; padding: 7px 10px; font-size: 12.5px; border: 1px solid var(--ch-sand-border); border-radius: var(--radius-sm); background: #fff;">
+          ${cityOptions}
+        </select>
+      </div>
+      <div>
+        <label style="font-size: 11px; font-weight: 700; color: var(--text-dim); display: block; margin-bottom: 3px;">WhatsApp (62xxx) *</label>
+        <input type="text" class="bulk-input-wa" placeholder="6281241075981" value="${data?.wa || '6281241075981'}" style="width: 100%; padding: 7px 10px; font-size: 12.5px; border: 1px solid var(--ch-sand-border); border-radius: var(--radius-sm);">
+      </div>
+      <div>
+        <label style="font-size: 11px; font-weight: 700; color: var(--text-dim); display: block; margin-bottom: 3px;">Jam Operasional</label>
+        <input type="text" class="bulk-input-hours" placeholder="07.00 - 22.00 WITA" value="${data?.hours || '07.00 - 22.00 WITA'}" style="width: 100%; padding: 7px 10px; font-size: 12.5px; border: 1px solid var(--ch-sand-border); border-radius: var(--radius-sm);">
+      </div>
+    </div>
+
+    <div class="bulk-row-grid-full">
+      <div>
+        <label style="font-size: 11px; font-weight: 700; color: var(--text-dim); display: block; margin-bottom: 3px;">Alamat Lengkap</label>
+        <input type="text" class="bulk-input-address" placeholder="Jl. MT Haryono No. 15, Kel. Damai, Balikpapan" value="${data?.address || ''}" style="width: 100%; padding: 7px 10px; font-size: 12.5px; border: 1px solid var(--ch-sand-border); border-radius: var(--radius-sm);">
+      </div>
+      <div>
+        <label style="font-size: 11px; font-weight: 700; color: var(--text-dim); display: block; margin-bottom: 3px;">Link Google Maps (Opsional)</label>
+        <input type="text" class="bulk-input-maps" placeholder="https://maps.app.goo.gl/..." value="${data?.mapsUrl || ''}" style="width: 100%; padding: 7px 10px; font-size: 12.5px; border: 1px solid var(--ch-sand-border); border-radius: var(--radius-sm);">
+      </div>
+    </div>
+
+    <!-- Nested Booths Container -->
+    <div class="bulk-booth-nested-container">
+      <div style="font-size: 11.5px; font-weight: 700; color: var(--ch-olive); margin-bottom: 6px; display: flex; align-items: center; gap: 6px;">
+        <i class="fa-solid fa-location-crosshairs"></i> Titik Booth Counter di Cabang Ini:
+      </div>
+      <div class="bulk-booths-list">
+        <!-- Booth sub-items -->
+      </div>
+    </div>
+  `;
+
+  container.appendChild(rowCard);
+}
+
+function refreshBulkRowIndices() {
+  const container = document.getElementById('bulk-table-rows-container');
+  if (!container) return;
+  Array.from(container.children).forEach((card, idx) => {
+    const title = card.querySelector('.bulk-row-header div');
+    if (title) title.innerHTML = `<i class="fa-solid fa-store"></i> Cabang Outlet #${idx + 1}`;
+  });
+}
+
+function addBulkBoothToTableRow(btnOrCard) {
+  const card = btnOrCard.closest ? btnOrCard.closest('.bulk-row-card') : btnOrCard;
+  if (!card) return;
+  const boothsList = card.querySelector('.bulk-booths-list');
+  if (!boothsList) return;
+
+  const defaultWa = card.querySelector('.bulk-input-wa')?.value || '6281241075981';
+  const boothIdx = boothsList.children.length + 1;
+
+  const boothItem = document.createElement('div');
+  boothItem.className = 'bulk-booth-row-item';
+  boothItem.innerHTML = `
+    <input type="text" class="bulk-booth-name" placeholder="Nama Titik Booth #${boothIdx} (Contoh: Booth Living Plaza)" style="padding: 5px 8px; font-size: 12px; border: 1px solid var(--ch-sand-border); border-radius: 4px;">
+    <input type="text" class="bulk-booth-loc" placeholder="Lokasi (Lantai Dasar / SPBU)" style="padding: 5px 8px; font-size: 12px; border: 1px solid var(--ch-sand-border); border-radius: 4px;">
+    <input type="text" class="bulk-booth-wa" placeholder="WA Booth (62xxx)" value="${defaultWa}" style="padding: 5px 8px; font-size: 12px; border: 1px solid var(--ch-sand-border); border-radius: 4px;">
+    <button type="button" class="btn-del-booth" onclick="this.closest('.bulk-booth-row-item').remove()" title="Hapus Booth" style="padding: 4px 8px; font-size: 11px;">
+      <i class="fa-solid fa-xmark"></i>
+    </button>
+  `;
+  boothsList.appendChild(boothItem);
+}
+
+function collectBulkTableRows() {
+  const container = document.getElementById('bulk-table-rows-container');
+  if (!container) return [];
+
+  const cards = Array.from(container.querySelectorAll('.bulk-row-card'));
+  return cards.map((card, idx) => {
+    const name = card.querySelector('.bulk-input-name')?.value.trim() || `Cabang Outlet #${idx + 1}`;
+    const city = card.querySelector('.bulk-input-city')?.value || 'Balikpapan';
+    let wa = card.querySelector('.bulk-input-wa')?.value.trim().replace(/[^0-9]/g, '') || '6281241075981';
+    if (!wa) wa = '6281241075981';
+    const hours = card.querySelector('.bulk-input-hours')?.value.trim() || '07.00 - 22.00 WITA';
+    const address = card.querySelector('.bulk-input-address')?.value.trim() || `Kota ${city}`;
+    const mapsUrl = card.querySelector('.bulk-input-maps')?.value.trim() || `https://maps.google.com/?q=${encodeURIComponent(name + ' ' + city)}`;
+
+    // Collect nested booths
+    const boothItems = Array.from(card.querySelectorAll('.bulk-booth-row-item'));
+    const booths = boothItems.map((bRow, bIdx) => {
+      const bName = bRow.querySelector('.bulk-booth-name')?.value.trim() || `Booth ${bIdx + 1}`;
+      const bLoc = bRow.querySelector('.bulk-booth-loc')?.value.trim() || '';
+      let bWa = bRow.querySelector('.bulk-booth-wa')?.value.trim().replace(/[^0-9]/g, '') || wa;
+      if (!bWa) bWa = wa;
+      return {
+        id: 'bth-' + (Date.now() + idx * 100 + bIdx),
+        name: bName,
+        location: bLoc,
+        hours: '10.00 - 22.00 WITA',
+        status: 'Tersedia',
+        wa: bWa,
+        mapsUrl: `https://maps.google.com/?q=${encodeURIComponent(bName + ' ' + city)}`
+      };
+    }).filter(b => b.name !== '');
+
+    return {
+      id: 'out-bpn-' + (Date.now() + idx),
+      name,
+      city,
+      region: 'Kota Balikpapan',
+      image: 'assets/outlet_mt_haryono.jpg',
+      hours,
+      wa,
+      phone: '+' + wa,
+      address,
+      mapsUrl,
+      distance: '1.0 km',
+      booths
+    };
+  }).filter(o => o.name !== '');
+}
+
+function getParsedBulkOutlets() {
+  let list = [];
+  if (currentBulkTab === 'text') {
+    const raw = document.getElementById('bulk-outlet-textarea')?.value || '';
+    list = parseBulkOutletText(raw);
+  } else if (currentBulkTab === 'table') {
+    list = collectBulkTableRows();
+  } else if (currentBulkTab === 'json') {
+    const raw = document.getElementById('bulk-outlet-json-textarea')?.value || '';
+    try {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) {
+        list = parsed.map((o, idx) => ({
+          id: o.id || ('out-bpn-' + (Date.now() + idx)),
+          name: o.name || 'Cabang Amanda',
+          city: o.city || 'Balikpapan',
+          region: o.region || 'Kota Balikpapan',
+          image: o.image || 'assets/outlet_mt_haryono.jpg',
+          hours: o.hours || '07.00 - 22.00 WITA',
+          wa: o.wa ? String(o.wa).replace(/[^0-9]/g, '') : '6281241075981',
+          phone: o.phone || ('+' + (o.wa || '6281241075981')),
+          address: o.address || 'Kota Balikpapan',
+          mapsUrl: o.mapsUrl || o.maps_url || `https://maps.google.com/?q=${encodeURIComponent(o.name || 'Amanda')}`,
+          distance: o.distance || '1.0 km',
+          booths: Array.isArray(o.booths) ? o.booths.map((b, bIdx) => ({
+            id: b.id || ('bth-' + (Date.now() + idx * 100 + bIdx)),
+            name: b.name || `Booth ${bIdx + 1}`,
+            location: b.location || '',
+            hours: b.hours || '10.00 - 22.00 WITA',
+            status: b.status || 'Tersedia',
+            wa: b.wa ? String(b.wa).replace(/[^0-9]/g, '') : (o.wa || '6281241075981'),
+            mapsUrl: b.mapsUrl || b.maps_url || ''
+          })) : []
+        }));
+      }
+    } catch (e) {
+      return { success: false, outlets: [], error: 'Format JSON tidak valid: ' + e.message };
+    }
+  }
+
+  return { success: true, outlets: list };
+}
+
+function previewBulkOutletData() {
+  const result = getParsedBulkOutlets();
+  const previewBox = document.getElementById('bulk-outlet-preview-box');
+  const previewList = document.getElementById('bulk-preview-list');
+  const badge = document.getElementById('bulk-preview-badge');
+
+  if (!previewBox || !previewList || !badge) return;
+
+  if (!result.success) {
+    showCmsToast(result.error || 'Terjadi kesalahan format!', 'Format Error');
+    return;
+  }
+
+  const outlets = result.outlets;
+  if (outlets.length === 0) {
+    showCmsToast('Tidak ada data cabang outlet yang terdeteksi. Silakan isi data terlebih dahulu.', 'Data Kosong');
+    return;
+  }
+
+  let totalBooths = 0;
+  outlets.forEach(o => totalBooths += (o.booths ? o.booths.length : 0));
+
+  badge.textContent = `✓ ${outlets.length} Cabang Outlet, ${totalBooths} Titik Booth Siap Disimpan`;
+  badge.style.background = 'rgba(79, 91, 42, 0.15)';
+  badge.style.color = 'var(--ch-olive-dark)';
+
+  previewList.innerHTML = outlets.map((o, idx) => `
+    <div class="bulk-preview-item">
+      <div>
+        <div style="font-weight: 700; font-size: 13.5px; color: var(--text-main);">
+          ${idx + 1}. ${o.name} <span style="font-size: 11px; background: var(--ch-olive); color: #fff; padding: 2px 7px; border-radius: 4px; margin-left: 6px;">${o.city}</span>
+        </div>
+        <div style="font-size: 12px; color: var(--text-muted); margin-top: 3px;">
+          <i class="fa-solid fa-location-dot" style="color: var(--ch-gold);"></i> ${o.address} &nbsp;|&nbsp; 
+          <i class="fa-brands fa-whatsapp" style="color: #25d366;"></i> ${o.wa} &nbsp;|&nbsp;
+          <i class="fa-regular fa-clock"></i> ${o.hours}
+        </div>
+        ${o.booths && o.booths.length > 0 ? `
+          <div style="margin-top: 6px;">
+            ${o.booths.map(b => `<span class="bulk-preview-booth-chip"><i class="fa-solid fa-store"></i> ${b.name} (${b.wa || o.wa})</span>`).join('')}
+          </div>
+        ` : '<div style="font-size: 11px; color: var(--text-dim); margin-top: 4px; font-style: italic;">(Belum ada titik booth counter)</div>'}
+      </div>
+      <div style="font-size: 12px; font-weight: 700; color: var(--ch-olive-dark); background: #fff; border: 1px solid var(--ch-sand-border); padding: 4px 8px; border-radius: 4px; white-space: nowrap;">
+        ${o.booths ? o.booths.length : 0} Booth
+      </div>
+    </div>
+  `).join('');
+
+  previewBox.style.display = 'block';
+  previewBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  showCmsToast(`Terdeteksi ${outlets.length} cabang & ${totalBooths} titik booth counter!`);
+}
+
+async function executeBulkOutletSave() {
+  const result = getParsedBulkOutlets();
+  if (!result.success || result.outlets.length === 0) {
+    showCmsToast('Data belum diisi atau format belum sesuai. Klik "Uji & Preview Data" untuk validasi.', 'Data Kosong');
+    return;
+  }
+
+  const newOutlets = result.outlets;
+  const saveMode = document.querySelector('input[name="bulk-outlet-mode"]:checked')?.value || 'append';
+
+  const saveBtn = document.getElementById('btn-save-bulk-outlets');
+  if (saveBtn) {
+    saveBtn.disabled = true;
+    saveBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Menyimpan ke Cloud...';
+  }
+
+  try {
+    let totalBooths = 0;
+    newOutlets.forEach(o => totalBooths += (o.booths ? o.booths.length : 0));
+
+    if (saveMode === 'replace') {
+      if (!confirm(`PERINGATAN: Opsi "Gantikan Semua" akan menimpa seluruh ${AMANDA_OUTLETS.length} cabang outlet lama dengan ${newOutlets.length} cabang baru ini. Lanjutkan?`)) {
+        if (saveBtn) {
+          saveBtn.disabled = false;
+          saveBtn.innerHTML = '<i class="fa-solid fa-cloud-arrow-up"></i> Simpan Semua Outlet & Booth ke Database';
+        }
+        return;
+      }
+      AMANDA_OUTLETS = newOutlets;
+    } else {
+      // Append mode: deduplicate by ID or Name if already present
+      newOutlets.forEach(newOut => {
+        const existingIdx = AMANDA_OUTLETS.findIndex(o => o.id === newOut.id || (o.name.toLowerCase() === newOut.name.toLowerCase() && o.city === newOut.city));
+        if (existingIdx !== -1) {
+          AMANDA_OUTLETS[existingIdx] = {
+            ...AMANDA_OUTLETS[existingIdx],
+            ...newOut,
+            booths: [...(AMANDA_OUTLETS[existingIdx].booths || []), ...(newOut.booths || [])]
+          };
+        } else {
+          AMANDA_OUTLETS.push(newOut);
+        }
+      });
+    }
+
+    // Save and push to Supabase Cloud
+    saveStoredData('amanda_outlets', AMANDA_OUTLETS);
+
+    // If Supabase is connected, trigger direct upsert
+    if (typeof pushToSupabase === 'function' && typeof isSupabaseActive === 'function' && isSupabaseActive()) {
+      await pushToSupabase('outlets', AMANDA_OUTLETS);
+    }
+
+    closeModal('bulk-outlet-modal');
+    renderOutletsManager();
+    renderOutletCategoriesManager();
+    renderDashboard();
+
+    showCmsToast(`🎉 Sukses! ${newOutlets.length} Cabang Outlet & ${totalBooths} Titik Booth berhasil disimpan & tersinkronisasi ke Database Cloud!`, 'Bulk Import Berhasil');
+  } catch (err) {
+    console.error('Error executing bulk save:', err);
+    showCmsToast('Terjadi kesalahan saat menyimpan bulk data: ' + err.message, 'Gagal');
+  } finally {
+    if (saveBtn) {
+      saveBtn.disabled = false;
+      saveBtn.innerHTML = '<i class="fa-solid fa-cloud-arrow-up"></i> Simpan Semua Outlet & Booth ke Database';
+    }
+  }
+}
+
+// ===================================================================
 // 3B. OUTLET CATEGORIES / WILAYAH MANAGEMENT
 // ===================================================================
 function renderOutletCategoriesManager(filterQuery = '') {

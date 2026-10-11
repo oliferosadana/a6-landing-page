@@ -2413,7 +2413,16 @@ function renderCsManager() {
         </td>
 
         <td style="padding: 12px 16px; vertical-align: top;">
-          <div style="font-size: 12.5px; font-weight: 600; color: var(--text-main);">${escapeHtml(item.outlet_name || 'Amanda Balikpapan')}</div>
+          ${(() => {
+            const rawOutlet = item.outlet_name || 'Amanda Balikpapan';
+            const parts = rawOutlet.split('•').map(s => s.trim());
+            const branchTitle = parts[0] || 'Amanda Balikpapan';
+            const boothBadge = parts[1] ? `
+              <div style="display: inline-flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 700; color: #8c671d; background: rgba(184, 137, 45, 0.12); padding: 2px 7px; border-radius: 4px; margin-top: 3px;">
+                <i class="fa-solid fa-store" style="font-size: 10px;"></i> ${escapeHtml(parts[1])}
+              </div>` : '';
+            return `<div style="font-size: 12.5px; font-weight: 600; color: var(--text-main);">${escapeHtml(branchTitle)}</div>${boothBadge}`;
+          })()}
           ${item.receipt_number ? `<div style="font-size: 11px; color: var(--text-dim); margin-top: 2px;">No Struk: <strong>${escapeHtml(item.receipt_number)}</strong></div>` : ''}
         </td>
 

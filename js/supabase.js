@@ -624,6 +624,7 @@ async function pushToSupabase(tableName, payload, operation = 'upsert') {
         message: cs.message,
         rating: Number(cs.rating) || 5,
         status: cs.status || 'NEW',
+        admin_notes: cs.admin_notes || (cs.booth_name ? `Titik Booth: ${cs.booth_name}` : null),
         created_at: cs.created_at || new Date().toISOString()
       }));
     } else if (tableName === 'pricelists') {

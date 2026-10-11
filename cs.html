@@ -437,9 +437,21 @@
           <!-- Cabang Outlet Terkait -->
           <div class="form-group-cs">
             <label for="cs-outlet">Cabang Outlet Amanda Balikpapan *</label>
-            <select id="cs-outlet" class="cs-select" required>
+            <select id="cs-outlet" class="cs-select" required onchange="handleOutletChange(this.value)">
               <option value="">-- Pilih Cabang Outlet --</option>
               <!-- Diinjeksi otomatis oleh JS -->
+            </select>
+          </div>
+
+          <!-- Titik Booth Counter (Dinamis jika outlet memiliki booth) -->
+          <div class="form-group-cs" id="form-group-booth" style="display: none;">
+            <label for="cs-booth">
+              Titik Booth Counter / Pos Penjualan
+              <span class="label-sub" style="color: var(--primary-olive); font-weight: 600;">(Opsional jika di booth)</span>
+            </label>
+            <select id="cs-booth" class="cs-select">
+              <option value="">🏢 Toko Cabang Utama (Bukan di Titik Booth Counter)</option>
+              <!-- Diinjeksi otomatis berdasarkan outlet yang dipilih -->
             </select>
           </div>
 
@@ -543,9 +555,14 @@
 
       <div
         style="background: var(--bg-surface-elevated); border: 1px solid var(--border-sand-light); border-radius: 12px; padding: 12px; margin-bottom: 24px; font-size: 12.5px;">
-        <span style="color: var(--text-dim);">Nomor Tiket Layanan:</span>
-        <strong id="modal-ticket-id"
-          style="color: var(--primary-olive); display: block; font-size: 15px; margin-top: 2px;">#CS-BPN-0000</strong>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+          <span style="color: var(--text-dim);">Nomor Tiket Layanan:</span>
+          <strong id="modal-ticket-id" style="color: var(--primary-olive); font-size: 15px;">#CS-BPN-0000</strong>
+        </div>
+        <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px dashed var(--border-sand-light); padding-top: 6px;">
+          <span style="color: var(--text-dim);">Lokasi Cabang / Booth:</span>
+          <strong id="modal-outlet-name" style="color: var(--text-main); font-size: 12px; text-align: right;">-</strong>
+        </div>
       </div>
 
       <div style="display: flex; flex-direction: column; gap: 10px;">
@@ -563,9 +580,9 @@
 
   <!-- Scripts -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="js/data.js?v=3.2"></script>
-  <script src="js/supabase.js?v=3.2"></script>
-  <script src="js/waas-status.js?v=3.2"></script>
+  <script src="js/data.js?v=3.4"></script>
+  <script src="js/supabase.js?v=3.4"></script>
+  <script src="js/waas-status.js?v=3.4"></script>
 
   <script>
     let uploadedReceiptImages = [];
@@ -575,6 +592,11 @@
       populateOutletDropdown();
       setupRatingHover();
       renderReceiptPreviews();
+
+      // Listen for background Supabase updates to keep outlet/booth list synced
+      window.addEventListener('amanda_data_updated', () => {
+        populateOutletDropdown();
+      });
     });
 
     function populateOutletDropdown() {
@@ -582,15 +604,50 @@
       if (!select) return;
       const outlets = (typeof getOutlets === 'function') ? getOutlets() : (typeof AMANDA_OUTLETS !== 'undefined' ? AMANDA_OUTLETS : []);
 
-      select.innerHTML = '<option value="">-- Pilih Cabang Outlet Balikpapan --</option>';
+      const savedVal = select.value;
+      select.innerHTML = '<option value="">-- Pilih Cabang Outlet Amanda --</option>';
       outlets.forEach(out => {
         const opt = document.createElement('option');
         opt.value = out.id;
-        opt.textContent = `${out.name} (${out.city || 'Balikpapan'})`;
+        const boothCount = Array.isArray(out.booths) && out.booths.length > 0 ? ` (${out.booths.length} Titik Booth)` : '';
+        opt.textContent = `${out.name} - ${out.city || 'Balikpapan'}${boothCount}`;
         opt.dataset.wa = out.wa || '6281322119988';
         opt.dataset.name = out.name;
         select.appendChild(opt);
       });
+
+      if (savedVal) {
+        select.value = savedVal;
+        handleOutletChange(savedVal);
+      }
+    }
+
+    function handleOutletChange(outletId) {
+      const boothGroup = document.getElementById('form-group-booth');
+      const boothSelect = document.getElementById('cs-booth');
+      if (!boothGroup || !boothSelect) return;
+
+      if (!outletId) {
+        boothSelect.innerHTML = '<option value="">🏢 Toko Cabang Utama (Bukan di Titik Booth Counter)</option>';
+        boothGroup.style.display = 'none';
+        return;
+      }
+
+      const outlets = (typeof getOutlets === 'function') ? getOutlets() : (typeof AMANDA_OUTLETS !== 'undefined' ? AMANDA_OUTLETS : []);
+      const selectedOutlet = outlets.find(o => o.id === outletId);
+
+      if (selectedOutlet && Array.isArray(selectedOutlet.booths) && selectedOutlet.booths.length > 0) {
+        boothSelect.innerHTML = '<option value="">🏢 Toko Cabang Utama (Bukan di Titik Booth Counter)</option>' +
+          selectedOutlet.booths.map(b => `
+            <option value="${b.id}" data-name="${b.name}" data-wa="${b.wa || selectedOutlet.wa}">
+              🏪 ${b.name} ${b.location ? '(' + b.location + ')' : ''}
+            </option>
+          `).join('');
+        boothGroup.style.display = 'block';
+      } else {
+        boothSelect.innerHTML = '<option value="">🏢 Toko Cabang Utama (Bukan di Titik Booth Counter)</option>';
+        boothGroup.style.display = 'none';
+      }
     }
 
     function setRating(val) {
@@ -782,8 +839,20 @@
 
       const outletSelect = document.getElementById('cs-outlet');
       const selectedOption = outletSelect.options[outletSelect.selectedIndex];
-      const outletName = selectedOption ? (selectedOption.dataset.name || selectedOption.textContent) : 'Amanda Balikpapan';
-      const outletWa = selectedOption ? (selectedOption.dataset.wa || '6281322119988') : '6281322119988';
+      const baseOutletName = selectedOption ? (selectedOption.dataset.name || selectedOption.textContent.split(' - ')[0]) : 'Amanda Balikpapan';
+      let targetWa = selectedOption ? (selectedOption.dataset.wa || '6281322119988') : '6281322119988';
+
+      const boothSelect = document.getElementById('cs-booth');
+      const selectedBoothOption = (boothSelect && boothSelect.selectedIndex > 0) ? boothSelect.options[boothSelect.selectedIndex] : null;
+      const boothName = selectedBoothOption ? (selectedBoothOption.dataset.name || selectedBoothOption.textContent.replace(/^🏪\s*/, '').trim()) : '';
+      const boothWa = selectedBoothOption ? selectedBoothOption.dataset.wa : '';
+
+      // Route to booth WA if available and selected
+      if (boothWa) {
+        targetWa = boothWa;
+      }
+
+      const fullLocation = boothName ? `${baseOutletName} • ${boothName}` : baseOutletName;
 
       const ticketId = 'CS-BPN-' + Date.now().toString(36).toUpperCase();
       const rawPhone = document.getElementById('cs-phone').value.trim();
@@ -795,7 +864,7 @@
         name: document.getElementById('cs-name').value.trim(),
         phone: cleanPhone,
         outlet_id: outletSelect.value,
-        outlet_name: outletName,
+        outlet_name: fullLocation,
         category: document.getElementById('cs-category').value,
         receipt_number: document.getElementById('cs-receipt-no').value.trim(),
         receipt_image: uploadedReceiptImages[0] || null,
@@ -803,6 +872,7 @@
         message: document.getElementById('cs-message').value.trim(),
         rating: parseInt(document.getElementById('cs-rating-val').value, 10) || 5,
         status: 'NEW',
+        admin_notes: boothName ? `Titik Booth: ${boothName}` : null,
         created_at: new Date().toISOString()
       };
 
@@ -826,25 +896,33 @@
 
       // 3. Prepare direct WhatsApp Link
       const photoNote = uploadedReceiptImages.length > 0 ? `\n• Lampiran: *${uploadedReceiptImages.length} Foto Bukti Terlampir*` : '';
+      const locationNote = boothName
+        ? `\n• Cabang: *${baseOutletName}*\n• Titik Booth: *${boothName}*`
+        : `\n• Cabang: *${baseOutletName}*`;
+
       const waText = encodeURIComponent(
-        `Halo Tim CS Amanda Brownies Balikpapan (${outletName}),\n\n` +
+        `Halo Tim CS Amanda Brownies Balikpapan,\n\n` +
         `Saya ingin menindaklanjuti pesan layanan pelanggan:\n` +
         `• No Tiket: *#${ticketId}*\n` +
-        `• Nama: *${payload.name}*\n` +
+        `• Nama: *${payload.name}*` +
+        locationNote + `\n` +
         `• Kategori: *${payload.category.toUpperCase()}*` +
         photoNote + `\n` +
         `• Pesan: "${payload.message}"\n\n` +
         `Mohon dibantu informasinya ya kak. Terima kasih!`
       );
-      const waLink = `https://wa.me/${outletWa}?text=${waText}`;
+      const waLink = `https://wa.me/${targetWa}?text=${waText}`;
 
       // 4. Show Success Modal
       document.getElementById('modal-ticket-id').textContent = '#' + ticketId;
+      const modalOutletElem = document.getElementById('modal-outlet-name');
+      if (modalOutletElem) modalOutletElem.textContent = fullLocation;
       document.getElementById('btn-modal-wa').href = waLink;
       document.getElementById('cs-success-modal').classList.add('active');
 
       // Reset form
       document.getElementById('cs-inquiry-form').reset();
+      handleOutletChange('');
       clearReceiptPhoto();
       btn.disabled = false;
       btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Kirim Pesan Layanan Pelanggan';

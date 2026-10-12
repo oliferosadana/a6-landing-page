@@ -456,22 +456,34 @@ async function pullAllDataFromSupabase() {
       .order('created_at', { ascending: false });
 
     if (!errCs && dbCs && dbCs.length > 0) {
-      AMANDA_CS_INQUIRIES = dbCs.map(cs => ({
-        id: cs.id,
-        name: cs.name,
-        phone: cs.phone,
-        outlet_id: cs.outlet_id,
-        outlet_name: cs.outlet_name,
-        category: cs.category,
-        receipt_number: cs.receipt_number,
-        receipt_image: cs.receipt_image,
-        receipt_images: Array.isArray(cs.receipt_images) ? cs.receipt_images : (cs.receipt_image ? [cs.receipt_image] : []),
-        message: cs.message,
-        rating: Number(cs.rating) || 5,
-        status: cs.status || 'NEW',
-        admin_notes: cs.admin_notes || null,
-        created_at: cs.created_at
-      }));
+      AMANDA_CS_INQUIRIES = dbCs.map(cs => {
+        let parsedImages = [];
+        if (Array.isArray(cs.receipt_images) && cs.receipt_images.length > 0) {
+          parsedImages = cs.receipt_images;
+        } else if (typeof cs.receipt_images === 'string' && cs.receipt_images.startsWith('[')) {
+          try { parsedImages = JSON.parse(cs.receipt_images); } catch(e) {}
+        }
+        if (parsedImages.length === 0 && cs.receipt_image) {
+          parsedImages = [cs.receipt_image];
+        }
+
+        return {
+          id: cs.id,
+          name: cs.name,
+          phone: cs.phone,
+          outlet_id: cs.outlet_id,
+          outlet_name: cs.outlet_name,
+          category: cs.category,
+          receipt_number: cs.receipt_number || '',
+          receipt_image: cs.receipt_image || (parsedImages[0] || null),
+          receipt_images: parsedImages,
+          message: cs.message,
+          rating: Number(cs.rating) || 5,
+          status: cs.status || 'NEW',
+          admin_notes: cs.admin_notes || null,
+          created_at: cs.created_at
+        };
+      });
       if (typeof saveCsInquiries === 'function') {
         saveCsInquiries(AMANDA_CS_INQUIRIES, false);
       }
@@ -877,12 +889,18 @@ function startCsRealtimeHeartbeat() {
         .limit(30);
 
       if (!error && Array.isArray(dbCs) && dbCs.length > 0) {
-        const currentIds = new Set(AMANDA_CS_INQUIRIES.map(i => i.id));
-        const newItems = dbCs.filter(i => !currentIds.has(i.id));
+        const mappedList = dbCs.map(cs => {
+          let parsedImages = [];
+          if (Array.isArray(cs.receipt_images) && cs.receipt_images.length > 0) {
+            parsedImages = cs.receipt_images;
+          } else if (typeof cs.receipt_images === 'string' && cs.receipt_images.startsWith('[')) {
+            try { parsedImages = JSON.parse(cs.receipt_images); } catch(e) {}
+          }
+          if (parsedImages.length === 0 && cs.receipt_image) {
+            parsedImages = [cs.receipt_image];
+          }
 
-        if (newItems.length > 0) {
-          console.log(`🔄 [Heartbeat Sync] Mendeteksi ${newItems.length} tiket baru di Supabase Cloud.`);
-          const mappedNew = newItems.map(cs => ({
+          return {
             id: cs.id,
             name: cs.name,
             phone: cs.phone,
@@ -890,16 +908,30 @@ function startCsRealtimeHeartbeat() {
             outlet_name: cs.outlet_name,
             category: cs.category,
             receipt_number: cs.receipt_number || '',
-            receipt_image: cs.receipt_image || (Array.isArray(cs.receipt_images) && cs.receipt_images[0]) || null,
-            receipt_images: Array.isArray(cs.receipt_images) ? cs.receipt_images : (cs.receipt_image ? [cs.receipt_image] : []),
+            receipt_image: cs.receipt_image || (parsedImages[0] || null),
+            receipt_images: parsedImages,
             message: cs.message,
             rating: Number(cs.rating) || 5,
             status: cs.status || 'NEW',
             admin_notes: cs.admin_notes || null,
             created_at: cs.created_at
-          }));
+          };
+        });
 
-          AMANDA_CS_INQUIRIES = [...mappedNew, ...AMANDA_CS_INQUIRIES];
+        const currentIds = new Set(AMANDA_CS_INQUIRIES.map(i => i.id));
+        const hasNew = mappedList.some(i => !currentIds.has(i.id));
+
+        // Cek apakah ada tiket di memori yang kehilangan foto lampiran
+        const needsPhotoRestore = AMANDA_CS_INQUIRIES.some(item => {
+          const cloudItem = mappedList.find(m => m.id === item.id);
+          return cloudItem && (cloudItem.receipt_image || cloudItem.receipt_images.length > 0) &&
+            (!item.receipt_image && (!item.receipt_images || item.receipt_images.length === 0));
+        });
+
+        if (hasNew || needsPhotoRestore || mappedList.length !== AMANDA_CS_INQUIRIES.length) {
+          console.log(`🔄 [Heartbeat Sync] Memperbarui ${mappedList.length} pengaduan dari Supabase Cloud (memulihkan foto bukti).`);
+          const prevCount = AMANDA_CS_INQUIRIES.length;
+          AMANDA_CS_INQUIRIES = mappedList;
           if (typeof saveCsInquiries === 'function') {
             saveCsInquiries(AMANDA_CS_INQUIRIES, false);
           }
@@ -908,10 +940,11 @@ function startCsRealtimeHeartbeat() {
           if (typeof renderCsManager === 'function') renderCsManager();
           if (typeof renderDashboard === 'function') renderDashboard();
 
-          // Mainkan suara lonceng & notifikasi
-          playCsNotificationSound();
-          if (typeof showCmsToast === 'function') {
-            showCmsToast(`📩 ${newItems.length} Pengaduan Pelanggan Baru Masuk!`, 'success');
+          if (hasNew) {
+            playCsNotificationSound();
+            if (typeof showCmsToast === 'function') {
+              showCmsToast(`📩 Ada ${mappedList.length - prevCount} Pengaduan Pelanggan Baru Masuk!`, 'success');
+            }
           }
         }
       }
@@ -985,22 +1018,34 @@ async function syncCsInquiriesNow(btnElement) {
       .order('created_at', { ascending: false });
 
     if (!error && Array.isArray(dbCs)) {
-      AMANDA_CS_INQUIRIES = dbCs.map(cs => ({
-        id: cs.id,
-        name: cs.name,
-        phone: cs.phone,
-        outlet_id: cs.outlet_id,
-        outlet_name: cs.outlet_name,
-        category: cs.category,
-        receipt_number: cs.receipt_number || '',
-        receipt_image: cs.receipt_image || (Array.isArray(cs.receipt_images) && cs.receipt_images[0]) || null,
-        receipt_images: Array.isArray(cs.receipt_images) ? cs.receipt_images : (cs.receipt_image ? [cs.receipt_image] : []),
-        message: cs.message,
-        rating: Number(cs.rating) || 5,
-        status: cs.status || 'NEW',
-        admin_notes: cs.admin_notes || null,
-        created_at: cs.created_at
-      }));
+      AMANDA_CS_INQUIRIES = dbCs.map(cs => {
+        let parsedImages = [];
+        if (Array.isArray(cs.receipt_images) && cs.receipt_images.length > 0) {
+          parsedImages = cs.receipt_images;
+        } else if (typeof cs.receipt_images === 'string' && cs.receipt_images.startsWith('[')) {
+          try { parsedImages = JSON.parse(cs.receipt_images); } catch(e) {}
+        }
+        if (parsedImages.length === 0 && cs.receipt_image) {
+          parsedImages = [cs.receipt_image];
+        }
+
+        return {
+          id: cs.id,
+          name: cs.name,
+          phone: cs.phone,
+          outlet_id: cs.outlet_id,
+          outlet_name: cs.outlet_name,
+          category: cs.category,
+          receipt_number: cs.receipt_number || '',
+          receipt_image: cs.receipt_image || (parsedImages[0] || null),
+          receipt_images: parsedImages,
+          message: cs.message,
+          rating: Number(cs.rating) || 5,
+          status: cs.status || 'NEW',
+          admin_notes: cs.admin_notes || null,
+          created_at: cs.created_at
+        };
+      });
 
       if (typeof saveCsInquiries === 'function') {
         saveCsInquiries(AMANDA_CS_INQUIRIES, false);

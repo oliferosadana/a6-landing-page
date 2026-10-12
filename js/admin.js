@@ -2371,9 +2371,18 @@ function renderCsManager() {
     const waLink = `https://wa.me/${item.phone}?text=${waReplyText}`;
 
     // Receipt Column with Multi-Image Support
-    const imagesList = Array.isArray(item.receipt_images) && item.receipt_images.length > 0
-      ? item.receipt_images
-      : (item.receipt_image ? [item.receipt_image] : []);
+    let imagesList = [];
+    if (Array.isArray(item.receipt_images) && item.receipt_images.length > 0) {
+      imagesList = item.receipt_images.filter(img => typeof img === 'string' && img.length > 0);
+    } else if (typeof item.receipt_images === 'string' && item.receipt_images.startsWith('[')) {
+      try {
+        const parsed = JSON.parse(item.receipt_images);
+        if (Array.isArray(parsed)) imagesList = parsed;
+      } catch (e) {}
+    }
+    if (imagesList.length === 0 && item.receipt_image && typeof item.receipt_image === 'string' && item.receipt_image.length > 0) {
+      imagesList = [item.receipt_image];
+    }
 
     let receiptCell = '<span style="color: var(--text-dim); font-size: 12px;">-</span>';
     if (imagesList.length > 0) {
@@ -2523,10 +2532,19 @@ function openCsReceiptModal(inquiryId, initialIndex = 0) {
   const item = rawList.find(i => i.id === inquiryId);
   if (!item) return;
 
-  activeCsModalItem = item;
-  activeCsModalImages = Array.isArray(item.receipt_images) && item.receipt_images.length > 0
-    ? item.receipt_images
-    : (item.receipt_image ? [item.receipt_image] : []);
+  let images = [];
+  if (Array.isArray(item.receipt_images) && item.receipt_images.length > 0) {
+    images = item.receipt_images.filter(img => typeof img === 'string' && img.length > 0);
+  } else if (typeof item.receipt_images === 'string' && item.receipt_images.startsWith('[')) {
+    try {
+      const parsed = JSON.parse(item.receipt_images);
+      if (Array.isArray(parsed)) images = parsed;
+    } catch (e) {}
+  }
+  if (images.length === 0 && item.receipt_image && typeof item.receipt_image === 'string' && item.receipt_image.length > 0) {
+    images = [item.receipt_image];
+  }
+  activeCsModalImages = images;
   activeCsModalIndex = initialIndex >= 0 && initialIndex < activeCsModalImages.length ? initialIndex : 0;
 
   const titleEl = document.getElementById('cs-modal-ticket-title');

@@ -491,7 +491,21 @@ let isPromoSlideHovered = false;
 
 function renderPromoFlyers() {
   const stage = document.getElementById('promo-coverflow-stage');
-  if (!stage || typeof AMANDA_PROMOS === 'undefined' || AMANDA_PROMOS.length === 0) return;
+  const pagination = document.getElementById('promo-slider-pagination');
+  if (!stage) return;
+
+  if (typeof AMANDA_PROMOS === 'undefined' || AMANDA_PROMOS.length === 0) {
+    stage.innerHTML = `
+      <div style="display:flex; justify-content:center; align-items:center; min-height:280px; width:100%; color:var(--text-dim); text-align:center;">
+        <div>
+          <i class="fa-solid fa-spinner fa-spin" style="font-size:26px; color:var(--primary-gold); margin-bottom:10px; display:block;"></i>
+          <span style="font-size:13px; font-weight:600; letter-spacing:0.3px;">Memuat Promo Resmi Amanda...</span>
+        </div>
+      </div>
+    `;
+    if (pagination) pagination.innerHTML = '';
+    return;
+  }
 
   if (currentPromoSlide >= AMANDA_PROMOS.length) {
     currentPromoSlide = 0;
@@ -746,7 +760,19 @@ function initPromoSlideEvents() {
 // ===================================================================
 function renderPriceListCards() {
   const track = document.getElementById('pricelist-cards-track');
-  if (!track || typeof AMANDA_PRICELISTS === 'undefined') return;
+  if (!track) return;
+
+  if (typeof AMANDA_PRICELISTS === 'undefined' || AMANDA_PRICELISTS.length === 0) {
+    track.innerHTML = `
+      <div style="display:flex; justify-content:center; align-items:center; min-height:220px; width:100%; color:var(--text-dim); text-align:center; grid-column:1/-1;">
+        <div>
+          <i class="fa-solid fa-spinner fa-spin" style="font-size:24px; color:var(--primary-gold); margin-bottom:10px; display:block;"></i>
+          <span style="font-size:13px; font-weight:600;">Memuat Daftar Harga Resmi Amanda...</span>
+        </div>
+      </div>
+    `;
+    return;
+  }
 
   track.innerHTML = AMANDA_PRICELISTS.map(item => {
     return `

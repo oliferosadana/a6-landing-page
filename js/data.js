@@ -296,64 +296,9 @@ const DEFAULT_OUTLET_CATEGORIES = [
   }
 ];
 
-const DEFAULT_PROMOS = [
-  {
-    id: "promo-01",
-    title: "Diskon 20% Semua Varian Brownies",
-    badge: "Flash Sale Balikpapan",
-    badgeColor: "gold",
-    image: "assets/promo_flyer_1.jpg",
-    aspectRatio: "4/5",
-    description: "Nikmati potongan 20% untuk semua varian brownies favorit (Kukus Original, Cheese Cream, Almond, & Pandan). Cocok untuk oleh-oleh dan cemilan keluarga!",
-    period: "Berlaku Hari Ini s/d Pukul 21:30 WITA",
-    waMessage: "Halo Amanda Brownies Balikpapan, saya ingin memesan Promo Diskon 20%. Mohon info varian yang ready.",
-    ctaText: "Pesan Promo 20%",
-    active: true
-  },
-  {
-    id: "promo-02",
-    title: "Spesial Promo Bundling 3 Box Hemat",
-    badge: "Paket Hemat Rp 210.000",
-    badgeColor: "red",
-    image: "assets/promo_flyer_2.jpg",
-    aspectRatio: "4/5",
-    description: "Beli 3 paket brownies pilihan (Almond Brownies, Tiramisu Marble, Cheese Cream) dapatkan harga hemat hanya Rp 210.000 + Free Totebag!",
-    period: "Berlaku Khusus Outlet Resmi Balikpapan",
-    waMessage: "Halo Amanda Brownies Balikpapan, saya mau pesan Paket Bundling 3 Box Hemat Rp 210.000.",
-    ctaText: "Pesan Paket 3 Box",
-    active: true
-  },
-  {
-    id: "promo-03",
-    title: "Voucher Spesial Amanda Brownies",
-    badge: "Diskon Khusus",
-    badgeColor: "gold",
-    image: "assets/promo_flyer_1.jpg",
-    aspectRatio: "4/5",
-    description: "Dapatkan penawaran harga spesial untuk pembelian varian favorit di seluruh outlet resmi Amanda Brownies Kalimantan.",
-    period: "Berlaku Selama Persediaan Masih Ada",
-    waMessage: "Halo Amanda Brownies Balikpapan, saya ingin info promo voucher spesial.",
-    ctaText: "Info Promo",
-    active: true
-  }
-];
-
-const DEFAULT_PRICELISTS = [
-  {
-    id: "price-01",
-    title: "Daftar Harga Menu Resmi Amanda Brownies Balikpapan",
-    badge: "Price List Brownies",
-    image: "assets/amanda_pricelist_poster.jpg",
-    caption: "Daftar Harga Resmi Amanda Brownies Kalimantan - Outlet Balikpapan"
-  },
-  {
-    id: "price-02",
-    title: "Daftar Harga Menu Spesial & Bolu Pastry",
-    badge: "Menu & Bolu Pastry",
-    image: "assets/amanda_pricelist_premium.jpg",
-    caption: "Daftar Harga Menu Spesial, Bolu & Pastry - Outlet Balikpapan"
-  }
-];
+// Default Promo & Price List collections (Kosong secara default agar halaman hanya memuat data asli dari database Supabase)
+const DEFAULT_PROMOS = [];
+const DEFAULT_PRICELISTS = [];
 
 const DEFAULT_PRODUCTS = [
   {
@@ -557,37 +502,8 @@ function notifyAmandaDataChanged() {
   }, 120);
 }
 
-// Default Customer Service Sample Inquiries
-const DEFAULT_CS_INQUIRIES = [
-  {
-    id: "CS-BPN-K8F91A",
-    name: "Hendra Wijaya",
-    phone: "6281234567890",
-    outlet_id: "out-bpn-01",
-    outlet_name: "Amanda Brownies Outlet MT Haryono",
-    category: "catering",
-    receipt_number: "RCP-202610-0012",
-    receipt_image: null,
-    message: "Saya ingin memesan 40 box Brownies Kukus Original & Cheese Cream untuk acara syukuran kantor hari Sabtu depan.",
-    rating: 5,
-    status: "NEW",
-    created_at: "2026-10-06T09:30:00.000Z"
-  },
-  {
-    id: "CS-BPN-L2X77B",
-    name: "Siti Rahmawati",
-    phone: "6285299887766",
-    outlet_id: "out-bpn-04",
-    outlet_name: "Amanda Brownies Cabang Sepinggan (Akses Bandara)",
-    category: "complaint",
-    receipt_number: "RCP-202610-0089",
-    receipt_image: null,
-    message: "Tadi beli varian Sarikaya Pandan di booth bandara jam 14.00, struk terlampir. Mohon konfirmasi ketersediaan box oleh-oleh tambahan.",
-    rating: 4,
-    status: "IN_PROGRESS",
-    created_at: "2026-10-05T14:15:00.000Z"
-  }
-];
+// Default Customer Service Sample Inquiries (Kosong secara default agar hanya memuat pengaduan asli dari Supabase)
+const DEFAULT_CS_INQUIRIES = [];
 
 // Global active datasets loaded from localStorage or defaults
 let AMANDA_OUTLETS = [];
@@ -606,14 +522,33 @@ function reloadAmandaData() {
       booths: Array.isArray(out.booths) ? out.booths : []
     };
   });
-  AMANDA_PROMOS = getStoredData('amanda_promos', DEFAULT_PROMOS);
-  AMANDA_PRICELISTS = getStoredData('amanda_pricelists', DEFAULT_PRICELISTS);
+  // Promos: Hanya muat data asli database, bersihkan data default legacy
+  const storedPromos = getStoredData('amanda_promos', []);
+  AMANDA_PROMOS = Array.isArray(storedPromos)
+    ? storedPromos.filter(p => p && p.id && !p.id.startsWith('promo-0'))
+    : [];
+  if (Array.isArray(storedPromos) && storedPromos.some(p => p && p.id && p.id.startsWith('promo-0'))) {
+    try { localStorage.setItem('amanda_promos', JSON.stringify(AMANDA_PROMOS)); } catch (e) {}
+  }
+
+  // Price Lists: Hanya muat data asli database, bersihkan data default legacy
+  const storedPricelists = getStoredData('amanda_pricelists', []);
+  AMANDA_PRICELISTS = Array.isArray(storedPricelists)
+    ? storedPricelists.filter(p => p && p.id && !p.id.startsWith('price-0'))
+    : [];
+  if (Array.isArray(storedPricelists) && storedPricelists.some(p => p && p.id && p.id.startsWith('price-0'))) {
+    try { localStorage.setItem('amanda_pricelists', JSON.stringify(AMANDA_PRICELISTS)); } catch (e) {}
+  }
+
   AMANDA_PRODUCTS = getStoredData('amanda_products', DEFAULT_PRODUCTS);
   AMANDA_TICKER = getStoredData('amanda_ticker', DEFAULT_TICKER);
 
-  // CS Inquiries: hanya inisialisasi dari localStorage jika memori masih kosong
+  // CS Inquiries: Hanya muat data asli database, jangan muat dummy sampel
   if (!Array.isArray(AMANDA_CS_INQUIRIES) || AMANDA_CS_INQUIRIES.length === 0) {
-    AMANDA_CS_INQUIRIES = getStoredData('amanda_cs_inquiries', DEFAULT_CS_INQUIRIES);
+    const storedCs = getStoredData('amanda_cs_inquiries', []);
+    AMANDA_CS_INQUIRIES = Array.isArray(storedCs)
+      ? storedCs.filter(c => c && c.id && !c.id.startsWith('CS-BPN-K8') && !c.id.startsWith('CS-BPN-L2'))
+      : [];
   }
 }
 

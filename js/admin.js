@@ -2284,7 +2284,14 @@ function renderCsManager() {
   if (outletFilter && outletFilter.options.length <= 1 && typeof AMANDA_OUTLETS !== 'undefined' && AMANDA_OUTLETS.length > 0) {
     const currentVal = outletFilter.value;
     outletFilter.innerHTML = '<option value="all">Semua Outlet Balikpapan</option>' +
-      AMANDA_OUTLETS.map(o => `<option value="${o.id}">${o.name}</option>`).join('');
+      AMANDA_OUTLETS.map(o => {
+        let shortName = (o.name || '')
+          .replace(/^Amanda Brownies\s*(Outlet|Cabang)?\s*/i, '')
+          .replace(/^(Outlet|Cabang)\s+/i, '')
+          .replace(/\s*\([^)]*\)\s*$/g, '')
+          .trim();
+        return `<option value="${o.id}">[Outlet] ${shortName || o.name}</option>`;
+      }).join('');
     outletFilter.value = currentVal;
   }
 

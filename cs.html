@@ -570,9 +570,9 @@
 
   <!-- Scripts -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="js/data.js?v=3.4"></script>
-  <script src="js/supabase.js?v=3.4"></script>
-  <script src="js/waas-status.js?v=3.4"></script>
+  <script src="js/data.js?v=3.5"></script>
+  <script src="js/supabase.js?v=3.5"></script>
+  <script src="js/waas-status.js?v=3.5"></script>
 
   <script>
     let uploadedReceiptImages = [];
@@ -589,40 +589,64 @@
       });
     });
 
+    // Helper format nama singkat tanpa alamat untuk tampilan rapi
+    function getCleanOutletName(rawName) {
+      if (!rawName) return 'Outlet';
+      let clean = rawName.trim();
+      clean = clean.replace(/^Amanda Brownies\s*(Outlet|Cabang)?\s*/i, '');
+      clean = clean.replace(/^(Outlet|Cabang)\s+/i, '');
+      clean = clean.replace(/\s*\([^)]*\)\s*$/g, '');
+      return clean.trim() || rawName;
+    }
+
+    function getCleanBoothName(rawName) {
+      if (!rawName) return 'Booth';
+      let clean = rawName.trim();
+      clean = clean.replace(/^Booth\s+/i, '');
+      clean = clean.replace(/\s+Balikpapan$/i, '');
+      clean = clean.replace(/\s*\(The Plaza\)/i, '');
+      return clean.trim() || rawName;
+    }
+
     function populateOutletDropdown() {
       const select = document.getElementById('cs-outlet');
       if (!select) return;
       const outlets = (typeof getOutlets === 'function') ? getOutlets() : (typeof AMANDA_OUTLETS !== 'undefined' ? AMANDA_OUTLETS : []);
 
       const savedVal = select.value;
-      select.innerHTML = '<option value="">-- Pilih Cabang Outlet / Titik Booth --</option>';
+      select.innerHTML = '<option value="">-- Pilih Outlet / Booth --</option>';
 
       outlets.forEach(out => {
-        // 1. Tampilkan Baris Cabang Outlet Utama
+        const shortOutName = getCleanOutletName(out.name);
+
+        // 1. Baris Cabang Outlet Utama (Singkat, rapi, tanpa alamat)
         const optOutlet = document.createElement('option');
         optOutlet.value = out.id;
-        optOutlet.textContent = `🏢 [Outlet] ${out.name} (${out.city || 'Balikpapan'})`;
+        optOutlet.textContent = `[Outlet] ${shortOutName}`;
         optOutlet.dataset.type = 'outlet';
         optOutlet.dataset.outletId = out.id;
-        optOutlet.dataset.outletName = out.name;
+        optOutlet.dataset.outletName = shortOutName;
+        optOutlet.dataset.fullOutletName = out.name;
         optOutlet.dataset.wa = out.wa || '6281322119988';
-        optOutlet.dataset.fullName = out.name;
-        optOutlet.style.fontWeight = 'bold';
+        optOutlet.dataset.fullName = `Outlet ${shortOutName}`;
+        optOutlet.style.fontWeight = '700';
         select.appendChild(optOutlet);
 
-        // 2. Langsung tampilkan Baris Titik Booth Counter di bawah outlet tersebut jika ada
+        // 2. Baris Titik Booth Counter di bawah outlet tersebut (outlet, booth, booth, outlet, dst)
         if (Array.isArray(out.booths) && out.booths.length > 0) {
           out.booths.forEach(b => {
+            const shortBoothName = getCleanBoothName(b.name);
             const optBooth = document.createElement('option');
             optBooth.value = `${out.id}:::${b.id}`;
-            optBooth.textContent = `\u00A0\u00A0\u00A0\u00A0↳ 🏪 [Booth] ${b.name}${b.location ? ' (' + b.location + ')' : ''}`;
+            optBooth.textContent = `\u00A0\u00A0\u00A0\u00A0↳ [Booth] ${shortBoothName}`;
             optBooth.dataset.type = 'booth';
             optBooth.dataset.outletId = out.id;
-            optBooth.dataset.outletName = out.name;
+            optBooth.dataset.outletName = shortOutName;
             optBooth.dataset.boothId = b.id;
-            optBooth.dataset.boothName = b.name;
+            optBooth.dataset.boothName = shortBoothName;
+            optBooth.dataset.fullBoothName = b.name;
             optBooth.dataset.wa = b.wa || out.wa || '6281322119988';
-            optBooth.dataset.fullName = `${out.name} • ${b.name}`;
+            optBooth.dataset.fullName = `Outlet ${shortOutName} • Booth ${shortBoothName}`;
             select.appendChild(optBooth);
           });
         }
@@ -831,9 +855,9 @@
 
       const itemType = selectedOption.dataset.type || 'outlet';
       const outletId = selectedOption.dataset.outletId || outletSelect.value.split(':::')[0];
-      const baseOutletName = selectedOption.dataset.outletName || selectedOption.textContent.replace(/^🏢\s*\[Outlet\]\s*/, '').trim();
+      const baseOutletName = selectedOption.dataset.outletName || selectedOption.textContent.replace(/^(\uD83C\uDFE2\s*)?\[Outlet\]\s*/, '').trim();
       const boothName = selectedOption.dataset.boothName || '';
-      const fullLocation = selectedOption.dataset.fullName || (boothName ? `${baseOutletName} • ${boothName}` : baseOutletName);
+      const fullLocation = selectedOption.dataset.fullName || (boothName ? `Outlet ${baseOutletName} • Booth ${boothName}` : `Outlet ${baseOutletName}`);
       const targetWa = selectedOption.dataset.wa || '6281322119988';
 
       const ticketId = 'CS-BPN-' + Date.now().toString(36).toUpperCase();
@@ -854,7 +878,7 @@
         message: document.getElementById('cs-message').value.trim(),
         rating: parseInt(document.getElementById('cs-rating-val').value, 10) || 5,
         status: 'NEW',
-        admin_notes: boothName ? `Titik Booth: ${boothName}` : null,
+        admin_notes: boothName ? `Titik Booth: Booth ${boothName}` : null,
         created_at: new Date().toISOString()
       };
 
@@ -879,8 +903,8 @@
       // 3. Prepare direct WhatsApp Link
       const photoNote = uploadedReceiptImages.length > 0 ? `\n• Lampiran: *${uploadedReceiptImages.length} Foto Bukti Terlampir*` : '';
       const locationNote = boothName
-        ? `\n• Cabang: *${baseOutletName}*\n• Titik Booth: *${boothName}*`
-        : `\n• Cabang: *${baseOutletName}*`;
+        ? `\n• Cabang Outlet: *Outlet ${baseOutletName}*\n• Titik Booth: *Booth ${boothName}*`
+        : `\n• Cabang Outlet: *Outlet ${baseOutletName}*`;
 
       const waText = encodeURIComponent(
         `Halo Tim CS Amanda Brownies Balikpapan,\n\n` +

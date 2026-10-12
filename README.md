@@ -8,7 +8,7 @@ Aplikasi web modern, ultra-cepat, dan terpadu untuk ekosistem **Landing Page Pub
 
 | Halaman | File | Deskripsi & Hak Akses |
 | :--- | :--- | :--- |
-| **Landing Page Publik** | [`index.html`](./index.html) | Katalog menu realtime 2-kolom mobile, flyer promo 4:5 dengan lightbox zoom, floating WhatsApp speed dial (Kerjasama, Reseller, Komplain), dan outlet locator. |
+| **Landing Page Publik** | [`index.html`](./index.html) | Katalog menu realtime 2-kolom mobile, flyer promo 4:5 dengan lightbox zoom, floating WhatsApp speed dial (Kerjasama, Reseller, Form CS & Struk), dan outlet locator. |
 | **Panel CMS Cabang** | [`admin.html`](./admin.html) | Panel khusus admin untuk mengelola katalog menu, stok outlet, flyer promo 4:5, price list, kategori wilayah, running promo ticker, dan sinkronisasi Supabase. |
 | **Login Portal** | [`login.html`](./login.html) | Otentikasi aman terintegrasi Supabase Auth & Session Guard untuk akses ke panel CMS. |
 

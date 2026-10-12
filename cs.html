@@ -539,8 +539,7 @@
         Pesan Anda Berhasil Terkirim!
       </h2>
       <p style="font-size: 13.5px; color: var(--text-muted); line-height: 1.55; margin-bottom: 20px;">
-        Terima kasih telah menghubungi Customer Service Amanda Brownies Balikpapan. Tim outlet kami telah menerima pesan
-        Anda dan akan segera merespon via WhatsApp.
+        Terima kasih telah menghubungi Customer Service Amanda Brownies Balikpapan. Pesan dan keluhan Anda telah kami terima dan akan segera ditindaklanjuti oleh tim kami.
       </p>
 
       <div
@@ -556,12 +555,12 @@
       </div>
 
       <div style="display: flex; flex-direction: column; gap: 10px;">
-        <a id="btn-modal-wa" href="#" target="_blank" class="btn-primary"
-          style="text-decoration: none; padding: 12px; border-radius: var(--radius-pill); font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 8px; background: #25d366; box-shadow: 0 4px 12px rgba(37,211,102,0.3);">
-          <i class="fa-brands fa-whatsapp" style="font-size: 18px;"></i> Lanjut Hubungi WhatsApp Cabang
-        </a>
+        <button type="button" onclick="closeCsSuccessModal()" class="btn-primary"
+          style="padding: 12px; border-radius: var(--radius-pill); font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 8px; background: var(--primary-olive); color: #fff; border: none; cursor: pointer; font-size: 14px;">
+          <i class="fa-solid fa-check"></i> Selesai & Tutup
+        </button>
         <a href="index.html" class="btn-secondary"
-          style="text-decoration: none; padding: 11px; border-radius: var(--radius-pill); font-size: 13px;">
+          style="text-decoration: none; padding: 11px; border-radius: var(--radius-pill); font-size: 13px; text-align: center;">
           Kembali ke Halaman Menu
         </a>
       </div>
@@ -570,9 +569,9 @@
 
   <!-- Scripts -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="js/data.js?v=3.6"></script>
-  <script src="js/supabase.js?v=3.6"></script>
-  <script src="js/waas-status.js?v=3.6"></script>
+  <script src="js/data.js?v=3.7"></script>
+  <script src="js/supabase.js?v=3.7"></script>
+  <script src="js/waas-status.js?v=3.7"></script>
 
   <script>
     let uploadedReceiptImages = [];
@@ -582,6 +581,13 @@
       populateOutletDropdown();
       setupRatingHover();
       renderReceiptPreviews();
+
+      const overlay = document.getElementById('cs-success-modal');
+      if (overlay) {
+        overlay.addEventListener('click', (e) => {
+          if (e.target === overlay) closeCsSuccessModal();
+        });
+      }
 
       // Listen for background Supabase updates to keep outlet/booth list synced
       window.addEventListener('amanda_data_updated', () => {
@@ -907,30 +913,10 @@
         window.dispatchEvent(new CustomEvent('amanda_data_updated'));
       } catch (e) {}
 
-      // 3. Prepare direct WhatsApp Link
-      const photoNote = uploadedReceiptImages.length > 0 ? `\n• Lampiran: *${uploadedReceiptImages.length} Foto Bukti Terlampir*` : '';
-      const locationNote = boothName
-        ? `\n• Cabang Outlet: *Outlet ${baseOutletName}*\n• Titik Booth: *Booth ${boothName}*`
-        : `\n• Cabang Outlet: *Outlet ${baseOutletName}*`;
-
-      const waText = encodeURIComponent(
-        `Halo Tim CS Amanda Brownies Balikpapan,\n\n` +
-        `Saya ingin menindaklanjuti pesan layanan pelanggan:\n` +
-        `• No Tiket: *#${ticketId}*\n` +
-        `• Nama: *${payload.name}*` +
-        locationNote + `\n` +
-        `• Kategori: *${payload.category.toUpperCase()}*` +
-        photoNote + `\n` +
-        `• Pesan: "${payload.message}"\n\n` +
-        `Mohon dibantu informasinya ya kak. Terima kasih!`
-      );
-      const waLink = `https://wa.me/${targetWa}?text=${waText}`;
-
-      // 4. Show Success Modal
+      // 3. Show Success Modal
       document.getElementById('modal-ticket-id').textContent = '#' + ticketId;
       const modalOutletElem = document.getElementById('modal-outlet-name');
       if (modalOutletElem) modalOutletElem.textContent = fullLocation;
-      document.getElementById('btn-modal-wa').href = waLink;
       document.getElementById('cs-success-modal').classList.add('active');
 
       // Reset form
@@ -938,6 +924,11 @@
       clearReceiptPhoto();
       btn.disabled = false;
       btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Kirim Pesan Layanan Pelanggan';
+    }
+
+    function closeCsSuccessModal() {
+      const modal = document.getElementById('cs-success-modal');
+      if (modal) modal.classList.remove('active');
     }
   </script>
 </body>

@@ -434,24 +434,14 @@
         </div>
 
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px;">
-          <!-- Cabang Outlet Terkait -->
+          <!-- Lokasi Cabang Outlet / Titik Booth -->
           <div class="form-group-cs">
-            <label for="cs-outlet">Cabang Outlet Amanda Balikpapan *</label>
-            <select id="cs-outlet" class="cs-select" required onchange="handleOutletChange(this.value)">
-              <option value="">-- Pilih Cabang Outlet --</option>
-              <!-- Diinjeksi otomatis oleh JS -->
-            </select>
-          </div>
-
-          <!-- Titik Booth Counter (Dinamis jika outlet memiliki booth) -->
-          <div class="form-group-cs" id="form-group-booth" style="display: none;">
-            <label for="cs-booth">
-              Titik Booth Counter / Pos Penjualan
-              <span class="label-sub" style="color: var(--primary-olive); font-weight: 600;">(Opsional jika di booth)</span>
+            <label for="cs-outlet">
+              Lokasi Cabang Outlet / Titik Booth Counter *
             </label>
-            <select id="cs-booth" class="cs-select">
-              <option value="">🏢 Toko Cabang Utama (Bukan di Titik Booth Counter)</option>
-              <!-- Diinjeksi otomatis berdasarkan outlet yang dipilih -->
+            <select id="cs-outlet" class="cs-select" required>
+              <option value="">-- Pilih Cabang Outlet / Titik Booth --</option>
+              <!-- Diinjeksi otomatis oleh JS: Outlet, Booth, Booth, Outlet, dst -->
             </select>
           </div>
 
@@ -605,48 +595,41 @@
       const outlets = (typeof getOutlets === 'function') ? getOutlets() : (typeof AMANDA_OUTLETS !== 'undefined' ? AMANDA_OUTLETS : []);
 
       const savedVal = select.value;
-      select.innerHTML = '<option value="">-- Pilih Cabang Outlet Amanda --</option>';
+      select.innerHTML = '<option value="">-- Pilih Cabang Outlet / Titik Booth --</option>';
+
       outlets.forEach(out => {
-        const opt = document.createElement('option');
-        opt.value = out.id;
-        const boothCount = Array.isArray(out.booths) && out.booths.length > 0 ? ` (${out.booths.length} Titik Booth)` : '';
-        opt.textContent = `${out.name} - ${out.city || 'Balikpapan'}${boothCount}`;
-        opt.dataset.wa = out.wa || '6281322119988';
-        opt.dataset.name = out.name;
-        select.appendChild(opt);
+        // 1. Tampilkan Baris Cabang Outlet Utama
+        const optOutlet = document.createElement('option');
+        optOutlet.value = out.id;
+        optOutlet.textContent = `🏢 [Outlet] ${out.name} (${out.city || 'Balikpapan'})`;
+        optOutlet.dataset.type = 'outlet';
+        optOutlet.dataset.outletId = out.id;
+        optOutlet.dataset.outletName = out.name;
+        optOutlet.dataset.wa = out.wa || '6281322119988';
+        optOutlet.dataset.fullName = out.name;
+        optOutlet.style.fontWeight = 'bold';
+        select.appendChild(optOutlet);
+
+        // 2. Langsung tampilkan Baris Titik Booth Counter di bawah outlet tersebut jika ada
+        if (Array.isArray(out.booths) && out.booths.length > 0) {
+          out.booths.forEach(b => {
+            const optBooth = document.createElement('option');
+            optBooth.value = `${out.id}:::${b.id}`;
+            optBooth.textContent = `\u00A0\u00A0\u00A0\u00A0↳ 🏪 [Booth] ${b.name}${b.location ? ' (' + b.location + ')' : ''}`;
+            optBooth.dataset.type = 'booth';
+            optBooth.dataset.outletId = out.id;
+            optBooth.dataset.outletName = out.name;
+            optBooth.dataset.boothId = b.id;
+            optBooth.dataset.boothName = b.name;
+            optBooth.dataset.wa = b.wa || out.wa || '6281322119988';
+            optBooth.dataset.fullName = `${out.name} • ${b.name}`;
+            select.appendChild(optBooth);
+          });
+        }
       });
 
       if (savedVal) {
         select.value = savedVal;
-        handleOutletChange(savedVal);
-      }
-    }
-
-    function handleOutletChange(outletId) {
-      const boothGroup = document.getElementById('form-group-booth');
-      const boothSelect = document.getElementById('cs-booth');
-      if (!boothGroup || !boothSelect) return;
-
-      if (!outletId) {
-        boothSelect.innerHTML = '<option value="">🏢 Toko Cabang Utama (Bukan di Titik Booth Counter)</option>';
-        boothGroup.style.display = 'none';
-        return;
-      }
-
-      const outlets = (typeof getOutlets === 'function') ? getOutlets() : (typeof AMANDA_OUTLETS !== 'undefined' ? AMANDA_OUTLETS : []);
-      const selectedOutlet = outlets.find(o => o.id === outletId);
-
-      if (selectedOutlet && Array.isArray(selectedOutlet.booths) && selectedOutlet.booths.length > 0) {
-        boothSelect.innerHTML = '<option value="">🏢 Toko Cabang Utama (Bukan di Titik Booth Counter)</option>' +
-          selectedOutlet.booths.map(b => `
-            <option value="${b.id}" data-name="${b.name}" data-wa="${b.wa || selectedOutlet.wa}">
-              🏪 ${b.name} ${b.location ? '(' + b.location + ')' : ''}
-            </option>
-          `).join('');
-        boothGroup.style.display = 'block';
-      } else {
-        boothSelect.innerHTML = '<option value="">🏢 Toko Cabang Utama (Bukan di Titik Booth Counter)</option>';
-        boothGroup.style.display = 'none';
       }
     }
 
@@ -839,20 +822,19 @@
 
       const outletSelect = document.getElementById('cs-outlet');
       const selectedOption = outletSelect.options[outletSelect.selectedIndex];
-      const baseOutletName = selectedOption ? (selectedOption.dataset.name || selectedOption.textContent.split(' - ')[0]) : 'Amanda Balikpapan';
-      let targetWa = selectedOption ? (selectedOption.dataset.wa || '6281322119988') : '6281322119988';
-
-      const boothSelect = document.getElementById('cs-booth');
-      const selectedBoothOption = (boothSelect && boothSelect.selectedIndex > 0) ? boothSelect.options[boothSelect.selectedIndex] : null;
-      const boothName = selectedBoothOption ? (selectedBoothOption.dataset.name || selectedBoothOption.textContent.replace(/^🏪\s*/, '').trim()) : '';
-      const boothWa = selectedBoothOption ? selectedBoothOption.dataset.wa : '';
-
-      // Route to booth WA if available and selected
-      if (boothWa) {
-        targetWa = boothWa;
+      if (!selectedOption || !outletSelect.value) {
+        alert('Silakan pilih lokasi cabang outlet atau titik booth terlebih dahulu.');
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Kirim Pesan Layanan Pelanggan';
+        return;
       }
 
-      const fullLocation = boothName ? `${baseOutletName} • ${boothName}` : baseOutletName;
+      const itemType = selectedOption.dataset.type || 'outlet';
+      const outletId = selectedOption.dataset.outletId || outletSelect.value.split(':::')[0];
+      const baseOutletName = selectedOption.dataset.outletName || selectedOption.textContent.replace(/^🏢\s*\[Outlet\]\s*/, '').trim();
+      const boothName = selectedOption.dataset.boothName || '';
+      const fullLocation = selectedOption.dataset.fullName || (boothName ? `${baseOutletName} • ${boothName}` : baseOutletName);
+      const targetWa = selectedOption.dataset.wa || '6281322119988';
 
       const ticketId = 'CS-BPN-' + Date.now().toString(36).toUpperCase();
       const rawPhone = document.getElementById('cs-phone').value.trim();
@@ -863,7 +845,7 @@
         id: ticketId,
         name: document.getElementById('cs-name').value.trim(),
         phone: cleanPhone,
-        outlet_id: outletSelect.value,
+        outlet_id: outletId,
         outlet_name: fullLocation,
         category: document.getElementById('cs-category').value,
         receipt_number: document.getElementById('cs-receipt-no').value.trim(),
@@ -922,7 +904,6 @@
 
       // Reset form
       document.getElementById('cs-inquiry-form').reset();
-      handleOutletChange('');
       clearReceiptPhoto();
       btn.disabled = false;
       btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Kirim Pesan Layanan Pelanggan';

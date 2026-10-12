@@ -266,233 +266,269 @@ let hasSeededSupabase = false;
 async function pullAllDataFromSupabase() {
   if (!isSupabaseActive() || isCurrentlyPulling) return false;
 
+  const isAdminPage = typeof window !== 'undefined' && window.location && (
+    window.location.pathname.includes('admin.html') || window.location.pathname.includes('login.html')
+  );
+
   try {
     isCurrentlyPulling = true;
-    console.log('📥 Mengambil data langsung dari Supabase Cloud Database...');
+    console.log('📥 Mengambil data langsung dari Supabase Cloud Database (Parallel Mode)...');
 
-    // 1. Fetch Outlets & Booths
-    const { data: dbOutlets, error: errOut } = await supabaseClient
-      .from('outlets')
-      .select('*')
-      .order('id', { ascending: true });
-
-    if (!errOut && dbOutlets && dbOutlets.length > 0) {
-      AMANDA_OUTLETS = dbOutlets.map(o => ({
-        id: o.id,
-        name: o.name,
-        city: o.city,
-        region: o.region || 'Kota Balikpapan',
-        image: o.image,
-        address: o.address,
-        phone: o.phone,
-        wa: o.wa,
-        hours: o.hours,
-        mapsUrl: o.maps_url || o.mapsUrl || '',
-        distance: o.distance || '1.0 km',
-        booths: Array.isArray(o.booths) ? o.booths : (typeof o.booths === 'string' ? JSON.parse(o.booths) : [])
-      }));
-      saveStoredData('amanda_outlets', AMANDA_OUTLETS, false);
-    }
-
-    // 1B. Fetch Outlet Categories / Wilayah
-    const { data: dbOutletCats, error: errOutletCat } = await supabaseClient
-      .from('outlet_categories')
-      .select('*')
-      .order('sort_order', { ascending: true });
-
-    if (!errOutletCat && dbOutletCats && dbOutletCats.length > 0) {
-      AMANDA_OUTLET_CATEGORIES = dbOutletCats.map(c => ({
-        id: c.id,
-        slug: c.slug || c.id,
-        name: c.name,
-        region: c.region || 'Kota Balikpapan',
-        icon: c.icon || 'fa-solid fa-location-dot',
-        badgeColor: c.badge_color || c.badgeColor || 'olive',
-        description: c.description || '',
-        status: c.status || 'active',
-        sortOrder: Number(c.sort_order) || 1
-      }));
-      saveStoredData('amanda_outlet_categories', AMANDA_OUTLET_CATEGORIES, false);
-    }
-
-    // 2. Fetch Products & Stocks
-    const { data: dbProducts, error: errProd } = await supabaseClient
-      .from('products')
-      .select('*')
-      .order('id', { ascending: true });
-
-    if (!errProd && dbProducts && dbProducts.length > 0) {
-      AMANDA_PRODUCTS = dbProducts.map(p => ({
-        id: p.id,
-        name: p.name,
-        category: p.category,
-        categoryLabel: p.category_label || (p.category === 'kukus' ? 'Brownies Kukus' : (p.category === 'bakar' ? 'Brownies Bakar' : 'Premium & Marble')),
-        price: Number(p.price) || 0,
-        description: p.description || '',
-        image: p.image,
-        badge: p.badge || '',
-        badgeColor: p.badge_color || (p.category === 'bakar' ? 'bakar' : (p.category === 'marble' ? 'coffee' : 'gold')),
-        weight: p.weight || '700 gram',
-        shelfLife: p.shelf_life || p.shelfLife || '4 Hari (Suhu Ruang)',
-        outlets: Array.isArray(p.stocks) ? p.stocks : (Array.isArray(p.outlets) ? p.outlets : [])
-      }));
-      saveStoredData('amanda_products', AMANDA_PRODUCTS, false);
-    }
-
-    // 3. Fetch Promos
-    const { data: dbPromos, error: errPromo } = await supabaseClient
-      .from('promos')
-      .select('*')
-      .order('id', { ascending: true });
-
-    if (!errPromo && dbPromos && dbPromos.length > 0) {
-      AMANDA_PROMOS = dbPromos.map(pr => ({
-        id: pr.id,
-        title: pr.title,
-        badge: pr.badge,
-        badgeColor: pr.badge_color || pr.badgeColor || 'gold',
-        image: pr.image,
-        period: pr.period,
-        description: pr.description,
-        waMessage: pr.wa_msg || pr.waMessage || '',
-        aspectRatio: "4/5",
-        active: true
-      }));
-      saveStoredData('amanda_promos', AMANDA_PROMOS, false);
-    }
-
-    // 3B. Fetch Pricelists (Daftar Harga Poster Resmi)
-    const { data: dbPrice, error: errPrice } = await supabaseClient
+    // 1. Fetch Pricelists (Daftar Harga Poster Resmi) - Prioritas Langsung Render
+    const fetchPricelists = supabaseClient
       .from('pricelists')
       .select('*')
-      .order('id', { ascending: true });
+      .order('id', { ascending: true })
+      .then(({ data: dbPrice, error: errPrice }) => {
+        if (!errPrice && dbPrice && dbPrice.length > 0) {
+          AMANDA_PRICELISTS = dbPrice.map(pr => ({
+            id: pr.id,
+            title: pr.title,
+            badge: pr.badge || 'Price List',
+            image: pr.image,
+            caption: pr.caption || ''
+          }));
+          try { localStorage.setItem('amanda_pricelists', JSON.stringify(AMANDA_PRICELISTS)); } catch(e) {}
+          if (typeof renderPriceListCards === 'function') renderPriceListCards();
+          window.dispatchEvent(new CustomEvent('amanda_data_updated'));
+        }
+      });
 
-    if (!errPrice && dbPrice && dbPrice.length > 0) {
-      AMANDA_PRICELISTS = dbPrice.map(pr => ({
-        id: pr.id,
-        title: pr.title,
-        badge: pr.badge || 'Price List',
-        image: pr.image,
-        caption: pr.caption || ''
-      }));
-      saveStoredData('amanda_pricelists', AMANDA_PRICELISTS, false);
-    }
+    // 2. Fetch Promos (Flyer 4:5) - Prioritas Langsung Render
+    const fetchPromos = supabaseClient
+      .from('promos')
+      .select('*')
+      .order('id', { ascending: true })
+      .then(({ data: dbPromos, error: errPromo }) => {
+        if (!errPromo && dbPromos && dbPromos.length > 0) {
+          AMANDA_PROMOS = dbPromos.map(pr => ({
+            id: pr.id,
+            title: pr.title,
+            badge: pr.badge,
+            badgeColor: pr.badge_color || pr.badgeColor || 'gold',
+            image: pr.image,
+            period: pr.period,
+            description: pr.description,
+            waMessage: pr.wa_msg || pr.waMessage || '',
+            aspectRatio: "4/5",
+            active: true
+          }));
+          try { localStorage.setItem('amanda_promos', JSON.stringify(AMANDA_PROMOS)); } catch(e) {}
+          if (typeof renderPromoFlyers === 'function') renderPromoFlyers();
+          window.dispatchEvent(new CustomEvent('amanda_data_updated'));
+        }
+      });
 
-    // 4. Fetch Ticker
-    const { data: dbTicker, error: errTick } = await supabaseClient
+    // 3. Fetch Ticker
+    const fetchTicker = supabaseClient
       .from('ticker')
       .select('*')
-      .order('id', { ascending: true });
-
-    if (!errTick && dbTicker && dbTicker.length > 0) {
-      AMANDA_TICKER = dbTicker.map(t => ({
-        id: t.id,
-        title: t.title,
-        text: t.text,
-        icon: t.icon || 'fa-solid fa-bullhorn'
-      }));
-      saveStoredData('amanda_ticker', AMANDA_TICKER, false);
-    }
-
-    // 5. Fetch Tenants (Internal CMS Multi-Tenant)
-    const { data: dbTenants, error: errTen } = await supabaseClient
-      .from('tenants')
-      .select('*')
-      .order('created_at', { ascending: false });
-
-    if (!errTen && dbTenants && dbTenants.length > 0) {
-      const tenants = dbTenants.map(tn => ({
-        id: tn.id,
-        name: tn.name,
-        city: tn.city,
-        phone: tn.phone,
-        email: tn.email,
-        domain: tn.domain,
-        planId: tn.plan_id || tn.planId || 'plan-6m',
-        planName: tn.plan_name || tn.planName || 'Paket Bisnis (6 Bulan)',
-        cycle: tn.cycle || 'monthly',
-        status: tn.status || 'active',
-        startDate: tn.start_date || tn.startDate,
-        expiresAt: tn.expires_at || tn.expiresAt,
-        totalPaid: Number(tn.total_paid) || Number(tn.totalPaid) || 0,
-        outletsCount: tn.outlets_count || tn.outletsCount || 1,
-        notes: tn.notes || ''
-      }));
-      saveTenants(tenants, false);
-    }
-
-    // 6. Fetch Invoices
-    const { data: dbInvoices, error: errInv } = await supabaseClient
-      .from('invoices')
-      .select('*')
-      .order('created_at', { ascending: false });
-
-    if (!errInv && dbInvoices && dbInvoices.length > 0) {
-      const invoices = dbInvoices.map(inv => ({
-        id: inv.id,
-        date: inv.created_at ? inv.created_at.substring(0, 10) : '2026-09-01',
-        dueDate: inv.due_date ? inv.due_date.substring(0, 10) : '2026-09-04',
-        tenantName: inv.tenant_name,
-        tenantPhone: inv.tenant_phone,
-        tenantEmail: inv.tenant_email,
-        tenantDomain: inv.tenant_domain,
-        planId: inv.plan_id,
-        planName: inv.plan_name,
-        durationMonths: inv.duration_months || 1,
-        subtotal: Number(inv.subtotal) || 0,
-        uniqueCode: inv.unique_code || 0,
-        totalAmount: Number(inv.total_amount) || 0,
-        paymentMethodId: inv.payment_method_id,
-        paymentMethodName: inv.payment_method_name,
-        status: inv.status || 'PENDING',
-        paidAt: inv.paid_at || null
-      }));
-      saveInvoiceHistory(invoices, false);
-    }
-
-    // 7. Fetch Customer Service Inquiries (cs_inquiries)
-    const { data: dbCs, error: errCs } = await supabaseClient
-      .from('cs_inquiries')
-      .select('*')
-      .order('created_at', { ascending: false });
-
-    if (!errCs && dbCs && dbCs.length > 0) {
-      AMANDA_CS_INQUIRIES = dbCs.map(cs => {
-        let parsedImages = [];
-        if (Array.isArray(cs.receipt_images) && cs.receipt_images.length > 0) {
-          parsedImages = cs.receipt_images;
-        } else if (typeof cs.receipt_images === 'string' && cs.receipt_images.startsWith('[')) {
-          try { parsedImages = JSON.parse(cs.receipt_images); } catch(e) {}
+      .order('id', { ascending: true })
+      .then(({ data: dbTicker, error: errTick }) => {
+        if (!errTick && dbTicker && dbTicker.length > 0) {
+          AMANDA_TICKER = dbTicker.map(t => ({
+            id: t.id,
+            title: t.title,
+            text: t.text,
+            icon: t.icon || 'fa-solid fa-bullhorn'
+          }));
+          try { localStorage.setItem('amanda_ticker', JSON.stringify(AMANDA_TICKER)); } catch(e) {}
+          if (typeof renderPromoTicker === 'function') renderPromoTicker();
         }
-        if (parsedImages.length === 0 && cs.receipt_image) {
-          parsedImages = [cs.receipt_image];
-        }
-
-        return {
-          id: cs.id,
-          name: cs.name,
-          phone: cs.phone,
-          outlet_id: cs.outlet_id,
-          outlet_name: cs.outlet_name,
-          category: cs.category,
-          receipt_number: cs.receipt_number || '',
-          receipt_image: cs.receipt_image || (parsedImages[0] || null),
-          receipt_images: parsedImages,
-          message: cs.message,
-          rating: Number(cs.rating) || 5,
-          status: cs.status || 'NEW',
-          admin_notes: cs.admin_notes || null,
-          created_at: cs.created_at
-        };
       });
-      if (typeof saveCsInquiries === 'function') {
-        saveCsInquiries(AMANDA_CS_INQUIRIES, false);
-      }
+
+    // 4. Fetch Outlets & Booths
+    const fetchOutlets = supabaseClient
+      .from('outlets')
+      .select('*')
+      .order('id', { ascending: true })
+      .then(({ data: dbOutlets, error: errOut }) => {
+        if (!errOut && dbOutlets && dbOutlets.length > 0) {
+          AMANDA_OUTLETS = dbOutlets.map(o => ({
+            id: o.id,
+            name: o.name,
+            city: o.city,
+            region: o.region || 'Kota Balikpapan',
+            image: o.image,
+            address: o.address,
+            phone: o.phone,
+            wa: o.wa,
+            hours: o.hours,
+            mapsUrl: o.maps_url || o.mapsUrl || '',
+            distance: o.distance || '1.0 km',
+            booths: Array.isArray(o.booths) ? o.booths : (typeof o.booths === 'string' ? JSON.parse(o.booths) : [])
+          }));
+          try { localStorage.setItem('amanda_outlets', JSON.stringify(AMANDA_OUTLETS)); } catch(e) {}
+          if (typeof renderNavbarOutletDropdown === 'function') renderNavbarOutletDropdown();
+          if (typeof renderOutletLocatorList === 'function') renderOutletLocatorList();
+        }
+      });
+
+    // 5. Fetch Outlet Categories / Wilayah
+    const fetchCategories = supabaseClient
+      .from('outlet_categories')
+      .select('*')
+      .order('sort_order', { ascending: true })
+      .then(({ data: dbOutletCats, error: errOutletCat }) => {
+        if (!errOutletCat && dbOutletCats && dbOutletCats.length > 0) {
+          AMANDA_OUTLET_CATEGORIES = dbOutletCats.map(c => ({
+            id: c.id,
+            slug: c.slug || c.id,
+            name: c.name,
+            region: c.region || 'Kota Balikpapan',
+            icon: c.icon || 'fa-solid fa-location-dot',
+            badgeColor: c.badge_color || c.badgeColor || 'olive',
+            description: c.description || '',
+            status: c.status || 'active',
+            sortOrder: Number(c.sort_order) || 1
+          }));
+          try { localStorage.setItem('amanda_outlet_categories', JSON.stringify(AMANDA_OUTLET_CATEGORIES)); } catch(e) {}
+          if (typeof renderOutletCategoryFilterPills === 'function') renderOutletCategoryFilterPills();
+        }
+      });
+
+    // 6. Fetch Products & Stocks
+    const fetchProducts = supabaseClient
+      .from('products')
+      .select('*')
+      .order('id', { ascending: true })
+      .then(({ data: dbProducts, error: errProd }) => {
+        if (!errProd && dbProducts && dbProducts.length > 0) {
+          AMANDA_PRODUCTS = dbProducts.map(p => ({
+            id: p.id,
+            name: p.name,
+            category: p.category,
+            categoryLabel: p.category_label || (p.category === 'kukus' ? 'Brownies Kukus' : (p.category === 'bakar' ? 'Brownies Bakar' : 'Premium & Marble')),
+            price: Number(p.price) || 0,
+            description: p.description || '',
+            image: p.image,
+            badge: p.badge || '',
+            badgeColor: p.badge_color || (p.category === 'bakar' ? 'bakar' : (p.category === 'marble' ? 'coffee' : 'gold')),
+            weight: p.weight || '700 gram',
+            shelfLife: p.shelf_life || p.shelfLife || '4 Hari (Suhu Ruang)',
+            outlets: Array.isArray(p.stocks) ? p.stocks : (Array.isArray(p.outlets) ? p.outlets : [])
+          }));
+          try { localStorage.setItem('amanda_products', JSON.stringify(AMANDA_PRODUCTS)); } catch(e) {}
+          if (typeof renderProductGrid === 'function') renderProductGrid();
+        }
+      });
+
+    const tasks = [
+      fetchPricelists,
+      fetchPromos,
+      fetchTicker,
+      fetchOutlets,
+      fetchCategories,
+      fetchProducts
+    ];
+
+    // Hanya ambil data internal CMS jika membuka halaman admin
+    if (isAdminPage) {
+      const fetchTenants = supabaseClient
+        .from('tenants')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .then(({ data: dbTenants, error: errTen }) => {
+          if (!errTen && dbTenants && dbTenants.length > 0) {
+            const tenants = dbTenants.map(tn => ({
+              id: tn.id,
+              name: tn.name,
+              city: tn.city,
+              phone: tn.phone,
+              email: tn.email,
+              domain: tn.domain,
+              planId: tn.plan_id || tn.planId || 'plan-6m',
+              planName: tn.plan_name || tn.planName || 'Paket Bisnis (6 Bulan)',
+              cycle: tn.cycle || 'monthly',
+              status: tn.status || 'active',
+              startDate: tn.start_date || tn.startDate,
+              expiresAt: tn.expires_at || tn.expiresAt,
+              totalPaid: Number(tn.total_paid) || Number(tn.totalPaid) || 0,
+              outletsCount: tn.outlets_count || tn.outletsCount || 1,
+              notes: tn.notes || ''
+            }));
+            saveTenants(tenants, false);
+          }
+        });
+
+      const fetchInvoices = supabaseClient
+        .from('invoices')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .then(({ data: dbInvoices, error: errInv }) => {
+          if (!errInv && dbInvoices && dbInvoices.length > 0) {
+            const invoices = dbInvoices.map(inv => ({
+              id: inv.id,
+              date: inv.created_at ? inv.created_at.substring(0, 10) : '2026-09-01',
+              dueDate: inv.due_date ? inv.due_date.substring(0, 10) : '2026-09-04',
+              tenantName: inv.tenant_name,
+              tenantPhone: inv.tenant_phone,
+              tenantEmail: inv.tenant_email,
+              tenantDomain: inv.tenant_domain,
+              planId: inv.plan_id,
+              planName: inv.plan_name,
+              durationMonths: inv.duration_months || 1,
+              subtotal: Number(inv.subtotal) || 0,
+              uniqueCode: inv.unique_code || 0,
+              totalAmount: Number(inv.total_amount) || 0,
+              paymentMethodId: inv.payment_method_id,
+              paymentMethodName: inv.payment_method_name,
+              status: inv.status || 'PENDING',
+              paidAt: inv.paid_at || null
+            }));
+            saveInvoiceHistory(invoices, false);
+          }
+        });
+
+      const fetchCs = supabaseClient
+        .from('cs_inquiries')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .then(({ data: dbCs, error: errCs }) => {
+          if (!errCs && dbCs && dbCs.length > 0) {
+            AMANDA_CS_INQUIRIES = dbCs.map(cs => {
+              let parsedImages = [];
+              if (Array.isArray(cs.receipt_images) && cs.receipt_images.length > 0) {
+                parsedImages = cs.receipt_images;
+              } else if (typeof cs.receipt_images === 'string' && cs.receipt_images.startsWith('[')) {
+                try { parsedImages = JSON.parse(cs.receipt_images); } catch(e) {}
+              }
+              if (parsedImages.length === 0 && cs.receipt_image) {
+                parsedImages = [cs.receipt_image];
+              }
+
+              return {
+                id: cs.id,
+                name: cs.name,
+                phone: cs.phone,
+                outlet_id: cs.outlet_id,
+                outlet_name: cs.outlet_name,
+                category: cs.category,
+                receipt_number: cs.receipt_number || '',
+                receipt_image: cs.receipt_image || (parsedImages[0] || null),
+                receipt_images: parsedImages,
+                message: cs.message,
+                rating: Number(cs.rating) || 5,
+                status: cs.status || 'NEW',
+                admin_notes: cs.admin_notes || null,
+                created_at: cs.created_at
+              };
+            });
+            if (typeof saveCsInquiries === 'function') {
+              saveCsInquiries(AMANDA_CS_INQUIRIES, false);
+            }
+            if (typeof renderCsManager === 'function') renderCsManager();
+          }
+        });
+
+      tasks.push(fetchTenants, fetchInvoices, fetchCs);
     }
+
+    await Promise.all(tasks);
 
     isInitialSupabaseSyncDone = true;
     notifyAmandaDataChanged();
-    console.log('✅ Data berhasil dimuat langsung dari Supabase PostgreSQL!');
+    console.log('⚡ Semua data Supabase berhasil dimuat secara paralel!');
     return true;
   } catch (err) {
     console.error('Error fetching data from Supabase:', err);

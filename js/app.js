@@ -778,7 +778,7 @@ function renderPriceListCards() {
     return `
       <div class="pricelist-card" id="card-${item.id}" onclick="openPriceListModal('${item.id}')" title="Klik untuk memperbesar: ${item.title}">
         <div class="pricelist-media-box">
-          <img src="${item.image}" alt="${item.title}" class="pricelist-img" loading="lazy" />
+          <img src="${item.image}" alt="${item.title}" class="pricelist-img" loading="eager" decoding="async" fetchpriority="high" />
           ${item.badge ? `<span class="pricelist-card-badge"><i class="fa-solid fa-tag"></i> ${item.badge}</span>` : ''}
           <div class="pricelist-zoom-indicator">
             <i class="fa-solid fa-magnifying-glass-plus"></i> Perbesar

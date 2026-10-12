@@ -938,11 +938,33 @@ function savePaymentMethods(methods, syncCloud = true) {
 // CUSTOMER SERVICE (CS) DATA HELPERS
 // ===================================================================
 function getCsInquiries() {
+  if (Array.isArray(AMANDA_CS_INQUIRIES) && AMANDA_CS_INQUIRIES.length > 0) {
+    return AMANDA_CS_INQUIRIES;
+  }
   return getStoredData('amanda_cs_inquiries', DEFAULT_CS_INQUIRIES);
 }
 
 function saveCsInquiries(list, syncCloud = true) {
-  saveStoredData('amanda_cs_inquiries', list, syncCloud);
+  AMANDA_CS_INQUIRIES = Array.isArray(list) ? list : [];
+  try {
+    // Simpan ke localStorage dengan menghilangkan base64 foto besar agar tidak melampaui kuota
+    const lightweight = AMANDA_CS_INQUIRIES.map(item => ({
+      ...item,
+      receipt_image: (item.receipt_image && item.receipt_image.length > 500) ? null : item.receipt_image,
+      receipt_images: Array.isArray(item.receipt_images)
+        ? item.receipt_images.filter(img => img && img.length <= 500)
+        : []
+    }));
+    localStorage.setItem('amanda_cs_inquiries', JSON.stringify(lightweight));
+  } catch (e) {
+    console.warn('LocalStorage quota limit reached for CS inquiries, preserved in-memory:', e);
+  }
+
+  notifyAmandaDataChanged();
+
+  if (syncCloud && typeof pushToSupabase === 'function' && typeof isSupabaseActive === 'function' && isSupabaseActive()) {
+    pushToSupabase('cs_inquiries', AMANDA_CS_INQUIRIES);
+  }
 }
 
 function saveLocalCsInquiry(inquiry) {
@@ -953,7 +975,8 @@ function saveLocalCsInquiry(inquiry) {
   } else {
     current.unshift(inquiry);
   }
-  saveCsInquiries(current, true);
+  // Tidak perlu syncCloud=true di sini karena cs.html sudah langsung memanggil pushToSupabase single row
+  saveCsInquiries(current, false);
 }
 
 function updateCsInquiryStatus(id, newStatus) {

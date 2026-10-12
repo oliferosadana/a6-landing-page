@@ -2405,10 +2405,15 @@ function renderCsManager() {
       statusBadgeStyle = 'background: #dcfce7; color: #16a34a; border-color: #86efac;';
     }
 
+    const isRecent = item.created_at && (Date.now() - new Date(item.created_at).getTime()) < 10 * 60 * 1000;
+    const newBadge = (item.status === 'NEW' && isRecent) 
+      ? `<span style="display:inline-block; font-size:10px; font-weight:800; background:#dc2626; color:#fff; padding:1px 5px; border-radius:4px; margin-left:4px;">BARU</span>` 
+      : '';
+
     return `
-      <tr style="border-bottom: 1px solid var(--border-sand-light); font-size: 13px;">
+      <tr class="${isRecent ? 'row-new-highlight' : ''}" style="border-bottom: 1px solid var(--border-sand-light); font-size: 13px;">
         <td style="padding: 12px 16px; vertical-align: top;">
-          <div style="font-weight: 700; color: var(--primary-olive); font-family: monospace; font-size: 13px;">#${item.id}</div>
+          <div style="font-weight: 700; color: var(--primary-olive); font-family: monospace; font-size: 13px;">#${item.id} ${newBadge}</div>
           <div style="font-size: 11px; color: var(--text-dim); margin-top: 2px;">${dateFormatted}</div>
         </td>
         

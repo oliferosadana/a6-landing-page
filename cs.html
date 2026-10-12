@@ -570,9 +570,9 @@
 
   <!-- Scripts -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="js/data.js?v=3.5"></script>
-  <script src="js/supabase.js?v=3.5"></script>
-  <script src="js/waas-status.js?v=3.5"></script>
+  <script src="js/data.js?v=3.6"></script>
+  <script src="js/supabase.js?v=3.6"></script>
+  <script src="js/waas-status.js?v=3.6"></script>
 
   <script>
     let uploadedReceiptImages = [];
@@ -891,14 +891,21 @@
         }
       }
 
-      // 2. Save to LocalStorage cache
+      // 2. Save to LocalStorage cache & Broadcast cross-tab
       if (typeof saveLocalCsInquiry === 'function') {
         saveLocalCsInquiry(payload);
       } else {
         const localList = JSON.parse(localStorage.getItem('amanda_cs_inquiries') || '[]');
         localList.unshift(payload);
-        localStorage.setItem('amanda_cs_inquiries', JSON.stringify(localList));
+        try {
+          localStorage.setItem('amanda_cs_inquiries', JSON.stringify(localList));
+        } catch (e) {}
       }
+
+      try {
+        localStorage.setItem('amanda_sync_timestamp', Date.now().toString());
+        window.dispatchEvent(new CustomEvent('amanda_data_updated'));
+      } catch (e) {}
 
       // 3. Prepare direct WhatsApp Link
       const photoNote = uploadedReceiptImages.length > 0 ? `\n• Lampiran: *${uploadedReceiptImages.length} Foto Bukti Terlampir*` : '';

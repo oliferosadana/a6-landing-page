@@ -469,6 +469,7 @@ async function pullAllDataFromSupabase() {
         message: cs.message,
         rating: Number(cs.rating) || 5,
         status: cs.status || 'NEW',
+        admin_notes: cs.admin_notes || null,
         created_at: cs.created_at
       }));
       if (typeof saveCsInquiries === 'function') {
@@ -714,17 +715,19 @@ async function seedDefaultDataToSupabase(specificTable = null) {
 let realtimePullDebounceTimer = null;
 
 /**
- * Realtime Subscription Listener (Postgres Realtime WebSocket)
+ * Realtime Subscription Listener (Postgres Realtime WebSocket & Heartbeat Fallback)
  */
 function initSupabaseRealtime() {
   if (!isSupabaseActive()) return;
 
   try {
+    // 1. General listener untuk produk, promo, outlet, ticker
     supabaseClient
-      .channel('public-realtime-changes')
+      .channel('public-realtime-general')
       .on('postgres_changes', { event: '*', schema: 'public' }, (payload) => {
+        // Lewatkan cs_inquiries di sini agar tidak double pull
+        if (payload.table === 'cs_inquiries') return;
         console.log('⚡ Realtime Supabase event received:', payload.eventType, 'on table:', payload.table);
-        // Debounce pull requests to prevent rapid cascade loops
         if (realtimePullDebounceTimer) clearTimeout(realtimePullDebounceTimer);
         realtimePullDebounceTimer = setTimeout(() => {
           pullAllDataFromSupabase();
@@ -732,11 +735,310 @@ function initSupabaseRealtime() {
       })
       .subscribe((status) => {
         if (status === 'SUBSCRIBED') {
-          console.log('📡 Terhubung ke Supabase Realtime Channel (Live Postgres Changes).');
+          console.log('📡 Terhubung ke Supabase Realtime Channel (General Changes).');
+        }
+      });
+
+    // 2. Dedicated Live Feed Channel khusus Pengaduan CS (Realtime Instant)
+    initCsInquiriesRealtime();
+
+    // 3. Heartbeat Polling Fallback (menjamin data selalu sinkron meski websocket sempat terputus)
+    startCsRealtimeHeartbeat();
+  } catch (e) {
+    console.warn('Supabase Realtime not subscribed:', e);
+  }
+}
+
+/**
+ * Dedicated Realtime Channel Listener for CS Inquiries
+ */
+function initCsInquiriesRealtime() {
+  if (!isSupabaseActive()) return;
+
+  try {
+    supabaseClient
+      .channel('cs-inquiries-live-feed')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'cs_inquiries' }, (payload) => {
+        console.log('🔔 [Realtime CS] Event diterima:', payload.eventType, payload);
+        handleRealtimeCsChange(payload);
+      })
+      .subscribe((status) => {
+        if (status === 'SUBSCRIBED') {
+          console.log('📡 [Realtime CS] Live WebSocket terhubung aktif.');
+          updateCsLiveBadgeStatus(true);
+        } else if (status === 'CLOSED' || status === 'CHANNEL_ERROR') {
+          console.warn('⚠️ [Realtime CS] Status channel:', status);
+          updateCsLiveBadgeStatus(false);
         }
       });
   } catch (e) {
-    console.warn('Supabase Realtime not subscribed:', e);
+    console.warn('Error initCsInquiriesRealtime:', e);
+  }
+}
+
+/**
+ * Tangani perubahan data pengaduan secara instan dari WebSocket Realtime
+ */
+function handleRealtimeCsChange(payload) {
+  if (!payload || !payload.eventType) return;
+
+  if (payload.eventType === 'INSERT') {
+    const row = payload.new;
+    if (!row || !row.id) return;
+
+    const newInquiry = {
+      id: row.id,
+      name: row.name,
+      phone: row.phone,
+      outlet_id: row.outlet_id,
+      outlet_name: row.outlet_name,
+      category: row.category,
+      receipt_number: row.receipt_number || '',
+      receipt_image: row.receipt_image || (Array.isArray(row.receipt_images) && row.receipt_images[0]) || null,
+      receipt_images: Array.isArray(row.receipt_images) ? row.receipt_images : (row.receipt_image ? [row.receipt_image] : []),
+      message: row.message,
+      rating: Number(row.rating) || 5,
+      status: row.status || 'NEW',
+      admin_notes: row.admin_notes || null,
+      created_at: row.created_at || new Date().toISOString()
+    };
+
+    // Tambahkan ke urutan paling atas jika belum ada
+    const exists = AMANDA_CS_INQUIRIES.some(i => i.id === newInquiry.id);
+    if (!exists) {
+      AMANDA_CS_INQUIRIES.unshift(newInquiry);
+      if (typeof saveCsInquiries === 'function') {
+        saveCsInquiries(AMANDA_CS_INQUIRIES, false);
+      }
+      notifyAmandaDataChanged();
+
+      // Update UI langsung jika ada di admin panel
+      if (typeof renderCsManager === 'function') renderCsManager();
+      if (typeof renderDashboard === 'function') renderDashboard();
+
+      // Mainkan suara notifikasi lonceng & tampilkan toast
+      playCsNotificationSound();
+      if (typeof showCmsToast === 'function') {
+        showCmsToast(`📩 Ada Pengaduan Baru: ${newInquiry.name} (${newInquiry.outlet_name || 'Outlet'})`, 'success');
+      }
+    }
+  } else if (payload.eventType === 'UPDATE') {
+    const row = payload.new;
+    if (!row || !row.id) return;
+
+    const idx = AMANDA_CS_INQUIRIES.findIndex(i => i.id === row.id);
+    if (idx >= 0) {
+      AMANDA_CS_INQUIRIES[idx] = {
+        ...AMANDA_CS_INQUIRIES[idx],
+        ...row,
+        rating: Number(row.rating) || AMANDA_CS_INQUIRIES[idx].rating || 5,
+        receipt_images: Array.isArray(row.receipt_images) ? row.receipt_images : (row.receipt_image ? [row.receipt_image] : AMANDA_CS_INQUIRIES[idx].receipt_images)
+      };
+      if (typeof saveCsInquiries === 'function') {
+        saveCsInquiries(AMANDA_CS_INQUIRIES, false);
+      }
+      notifyAmandaDataChanged();
+      if (typeof renderCsManager === 'function') renderCsManager();
+      if (typeof renderDashboard === 'function') renderDashboard();
+    }
+  } else if (payload.eventType === 'DELETE') {
+    const oldId = payload.old?.id;
+    if (oldId) {
+      AMANDA_CS_INQUIRIES = AMANDA_CS_INQUIRIES.filter(i => i.id !== oldId);
+      if (typeof saveCsInquiries === 'function') {
+        saveCsInquiries(AMANDA_CS_INQUIRIES, false);
+      }
+      notifyAmandaDataChanged();
+      if (typeof renderCsManager === 'function') renderCsManager();
+      if (typeof renderDashboard === 'function') renderDashboard();
+    }
+  }
+}
+
+let csHeartbeatTimer = null;
+let isHeartbeatRunning = false;
+
+/**
+ * Background Heartbeat Polling: Cek data pengaduan baru setiap 5 detik
+ * Menjamin 100% data realtime tetap masuk meski koneksi WebSocket sempat terputus
+ */
+function startCsRealtimeHeartbeat() {
+  if (csHeartbeatTimer) return;
+
+  csHeartbeatTimer = setInterval(async () => {
+    if (!isSupabaseActive() || isHeartbeatRunning) return;
+
+    try {
+      isHeartbeatRunning = true;
+      const { data: dbCs, error } = await supabaseClient
+        .from('cs_inquiries')
+        .select('id, name, phone, outlet_id, outlet_name, category, receipt_number, receipt_image, receipt_images, message, rating, status, admin_notes, created_at')
+        .order('created_at', { ascending: false })
+        .limit(30);
+
+      if (!error && Array.isArray(dbCs) && dbCs.length > 0) {
+        const currentIds = new Set(AMANDA_CS_INQUIRIES.map(i => i.id));
+        const newItems = dbCs.filter(i => !currentIds.has(i.id));
+
+        if (newItems.length > 0) {
+          console.log(`🔄 [Heartbeat Sync] Mendeteksi ${newItems.length} tiket baru di Supabase Cloud.`);
+          const mappedNew = newItems.map(cs => ({
+            id: cs.id,
+            name: cs.name,
+            phone: cs.phone,
+            outlet_id: cs.outlet_id,
+            outlet_name: cs.outlet_name,
+            category: cs.category,
+            receipt_number: cs.receipt_number || '',
+            receipt_image: cs.receipt_image || (Array.isArray(cs.receipt_images) && cs.receipt_images[0]) || null,
+            receipt_images: Array.isArray(cs.receipt_images) ? cs.receipt_images : (cs.receipt_image ? [cs.receipt_image] : []),
+            message: cs.message,
+            rating: Number(cs.rating) || 5,
+            status: cs.status || 'NEW',
+            admin_notes: cs.admin_notes || null,
+            created_at: cs.created_at
+          }));
+
+          AMANDA_CS_INQUIRIES = [...mappedNew, ...AMANDA_CS_INQUIRIES];
+          if (typeof saveCsInquiries === 'function') {
+            saveCsInquiries(AMANDA_CS_INQUIRIES, false);
+          }
+          notifyAmandaDataChanged();
+
+          if (typeof renderCsManager === 'function') renderCsManager();
+          if (typeof renderDashboard === 'function') renderDashboard();
+
+          // Mainkan suara lonceng & notifikasi
+          playCsNotificationSound();
+          if (typeof showCmsToast === 'function') {
+            showCmsToast(`📩 ${newItems.length} Pengaduan Pelanggan Baru Masuk!`, 'success');
+          }
+        }
+      }
+    } catch (e) {
+      // silent background heartbeat
+    } finally {
+      isHeartbeatRunning = false;
+    }
+  }, 5000);
+}
+
+/**
+ * Suara Lonceng Notifikasi Web Audio API (Double Chime)
+ */
+function playCsNotificationSound() {
+  try {
+    const AudioContext = window.AudioContext || window.webkitAudioContext;
+    if (!AudioContext) return;
+    const ctx = new AudioContext();
+
+    // Nada 1: 880 Hz (A5)
+    const osc1 = ctx.createOscillator();
+    const gain1 = ctx.createGain();
+    osc1.type = 'sine';
+    osc1.frequency.setValueAtTime(880, ctx.currentTime);
+    gain1.gain.setValueAtTime(0.12, ctx.currentTime);
+    gain1.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.35);
+    osc1.connect(gain1);
+    gain1.connect(ctx.destination);
+    osc1.start(ctx.currentTime);
+    osc1.stop(ctx.currentTime + 0.35);
+
+    // Nada 2: 1174.66 Hz (D6)
+    const osc2 = ctx.createOscillator();
+    const gain2 = ctx.createGain();
+    osc2.type = 'sine';
+    osc2.frequency.setValueAtTime(1174.66, ctx.currentTime + 0.12);
+    gain2.gain.setValueAtTime(0.16, ctx.currentTime + 0.12);
+    gain2.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.55);
+    osc2.connect(gain2);
+    gain2.connect(ctx.destination);
+    osc2.start(ctx.currentTime + 0.12);
+    osc2.stop(ctx.currentTime + 0.55);
+  } catch (e) {
+    // Autoplay restrictions or headless browser
+  }
+}
+
+/**
+ * Tombol Refresh Manual Cepat untuk CS
+ */
+async function syncCsInquiriesNow(btnElement) {
+  if (btnElement) {
+    btnElement.disabled = true;
+    btnElement.innerHTML = '<i class="fa-solid fa-arrows-rotate fa-spin"></i> Menyinkronkan...';
+  }
+
+  if (!isSupabaseActive()) {
+    if (typeof showCmsToast === 'function') showCmsToast('Koneksi Supabase tidak aktif.', 'error');
+    if (btnElement) {
+      btnElement.disabled = false;
+      btnElement.innerHTML = '<i class="fa-solid fa-arrows-rotate"></i> Refresh Data';
+    }
+    return;
+  }
+
+  try {
+    const { data: dbCs, error } = await supabaseClient
+      .from('cs_inquiries')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (!error && Array.isArray(dbCs)) {
+      AMANDA_CS_INQUIRIES = dbCs.map(cs => ({
+        id: cs.id,
+        name: cs.name,
+        phone: cs.phone,
+        outlet_id: cs.outlet_id,
+        outlet_name: cs.outlet_name,
+        category: cs.category,
+        receipt_number: cs.receipt_number || '',
+        receipt_image: cs.receipt_image || (Array.isArray(cs.receipt_images) && cs.receipt_images[0]) || null,
+        receipt_images: Array.isArray(cs.receipt_images) ? cs.receipt_images : (cs.receipt_image ? [cs.receipt_image] : []),
+        message: cs.message,
+        rating: Number(cs.rating) || 5,
+        status: cs.status || 'NEW',
+        admin_notes: cs.admin_notes || null,
+        created_at: cs.created_at
+      }));
+
+      if (typeof saveCsInquiries === 'function') {
+        saveCsInquiries(AMANDA_CS_INQUIRIES, false);
+      }
+      notifyAmandaDataChanged();
+      if (typeof renderCsManager === 'function') renderCsManager();
+      if (typeof renderDashboard === 'function') renderDashboard();
+
+      if (typeof showCmsToast === 'function') {
+        showCmsToast(`✅ Berhasil menyinkronkan ${AMANDA_CS_INQUIRIES.length} pengaduan dari Supabase Cloud.`, 'success');
+      }
+    } else if (error) {
+      if (typeof showCmsToast === 'function') showCmsToast('Gagal sinkron: ' + error.message, 'error');
+    }
+  } catch (err) {
+    if (typeof showCmsToast === 'function') showCmsToast('Terjadi kesalahan sinkronisasi.', 'error');
+  } finally {
+    if (btnElement) {
+      btnElement.disabled = false;
+      btnElement.innerHTML = '<i class="fa-solid fa-arrows-rotate"></i> Refresh Data';
+    }
+  }
+}
+
+function updateCsLiveBadgeStatus(isLive = true) {
+  const badge = document.getElementById('cs-live-badge');
+  if (badge) {
+    if (isLive) {
+      badge.style.background = '#dcfce7';
+      badge.style.color = '#15803d';
+      badge.style.borderColor = '#86efac';
+      badge.innerHTML = '<span class="live-dot" style="background: #22c55e;"></span> Live Realtime Aktif';
+    } else {
+      badge.style.background = '#fef3c7';
+      badge.style.color = '#b45309';
+      badge.style.borderColor = '#fde68a';
+      badge.innerHTML = '<span class="live-dot" style="background: #f59e0b;"></span> Polling Realtime (5s)';
+    }
   }
 }
 
@@ -756,6 +1058,7 @@ function updateSupabaseStatusIndicator() {
       pill.title = 'Mode lokal. Klik untuk menghubungkan ke Supabase.';
     }
   });
+  updateCsLiveBadgeStatus(isSupabaseActive());
 }
 
 // Initial status check & immediate cloud pull

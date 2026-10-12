@@ -27,11 +27,11 @@ function getSecurityVaultData() {
     const raw = localStorage.getItem(SECURITY_VAULT_STORAGE_KEY);
     if (raw) {
       const parsed = JSON.parse(raw);
-      // Auto-migrate if stored URL is from old/stale instance
-      if (parsed.supabaseUrl && parsed.supabaseUrl.includes('zomkdefqivvbtxqzavpz')) {
+      // Auto-migrate if stored URL is from old/stale instance or key is invalid
+      if (parsed.supabaseUrl && (parsed.supabaseUrl.includes('zomkdefqivvbtxqzavpz') || !parsed.supabaseAnonKey || !parsed.supabaseAnonKey.startsWith('sb_publishable'))) {
         parsed.supabaseUrl = DEFAULT_SUPABASE_URL;
         parsed.supabaseAnonKey = DEFAULT_SUPABASE_KEY;
-        localStorage.setItem(SECURITY_VAULT_STORAGE_KEY, JSON.stringify(parsed));
+        try { localStorage.setItem(SECURITY_VAULT_STORAGE_KEY, JSON.stringify(parsed)); } catch(e) {}
       }
       return parsed;
     }
@@ -148,10 +148,11 @@ function loadSupabaseConfig() {
     const raw = localStorage.getItem(SUPABASE_CONFIG_STORAGE_KEY);
     if (raw) {
       supabaseConfig = JSON.parse(raw);
-      if (!supabaseConfig.url || supabaseConfig.url.includes('zomkdefqivvbtxqzavpz')) {
+      if (!supabaseConfig.url || supabaseConfig.url.includes('zomkdefqivvbtxqzavpz') || !supabaseConfig.key || !supabaseConfig.key.startsWith('sb_publishable')) {
         supabaseConfig.url = DEFAULT_SUPABASE_URL;
         supabaseConfig.key = DEFAULT_SUPABASE_KEY;
-        localStorage.setItem(SUPABASE_CONFIG_STORAGE_KEY, JSON.stringify(supabaseConfig));
+        supabaseConfig.enabled = true;
+        try { localStorage.setItem(SUPABASE_CONFIG_STORAGE_KEY, JSON.stringify(supabaseConfig)); } catch(e) {}
       }
     } else {
       supabaseConfig = {

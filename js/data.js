@@ -611,33 +611,9 @@ function reloadAmandaData() {
   AMANDA_PRODUCTS = getStoredData('amanda_products', DEFAULT_PRODUCTS);
   AMANDA_TICKER = getStoredData('amanda_ticker', DEFAULT_TICKER);
 
-  // Jangan hapus foto di AMANDA_CS_INQUIRIES yang sudah ada di memori
-  const localCs = getStoredData('amanda_cs_inquiries', DEFAULT_CS_INQUIRIES);
+  // CS Inquiries: hanya inisialisasi dari localStorage jika memori masih kosong
   if (!Array.isArray(AMANDA_CS_INQUIRIES) || AMANDA_CS_INQUIRIES.length === 0) {
-    AMANDA_CS_INQUIRIES = localCs;
-  } else if (Array.isArray(localCs)) {
-    const photoMap = new Map();
-    AMANDA_CS_INQUIRIES.forEach(item => {
-      const hasImg = (item.receipt_image && item.receipt_image.length > 0) ||
-        (Array.isArray(item.receipt_images) && item.receipt_images.length > 0);
-      if (hasImg) {
-        photoMap.set(item.id, {
-          receipt_image: item.receipt_image,
-          receipt_images: item.receipt_images
-        });
-      }
-    });
-
-    AMANDA_CS_INQUIRIES = localCs.map(item => {
-      const cached = photoMap.get(item.id);
-      return {
-        ...item,
-        receipt_image: item.receipt_image || cached?.receipt_image || null,
-        receipt_images: (Array.isArray(item.receipt_images) && item.receipt_images.length > 0)
-          ? item.receipt_images
-          : (cached?.receipt_images || (item.receipt_image ? [item.receipt_image] : []))
-      };
-    });
+    AMANDA_CS_INQUIRIES = getStoredData('amanda_cs_inquiries', DEFAULT_CS_INQUIRIES);
   }
 }
 
@@ -973,7 +949,9 @@ function getCsInquiries() {
 }
 
 function saveCsInquiries(list, syncCloud = true) {
-  AMANDA_CS_INQUIRIES = Array.isArray(list) ? list : [];
+  if (Array.isArray(list)) {
+    AMANDA_CS_INQUIRIES = list;
+  }
 
   // Simpan ke localStorage: utamakan simpan utuh beserta foto
   try {
@@ -990,7 +968,8 @@ function saveCsInquiries(list, syncCloud = true) {
     } catch (err2) {}
   }
 
-  notifyAmandaDataChanged();
+  // Beritahu UI tanpa membaca ulang localStorage agar foto di memori tidak hilang
+  window.dispatchEvent(new CustomEvent('amanda_data_updated'));
 
   if (syncCloud && typeof pushToSupabase === 'function' && typeof isSupabaseActive === 'function' && isSupabaseActive()) {
     pushToSupabase('cs_inquiries', AMANDA_CS_INQUIRIES);

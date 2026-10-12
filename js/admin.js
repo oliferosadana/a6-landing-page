@@ -2384,7 +2384,7 @@ function renderCsManager() {
       imagesList = [item.receipt_image];
     }
 
-    let receiptCell = '<span style="color: var(--text-dim); font-size: 12px;">-</span>';
+    let receiptCell = '<span style="color: var(--text-dim); font-size: 11.5px; font-style: italic;">Tanpa Lampiran</span>';
     if (imagesList.length > 0) {
       const thumbHtml = imagesList.map((imgSrc, idx) => `
         <button type="button" onclick="openCsReceiptModal('${item.id}', ${idx})" title="Foto ${idx + 1} (Klik untuk perbesar)" style="background: none; border: 1px solid var(--border-sand); padding: 2px; border-radius: 6px; cursor: pointer;">

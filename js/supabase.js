@@ -69,16 +69,8 @@ async function saveSecurityVaultData(vaultData, syncToCloud = true) {
       saveSupabaseConfig(cleanData.supabaseUrl, cleanData.supabaseAnonKey, true);
     }
 
-    // Sync to Supabase platform_settings table if client is connected
-    if (syncToCloud && isSupabaseActive()) {
-      await syncSettingsToSupabase('system_security_vault', {
-        supabaseUrl: cleanData.supabaseUrl,
-        hasSecretKey: Boolean(cleanData.supabaseSecretKey),
-        secretKeyMasked: cleanData.supabaseSecretKey ? (cleanData.supabaseSecretKey.substring(0, 10) + '••••••••') : 'Not Configured',
-        hasCloudflareToken: Boolean(cleanData.cloudflareToken),
-        lastUpdated: cleanData.lastUpdated
-      });
-    }
+    // Security: Do not sync secret credentials or vault metadata to cloud tables.
+    // Vault credentials remain strictly inside local isolated storage.
 
     return { success: true, message: 'Vault Kunci API & Kredensial berhasil disimpan dengan aman.' };
   } catch (err) {
@@ -688,8 +680,17 @@ async function pushToSupabase(tableName, payload, operation = 'upsert') {
         created_at: pr.created_at || new Date().toISOString()
       }));
     }
-
-    const { data, error } = await supabaseClient.from(tableName).upsert(dbPayload, { onConflict: 'id' });
+    let data, error;
+    const hasAdminSession = typeof getAuthSession === 'function' && !!getAuthSession();
+    if (operation === 'insert' || (tableName === 'cs_inquiries' && !hasAdminSession)) {
+      const res = await supabaseClient.from(tableName).insert(dbPayload);
+      data = res.data;
+      error = res.error;
+    } else {
+      const res = await supabaseClient.from(tableName).upsert(dbPayload, { onConflict: 'id' });
+      data = res.data;
+      error = res.error;
+    }
     if (error) {
       console.error(`❌ Supabase upsert [${tableName}] FAILED:`, error.message, '| Code:', error.code, '| Details:', error.details, '| Hint:', error.hint);
       if (typeof showCmsToast === 'function') {

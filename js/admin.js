@@ -2370,6 +2370,10 @@ function renderCsManager() {
     );
     const waLink = `https://wa.me/${item.phone}?text=${waReplyText}`;
 
+    // Safe ID sanitized for JS attributes and HTML display
+    const safeId = escapeHtml(item.id || '');
+    const jsSafeId = String(item.id || '').replace(/[^a-zA-Z0-9_-]/g, '');
+
     // Receipt Column with Multi-Image Support
     let imagesList = [];
     if (Array.isArray(item.receipt_images) && item.receipt_images.length > 0) {
@@ -2384,11 +2388,22 @@ function renderCsManager() {
       imagesList = [item.receipt_image];
     }
 
+    // Sanitize image sources against javascript: URIs & malformed payloads
+    imagesList = imagesList.filter(img => {
+      if (!img || typeof img !== 'string') return false;
+      const clean = img.trim();
+      return clean.startsWith('data:image/') || 
+             clean.startsWith('http://') || 
+             clean.startsWith('https://') || 
+             clean.startsWith('./') || 
+             clean.startsWith('/');
+    });
+
     let receiptCell = '<span style="color: var(--text-dim); font-size: 11.5px; font-style: italic;">Tanpa Lampiran</span>';
     if (imagesList.length > 0) {
       const thumbHtml = imagesList.map((imgSrc, idx) => `
-        <button type="button" onclick="openCsReceiptModal('${item.id}', ${idx})" title="Foto ${idx + 1} (Klik untuk perbesar)" style="background: none; border: 1px solid var(--border-sand); padding: 2px; border-radius: 6px; cursor: pointer;">
-          <img src="${imgSrc}" alt="Foto ${idx + 1}" style="width: 36px; height: 36px; object-fit: cover; border-radius: 4px; display: block;">
+        <button type="button" onclick="openCsReceiptModal('${jsSafeId}', ${idx})" title="Foto ${idx + 1} (Klik untuk perbesar)" style="background: none; border: 1px solid var(--border-sand); padding: 2px; border-radius: 6px; cursor: pointer;">
+          <img src="${escapeHtml(imgSrc)}" alt="Foto ${idx + 1}" style="width: 36px; height: 36px; object-fit: cover; border-radius: 4px; display: block;">
         </button>
       `).join('');
 
@@ -2397,13 +2412,13 @@ function renderCsManager() {
           <div style="display: flex; gap: 4px; justify-content: center; flex-wrap: wrap;">
             ${thumbHtml}
           </div>
-          <span style="font-size: 10.5px; font-weight: 700; color: var(--primary-olive); cursor: pointer;" onclick="openCsReceiptModal('${item.id}', 0)">
+          <span style="font-size: 10.5px; font-weight: 700; color: var(--primary-olive); cursor: pointer;" onclick="openCsReceiptModal('${jsSafeId}', 0)">
             <i class="fa-solid fa-images"></i> ${imagesList.length} Foto Bukti
           </span>
         </div>
       `;
     } else if (item.receipt_number) {
-      receiptCell = `<span style="font-size: 11.5px; font-weight: 600; color: var(--text-muted); background: #f3f4f6; padding: 2px 6px; border-radius: 4px;">#${item.receipt_number}</span>`;
+      receiptCell = `<span style="font-size: 11.5px; font-weight: 600; color: var(--text-muted); background: #f3f4f6; padding: 2px 6px; border-radius: 4px;">#${escapeHtml(item.receipt_number)}</span>`;
     }
 
     // Status Badge Color & Select
@@ -2422,14 +2437,14 @@ function renderCsManager() {
     return `
       <tr class="${isRecent ? 'row-new-highlight' : ''}" style="border-bottom: 1px solid var(--border-sand-light); font-size: 13px;">
         <td style="padding: 12px 16px; vertical-align: top;">
-          <div style="font-weight: 700; color: var(--primary-olive); font-family: monospace; font-size: 13px;">#${item.id} ${newBadge}</div>
+          <div style="font-weight: 700; color: var(--primary-olive); font-family: monospace; font-size: 13px;">#${safeId} ${newBadge}</div>
           <div style="font-size: 11px; color: var(--text-dim); margin-top: 2px;">${dateFormatted}</div>
         </td>
         
         <td style="padding: 12px 16px; vertical-align: top;">
           <div style="font-weight: 700; color: var(--text-main);">${escapeHtml(item.name)}</div>
           <a href="${waLink}" target="_blank" style="display: inline-flex; align-items: center; gap: 4px; font-size: 12px; color: #16a34a; font-weight: 600; text-decoration: none; margin-top: 2px;">
-            <i class="fa-brands fa-whatsapp"></i> +${item.phone}
+            <i class="fa-brands fa-whatsapp"></i> +${escapeHtml(item.phone)}
           </a>
         </td>
 
@@ -2467,7 +2482,7 @@ function renderCsManager() {
         </td>
 
         <td style="padding: 12px 16px; text-align: center; vertical-align: top;">
-          <select onchange="changeCsStatus('${item.id}', this.value)" style="padding: 4px 8px; font-size: 11.5px; font-weight: 700; border-radius: 8px; border: 1px solid; cursor: pointer; ${statusBadgeStyle}">
+          <select onchange="changeCsStatus('${jsSafeId}', this.value)" style="padding: 4px 8px; font-size: 11.5px; font-weight: 700; border-radius: 8px; border: 1px solid; cursor: pointer; ${statusBadgeStyle}">
             <option value="NEW" ${item.status === 'NEW' ? 'selected' : ''}>🔴 Baru</option>
             <option value="IN_PROGRESS" ${item.status === 'IN_PROGRESS' ? 'selected' : ''}>🟡 Diproses</option>
             <option value="RESOLVED" ${item.status === 'RESOLVED' ? 'selected' : ''}>🟢 Selesai</option>
@@ -2479,7 +2494,7 @@ function renderCsManager() {
             <a href="${waLink}" target="_blank" class="btn-secondary-sm" style="color: #16a34a; border-color: #86efac; text-decoration: none; padding: 5px 9px;" title="Balas via WhatsApp">
               <i class="fa-brands fa-whatsapp"></i>
             </a>
-            <button type="button" class="btn-secondary-sm" onclick="deleteCsInquiry('${item.id}')" style="color: #dc2626; border-color: #fca5a5; padding: 5px 9px;" title="Hapus Tiket">
+            <button type="button" class="btn-secondary-sm" onclick="deleteCsInquiry('${jsSafeId}')" style="color: #dc2626; border-color: #fca5a5; padding: 5px 9px;" title="Hapus Tiket">
               <i class="fa-solid fa-trash-can"></i>
             </button>
           </div>
@@ -2597,7 +2612,7 @@ function updateCsReceiptModalView() {
       if (activeCsModalImages.length > 1) {
         galleryStrip.innerHTML = activeCsModalImages.map((src, idx) => `
           <button type="button" onclick="selectCsModalImage(${idx})" style="border: 2px solid ${idx === activeCsModalIndex ? 'var(--primary-gold)' : 'rgba(255,255,255,0.3)'}; border-radius: 6px; padding: 2px; background: none; cursor: pointer; transform: ${idx === activeCsModalIndex ? 'scale(1.08)' : 'none'}; transition: all 0.15s;" title="Lihat Foto ${idx + 1}">
-            <img src="${src}" alt="Thumb ${idx + 1}" style="width: 46px; height: 46px; object-fit: cover; border-radius: 4px; display: block;">
+            <img src="${escapeHtml(src)}" alt="Thumb ${idx + 1}" style="width: 46px; height: 46px; object-fit: cover; border-radius: 4px; display: block;">
           </button>
         `).join('');
         galleryStrip.style.display = 'flex';

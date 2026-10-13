@@ -95,10 +95,8 @@ async function updateAdminCredentials(userId, newEmail, newPassword, newName) {
       localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(currentSession));
     }
 
-    // Sync to Supabase platform_settings if connected
-    if (typeof syncSettingsToSupabase === 'function') {
-      await syncSettingsToSupabase('admin_users', users);
-    }
+    // Do not sync local credential hashes to public cloud tables
+    // In production, user accounts are securely managed via Supabase Auth (auth.users)
 
     return { success: true, message: 'Kredensial admin berhasil diperbarui.' };
   } catch (err) {

@@ -164,36 +164,80 @@ ALTER TABLE public.invoices ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.platform_settings ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.cs_inquiries ENABLE ROW LEVEL SECURITY;
 
--- Izinkan SELECT / INSERT / UPDATE / DELETE untuk Anon Key (Frontend Web)
-DROP POLICY IF EXISTS "Public full access to tenants" ON public.tenants;
-CREATE POLICY "Public full access to tenants" ON public.tenants FOR ALL USING (true) WITH CHECK (true);
-
-DROP POLICY IF EXISTS "Public full access to products" ON public.products;
-CREATE POLICY "Public full access to products" ON public.products FOR ALL USING (true) WITH CHECK (true);
-
-DROP POLICY IF EXISTS "Public full access to promos" ON public.promos;
-CREATE POLICY "Public full access to promos" ON public.promos FOR ALL USING (true) WITH CHECK (true);
-
-DROP POLICY IF EXISTS "Public full access to pricelists" ON public.pricelists;
-CREATE POLICY "Public full access to pricelists" ON public.pricelists FOR ALL USING (true) WITH CHECK (true);
-
-DROP POLICY IF EXISTS "Public full access to outlets" ON public.outlets;
-CREATE POLICY "Public full access to outlets" ON public.outlets FOR ALL USING (true) WITH CHECK (true);
-
-DROP POLICY IF EXISTS "Public full access to outlet_categories" ON public.outlet_categories;
-CREATE POLICY "Public full access to outlet_categories" ON public.outlet_categories FOR ALL USING (true) WITH CHECK (true);
-
-DROP POLICY IF EXISTS "Public full access to ticker" ON public.ticker;
-CREATE POLICY "Public full access to ticker" ON public.ticker FOR ALL USING (true) WITH CHECK (true);
-
+-- 1. Batasi tabel sensitif & internal hanya untuk Admin Terautentikasi (authenticated)
 DROP POLICY IF EXISTS "Public full access to invoices" ON public.invoices;
-CREATE POLICY "Public full access to invoices" ON public.invoices FOR ALL USING (true) WITH CHECK (true);
+DROP POLICY IF EXISTS "Admin only invoices" ON public.invoices;
+CREATE POLICY "Admin only invoices" ON public.invoices 
+  FOR ALL TO authenticated USING (true) WITH CHECK (true);
 
 DROP POLICY IF EXISTS "Public full access to settings" ON public.platform_settings;
-CREATE POLICY "Public full access to settings" ON public.platform_settings FOR ALL USING (true) WITH CHECK (true);
+DROP POLICY IF EXISTS "Admin only settings" ON public.platform_settings;
+CREATE POLICY "Admin only settings" ON public.platform_settings 
+  FOR ALL TO authenticated USING (true) WITH CHECK (true);
 
+DROP POLICY IF EXISTS "Public full access to tenants" ON public.tenants;
+DROP POLICY IF EXISTS "Admin only tenants" ON public.tenants;
+CREATE POLICY "Admin only tenants" ON public.tenants 
+  FOR ALL TO authenticated USING (true) WITH CHECK (true);
+
+-- 2. Form CS publik: publik anonim hanya boleh INSERT (kirim tiket), baca/edit hanya admin
 DROP POLICY IF EXISTS "Public full access to cs_inquiries" ON public.cs_inquiries;
-CREATE POLICY "Public full access to cs_inquiries" ON public.cs_inquiries FOR ALL USING (true) WITH CHECK (true);
+DROP POLICY IF EXISTS "Public insert cs" ON public.cs_inquiries;
+DROP POLICY IF EXISTS "Admin manage cs" ON public.cs_inquiries;
+CREATE POLICY "Public insert cs" ON public.cs_inquiries 
+  FOR INSERT TO anon WITH CHECK (true);
+CREATE POLICY "Admin manage cs" ON public.cs_inquiries 
+  FOR ALL TO authenticated USING (true) WITH CHECK (true);
+
+-- 3. Katalog produk & outlet: publik (anonim & authenticated) hanya boleh SELECT (read-only)
+--    Hanya admin terautentikasi (authenticated) yang boleh INSERT, UPDATE, DELETE
+DROP POLICY IF EXISTS "Public full access to products" ON public.products;
+DROP POLICY IF EXISTS "Public read products" ON public.products;
+DROP POLICY IF EXISTS "Admin write products" ON public.products;
+CREATE POLICY "Public read products" ON public.products 
+  FOR SELECT USING (true);
+CREATE POLICY "Admin write products" ON public.products 
+  FOR ALL TO authenticated USING (true) WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Public full access to promos" ON public.promos;
+DROP POLICY IF EXISTS "Public read promos" ON public.promos;
+DROP POLICY IF EXISTS "Admin write promos" ON public.promos;
+CREATE POLICY "Public read promos" ON public.promos 
+  FOR SELECT USING (true);
+CREATE POLICY "Admin write promos" ON public.promos 
+  FOR ALL TO authenticated USING (true) WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Public full access to pricelists" ON public.pricelists;
+DROP POLICY IF EXISTS "Public read pricelists" ON public.pricelists;
+DROP POLICY IF EXISTS "Admin write pricelists" ON public.pricelists;
+CREATE POLICY "Public read pricelists" ON public.pricelists 
+  FOR SELECT USING (true);
+CREATE POLICY "Admin write pricelists" ON public.pricelists 
+  FOR ALL TO authenticated USING (true) WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Public full access to outlets" ON public.outlets;
+DROP POLICY IF EXISTS "Public read outlets" ON public.outlets;
+DROP POLICY IF EXISTS "Admin write outlets" ON public.outlets;
+CREATE POLICY "Public read outlets" ON public.outlets 
+  FOR SELECT USING (true);
+CREATE POLICY "Admin write outlets" ON public.outlets 
+  FOR ALL TO authenticated USING (true) WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Public full access to outlet_categories" ON public.outlet_categories;
+DROP POLICY IF EXISTS "Public read outlet_categories" ON public.outlet_categories;
+DROP POLICY IF EXISTS "Admin write outlet_categories" ON public.outlet_categories;
+CREATE POLICY "Public read outlet_categories" ON public.outlet_categories 
+  FOR SELECT USING (true);
+CREATE POLICY "Admin write outlet_categories" ON public.outlet_categories 
+  FOR ALL TO authenticated USING (true) WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Public full access to ticker" ON public.ticker;
+DROP POLICY IF EXISTS "Public read ticker" ON public.ticker;
+DROP POLICY IF EXISTS "Admin write ticker" ON public.ticker;
+CREATE POLICY "Public read ticker" ON public.ticker 
+  FOR SELECT USING (true);
+CREATE POLICY "Admin write ticker" ON public.ticker 
+  FOR ALL TO authenticated USING (true) WITH CHECK (true);
 
 -- Enable Realtime for all tables (Aman dijalankan berulang kali)
 DO $$

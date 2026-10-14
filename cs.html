@@ -572,6 +572,7 @@
   <script src="js/data.js?v=4.2.0"></script>
   <script src="js/supabase.js?v=4.2.0"></script>
   <script src="js/waas-status.js?v=4.2.0"></script>
+  <script src="js/waha.js?v=4.2.0"></script>
 
   <script>
     let uploadedReceiptImages = [];
@@ -912,6 +913,14 @@
         localStorage.setItem('amanda_sync_timestamp', Date.now().toString());
         window.dispatchEvent(new CustomEvent('amanda_data_updated'));
       } catch (e) {}
+
+      // Otomatis kirim notifikasi WhatsApp via WAHA Gateway jika aktif
+      if (typeof notifyAdminNewCsTicket === 'function') {
+        notifyAdminNewCsTicket(payload);
+      }
+      if (typeof notifyCustomerNewCsTicket === 'function') {
+        notifyCustomerNewCsTicket(payload);
+      }
 
       // 3. Show Success Modal
       document.getElementById('modal-ticket-id').textContent = '#' + ticketId;

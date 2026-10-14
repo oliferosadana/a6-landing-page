@@ -86,6 +86,13 @@
             </button>
           </li>
           <li>
+            <button class="nav-item" onclick="switchTab('waha', this)">
+              <i class="fa-brands fa-whatsapp" style="color: #22c55e;"></i>
+              <span>WAHA Gateway</span>
+              <span class="badge-count" id="badge-waha-status" style="background: rgba(34, 197, 94, 0.15); color: #16a34a; font-size: 10px;">OFF</span>
+            </button>
+          </li>
+          <li>
             <button class="nav-item" onclick="switchTab('ticker', this)">
               <i class="fa-solid fa-bullhorn"></i>
               <span>Running Promo Ticker</span>
@@ -904,6 +911,357 @@
 
         </section>
 
+        <!-- ==================== SECTION 9: WAHA GATEWAY MANAGER ==================== -->
+        <section id="section-waha" class="cms-section">
+
+          <!-- Section Toolbar -->
+          <div class="section-toolbar">
+            <div>
+              <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 4px;">
+                <span style="display: inline-flex; align-items: center; justify-content: center; width: 34px; height: 34px; background: rgba(34, 197, 94, 0.15); border-radius: 8px; color: #16a34a; font-size: 18px;">
+                  <i class="fa-brands fa-whatsapp"></i>
+                </span>
+                <h2 style="font-size: 20px; font-weight: 800; color: var(--text-main); margin: 0;">WhatsApp HTTP API (WAHA) Gateway</h2>
+              </div>
+              <p class="section-desc">Pusat integrasi server WhatsApp WAHA, pantau status sesi, scan QR code pairing, simulator pesan & automasi notifikasi CS.</p>
+            </div>
+            <div class="toolbar-actions">
+              <button class="btn-secondary" onclick="refreshWahaView()" title="Muat Ulang Status Sesi">
+                <i class="fa-solid fa-arrows-rotate"></i> Muat Ulang Status
+              </button>
+              <button class="btn-secondary" onclick="handleWahaPingTest()" title="Cek Koneksi Ping ke Server WAHA">
+                <i class="fa-solid fa-tower-broadcast"></i> Tes Ping Server
+              </button>
+            </div>
+          </div>
+
+          <!-- Status Bar Banner -->
+          <div style="background: #ffffff; border: 1px solid var(--ch-sand-border); border-radius: var(--radius-lg); padding: 16px 20px; margin-bottom: 22px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 14px; box-shadow: var(--shadow-sm);">
+            <div style="display: flex; align-items: center; gap: 14px;">
+              <span id="waha-banner-badge" class="waha-status-badge stopped">
+                <i class="fa-solid fa-circle-dot"></i> <span id="waha-banner-status-text">MEMERIKSA STATUS...</span>
+              </span>
+              <div style="font-size: 13px; color: var(--text-muted);">
+                Endpoint Aktif: <code id="waha-banner-url" style="background: rgba(79, 91, 42, 0.08); padding: 2px 6px; border-radius: 4px; font-weight: 600; color: var(--ch-olive-dark);">http://localhost:3000</code>
+                &bull; Sesi: <strong id="waha-banner-session">default</strong>
+              </div>
+            </div>
+            <div id="waha-banner-account-info" style="font-size: 13px; color: var(--text-main); font-weight: 600;">
+              <i class="fa-regular fa-user" style="color: #22c55e;"></i> Belum ada perangkat terhubung
+            </div>
+          </div>
+
+          <!-- WAHA Grid Layout -->
+          <div class="waha-grid">
+
+            <!-- LEFT COLUMN: Sesi & Live QR Code Pairing (Col 7) -->
+            <div class="waha-col-7">
+
+              <!-- Card 1: Sesi & Live Pairing QR -->
+              <div class="waha-card">
+                <div class="waha-card-header">
+                  <div class="waha-card-title">
+                    <i class="fa-solid fa-qrcode"></i>
+                    <span>Sesi & Live QR Code Pairing</span>
+                  </div>
+                  <span id="waha-card-session-badge" class="waha-status-badge stopped">STOPPED</span>
+                </div>
+
+                <div style="font-size: 13px; color: var(--text-muted); line-height: 1.5; margin-bottom: 12px;">
+                  Hubungkan nomor WhatsApp resmi Amanda Brownies ke server WAHA. Jika status <code>SCAN_QR_CODE</code>, scan QR code di bawah menggunakan aplikasi WhatsApp di HP Anda.
+                </div>
+
+                <!-- Live QR Code Viewer Box -->
+                <div class="waha-qr-wrap" id="waha-qr-box">
+                  <div id="waha-qr-content">
+                    <i class="fa-solid fa-qrcode" style="font-size: 56px; color: #d1c5b0; margin-bottom: 12px;"></i>
+                    <p style="font-size: 13.5px; font-weight: 600; color: var(--text-muted); margin: 0;">Tekan tombol "Mulai Sesi (Start)" untuk memuat QR Code</p>
+                  </div>
+                  <!-- Auto-refresh counter -->
+                  <div id="waha-qr-timer" style="display: none; margin-top: 10px; font-size: 11.5px; color: var(--text-dim);">
+                    <i class="fa-solid fa-arrows-rotate fa-spin"></i> Memperbarui QR code otomatis...
+                  </div>
+                </div>
+
+                <!-- Session Control Buttons -->
+                <div class="waha-actions-row">
+                  <button type="button" class="btn-olive" onclick="handleWahaStartSession()" id="btn-waha-start">
+                    <i class="fa-solid fa-play"></i> Mulai Sesi (Start)
+                  </button>
+                  <button type="button" class="btn-secondary" onclick="loadWahaQrCode(true)" id="btn-waha-refresh-qr">
+                    <i class="fa-solid fa-qrcode"></i> Ambil QR Baru
+                  </button>
+                  <button type="button" class="btn-secondary" onclick="handleWahaRestartSession()" id="btn-waha-restart">
+                    <i class="fa-solid fa-rotate"></i> Restart Sesi
+                  </button>
+                  <button type="button" class="btn-secondary" onclick="handleWahaStopSession()" id="btn-waha-stop">
+                    <i class="fa-solid fa-stop"></i> Hentikan Sesi
+                  </button>
+                  <button type="button" class="btn-secondary" onclick="handleWahaLogoutSession()" id="btn-waha-logout" style="color: #dc2626; border-color: rgba(220, 38, 38, 0.3);">
+                    <i class="fa-solid fa-right-from-bracket"></i> Putuskan (Logout)
+                  </button>
+                </div>
+
+                <!-- Pairing Steps Hint -->
+                <div style="background: rgba(245, 239, 227, 0.6); border-radius: var(--radius-md); padding: 12px 14px; margin-top: 16px; font-size: 12px; color: var(--text-muted);">
+                  <strong><i class="fa-solid fa-circle-info" style="color: var(--ch-gold);"></i> Cara Pairing WhatsApp:</strong>
+                  <ol style="margin: 6px 0 0 18px; line-height: 1.5;">
+                    <li>Buka aplikasi WhatsApp di HP Admin / Toko Amanda.</li>
+                    <li>Ketuk ikon titik tiga di kanan atas > pilih <strong>Perangkat tertaut (Linked Devices)</strong>.</li>
+                    <li>Ketuk <strong>Tautkan perangkat (Link a Device)</strong> lalu arahkan kamera ke QR Code di atas.</li>
+                  </ol>
+                </div>
+              </div>
+
+              <!-- Card 2: Simulator & Test Send Console -->
+              <div class="waha-card" style="margin-top: 22px;">
+                <div class="waha-card-header">
+                  <div class="waha-card-title">
+                    <i class="fa-solid fa-paper-plane"></i>
+                    <span>Simulator / Konsol Kirim Pesan WhatsApp</span>
+                  </div>
+                  <span style="font-size: 11.5px; background: rgba(79, 91, 42, 0.1); color: var(--ch-olive-dark); padding: 3px 8px; border-radius: 4px; font-weight: 600;">Test Console</span>
+                </div>
+
+                <form id="waha-test-form" onsubmit="handleWahaSendTestMessage(event)">
+                  <div class="form-grid-2">
+                    <div class="form-group">
+                      <label>Nomor WhatsApp Tujuan *</label>
+                      <input type="text" id="waha-test-phone" placeholder="Contoh: 081234567890 atau 62812..." required>
+                      <span style="font-size: 11px; color: var(--text-dim); display: block; margin-top: 3px;">Format otomatis diubah ke 628...@c.us</span>
+                    </div>
+
+                    <div class="form-group">
+                      <label>Tipe Pesan</label>
+                      <select id="waha-test-type" onchange="toggleWahaTestMessageType(this.value)">
+                        <option value="text">Pesan Teks Biasa</option>
+                        <option value="image">Pesan Gambar Flyer / Poster</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <!-- Optional Image URL -->
+                  <div class="form-group" id="waha-test-image-group" style="display: none;">
+                    <label>URL Gambar Flyer (Wajib jika tipe gambar)</label>
+                    <input type="text" id="waha-test-image-url" placeholder="https://... atau assets/promo_flyer_1.jpg">
+                  </div>
+
+                  <!-- Quick Templates -->
+                  <div style="margin-bottom: 10px;">
+                    <span style="font-size: 11.5px; font-weight: 700; color: var(--text-dim); display: block; margin-bottom: 6px;">
+                      Template Cepat (Klik untuk menyisipkan):
+                    </span>
+                    <div style="display: flex; flex-wrap: wrap; gap: 6px;">
+                      <button type="button" class="btn-secondary" style="font-size: 11px; padding: 4px 8px;" onclick="insertWahaTemplate('cs_reply')">
+                        <i class="fa-solid fa-reply"></i> Balas CS
+                      </button>
+                      <button type="button" class="btn-secondary" style="font-size: 11px; padding: 4px 8px;" onclick="insertWahaTemplate('promo')">
+                        <i class="fa-solid fa-tag"></i> Promo Amanda
+                      </button>
+                      <button type="button" class="btn-secondary" style="font-size: 11px; padding: 4px 8px;" onclick="insertWahaTemplate('outlet_hours')">
+                        <i class="fa-solid fa-clock"></i> Jam Outlet
+                      </button>
+                    </div>
+                  </div>
+
+                  <div class="form-group">
+                    <label>Isi Pesan WhatsApp *</label>
+                    <textarea id="waha-test-message" rows="4" placeholder="Tulis isi pesan pengujian di sini..." required style="width: 100%; border: 1px solid var(--ch-sand-border); border-radius: var(--radius-md); padding: 10px 12px; font-family: inherit; font-size: 13.5px;"></textarea>
+                  </div>
+
+                  <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
+                    <button type="submit" class="btn-olive" id="btn-waha-send-test" style="background: #16a34a; border-color: #15803d;">
+                      <i class="fa-brands fa-whatsapp"></i> Kirim Pesan Sekarang
+                    </button>
+                    <span id="waha-send-feedback" style="font-size: 12.5px; font-weight: 600;"></span>
+                  </div>
+                </form>
+              </div>
+
+            </div>
+
+            <!-- RIGHT COLUMN: Konfigurasi, Automasi & Guide (Col 5) -->
+            <div class="waha-col-5">
+
+              <!-- Card 3: Konfigurasi Server WAHA -->
+              <div class="waha-card">
+                <div class="waha-card-header">
+                  <div class="waha-card-title">
+                    <i class="fa-solid fa-server"></i>
+                    <span>Konfigurasi Server WAHA</span>
+                  </div>
+                  <button type="button" class="btn-secondary" style="font-size: 11px; padding: 4px 8px;" onclick="handleWahaPingTest()">
+                    <i class="fa-solid fa-bolt"></i> Tes Ping
+                  </button>
+                </div>
+
+                <form id="waha-config-form" onsubmit="handleWahaSaveConfig(event)">
+                  <!-- Toggle Aktif -->
+                  <div class="waha-toggle-item" style="margin-bottom: 16px;">
+                    <div class="waha-toggle-info">
+                      <strong>Aktifkan Integrasi WAHA Gateway</strong>
+                      <p>Nyalakan untuk mengizinkan sistem mengirim notifikasi otomatis via WhatsApp.</p>
+                    </div>
+                    <label class="waha-switch">
+                      <input type="checkbox" id="waha-cfg-enabled">
+                      <span class="waha-slider"></span>
+                    </label>
+                  </div>
+
+                  <div class="form-group">
+                    <label>URL Server WAHA Gateway *</label>
+                    <input type="text" id="waha-cfg-url" placeholder="http://localhost:3000 atau https://waha.domain.com" required>
+                    <span style="font-size: 11px; color: var(--text-dim); display: block; margin-top: 3px;">Alamat HTTP API server WAHA Docker / Cloud instance.</span>
+                  </div>
+
+                  <div class="form-group">
+                    <label>API Key / Secret Token (Opsional)</label>
+                    <div style="position: relative;">
+                      <input type="password" id="waha-cfg-key" placeholder="Kosongkan jika server tanpa password" style="padding-right: 40px;">
+                      <button type="button" onclick="togglePasswordVisibility('waha-cfg-key', this)" style="position: absolute; right: 8px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: var(--text-muted); padding: 4px 8px;">
+                        <i class="fa-regular fa-eye"></i>
+                      </button>
+                    </div>
+                    <span style="font-size: 11px; color: var(--text-dim); display: block; margin-top: 3px;">Header X-Api-Key / Authorization Bearer.</span>
+                  </div>
+
+                  <div class="form-grid-2">
+                    <div class="form-group">
+                      <label>Nama Sesi (Session Name) *</label>
+                      <input type="text" id="waha-cfg-session" placeholder="default" required>
+                    </div>
+                    <div class="form-group">
+                      <label>WA Admin Notifikasi *</label>
+                      <input type="text" id="waha-cfg-admin-phone" placeholder="6281322119988" required>
+                    </div>
+                  </div>
+
+                  <div style="margin-top: 14px;">
+                    <button type="submit" class="btn-olive" style="width: 100%;">
+                      <i class="fa-solid fa-floppy-disk"></i> Simpan Konfigurasi WAHA
+                    </button>
+                  </div>
+                </form>
+              </div>
+
+              <!-- Card 4: Automasi Notifikasi Tiket CS -->
+              <div class="waha-card" style="margin-top: 22px;">
+                <div class="waha-card-header">
+                  <div class="waha-card-title">
+                    <i class="fa-solid fa-wand-magic-sparkles"></i>
+                    <span>Automasi Notifikasi Amanda</span>
+                  </div>
+                  <span style="font-size: 11px; background: rgba(34, 197, 94, 0.15); color: #16a34a; padding: 2px 7px; border-radius: 4px; font-weight: 700;">Live Bot</span>
+                </div>
+
+                <div style="font-size: 13px; color: var(--text-muted); line-height: 1.4; margin-bottom: 12px;">
+                  Sistem dapat secara otomatis mengirim pesan WhatsApp ketika terjadi aktivitas pada website publik:
+                </div>
+
+                <!-- Toggle 1: Notif Admin -->
+                <div class="waha-toggle-item">
+                  <div class="waha-toggle-info">
+                    <strong>Notifikasi ke Nomor Admin</strong>
+                    <p>Kirim ringkasan saat ada pelanggan mengirim pengaduan / pesanan katering baru di form CS.</p>
+                  </div>
+                  <label class="waha-switch">
+                    <input type="checkbox" id="waha-auto-admin-ticket" onchange="handleWahaAutoToggle()">
+                    <span class="waha-slider"></span>
+                  </label>
+                </div>
+
+                <!-- Toggle 2: Konfirmasi ke Pelanggan -->
+                <div class="waha-toggle-item">
+                  <div class="waha-toggle-info">
+                    <strong>Kirim Konfirmasi ke Pelanggan</strong>
+                    <p>Kirim pesan balasan instan berisi nomor tiket kepada pelanggan setelah submit pengaduan.</p>
+                  </div>
+                  <label class="waha-switch">
+                    <input type="checkbox" id="waha-auto-cust-ticket" onchange="handleWahaAutoToggle()">
+                    <span class="waha-slider"></span>
+                  </label>
+                </div>
+
+                <!-- Toggle 3: Update Status Tiket -->
+                <div class="waha-toggle-item" style="margin-bottom: 0;">
+                  <div class="waha-toggle-info">
+                    <strong>Kirim Kabar Perubahan Status</strong>
+                    <p>Kirim pemberitahuan ke WhatsApp pelanggan saat status tiket diubah di tabel admin (Diproses / Selesai).</p>
+                  </div>
+                  <label class="waha-switch">
+                    <input type="checkbox" id="waha-auto-cust-status" onchange="handleWahaAutoToggle()">
+                    <span class="waha-slider"></span>
+                  </label>
+                </div>
+              </div>
+
+              <!-- Card 5: Panduan Singkat Docker WAHA -->
+              <div class="waha-card" style="margin-top: 22px; background: #faf7f2;">
+                <div class="waha-card-header" style="border-bottom-color: rgba(216, 201, 168, 0.6);">
+                  <div class="waha-card-title">
+                    <i class="fa-solid fa-circle-question" style="color: var(--ch-gold);"></i>
+                    <span style="font-size: 14.5px;">Menjalankan WAHA via Docker</span>
+                  </div>
+                  <a href="https://waha.devlike.pro" target="_blank" rel="noopener noreferrer" style="font-size: 11.5px; color: var(--ch-olive-dark); font-weight: 700; text-decoration: none;">
+                    Dokumentasi <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                  </a>
+                </div>
+                <p style="font-size: 12px; color: var(--text-muted); line-height: 1.5; margin-bottom: 10px;">
+                  Jika Anda menjalankan WAHA di server lokal atau VPS, jalankan perintah docker berikut:
+                </p>
+                <pre style="background: #231b14; color: #a7f3d0; padding: 10px 12px; border-radius: 6px; font-size: 11px; overflow-x: auto; font-family: monospace;">docker run -it -p 3000:3000/tcp --name waha devlike/waha</pre>
+                <div style="font-size: 11.5px; color: var(--text-dim); margin-top: 8px;">
+                  Port default: <strong>3000</strong> &bull; Dashboard Swagger UI tersedia di <code>http://localhost:3000/dashboard</code>
+                </div>
+              </div>
+
+            </div>
+
+            <!-- FULL WIDTH: Riwayat Log Pengiriman Pesan (Col 12) -->
+            <div class="waha-col-12" style="margin-top: 6px;">
+              <div class="waha-card">
+                <div class="waha-card-header">
+                  <div class="waha-card-title">
+                    <i class="fa-solid fa-clock-rotate-left"></i>
+                    <span>Riwayat Pengiriman Pesan & Log WAHA</span>
+                  </div>
+                  <div style="display: flex; gap: 8px;">
+                    <button type="button" class="btn-secondary" style="font-size: 11.5px; padding: 4px 10px;" onclick="renderWahaLogsTable()">
+                      <i class="fa-solid fa-rotate-right"></i> Refresh Log
+                    </button>
+                    <button type="button" class="btn-secondary" style="font-size: 11.5px; padding: 4px 10px; color: #dc2626; border-color: rgba(220, 38, 38, 0.3);" onclick="handleWahaClearLogs()">
+                      <i class="fa-solid fa-trash-can"></i> Bersihkan Log
+                    </button>
+                  </div>
+                </div>
+
+                <div style="overflow-x: auto;">
+                  <table class="waha-log-table">
+                    <thead>
+                      <tr>
+                        <th style="width: 140px;">Waktu</th>
+                        <th style="width: 160px;">Nomor Tujuan</th>
+                        <th style="width: 120px;">Tipe</th>
+                        <th style="width: 110px;">Status</th>
+                        <th>Cuplikan Isi Pesan</th>
+                      </tr>
+                    </thead>
+                    <tbody id="waha-logs-tbody">
+                      <tr>
+                        <td colspan="5" style="text-align: center; padding: 30px; color: var(--text-dim);">
+                          Belum ada riwayat aktivitas pengiriman pesan.
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+        </section>
+
       </div>
 
     </main>
@@ -1614,6 +1972,7 @@
   <script src="js/data.js?v=4.2.0"></script>
   <script src="js/supabase.js?v=4.2.0"></script>
   <script src="js/waas-status.js?v=4.2.0"></script>
+  <script src="js/waha.js?v=4.2.0"></script>
   <script src="js/admin.js?v=4.2.0"></script>
 </body>
 

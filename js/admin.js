@@ -12,6 +12,7 @@ document.addEventListener('DOMContentLoaded', () => {
   renderCsManager();
   renderTickerManager();
   renderSubscriptionManager();
+  if (typeof updateWahaStatusIndicator === 'function') updateWahaStatusIndicator();
 
   // Listen for storage changes from other tabs
   window.addEventListener('storage', (e) => {
@@ -25,6 +26,7 @@ document.addEventListener('DOMContentLoaded', () => {
       renderCsManager();
       renderTickerManager();
       renderSubscriptionManager();
+      if (typeof updateWahaStatusIndicator === 'function') updateWahaStatusIndicator();
     }
   });
 
@@ -39,6 +41,7 @@ document.addEventListener('DOMContentLoaded', () => {
     renderCsManager();
     renderTickerManager();
     renderSubscriptionManager();
+    if (typeof updateWahaStatusIndicator === 'function') updateWahaStatusIndicator();
   });
 });
 
@@ -61,6 +64,7 @@ function switchTab(tabName, btnElement) {
     'outlets': 'Cabang Outlet Resmi Balikpapan',
     'outlet-categories': 'Manajemen Kategori & Wilayah Outlet',
     'cs': 'Layanan CS & Analisis Data Pelanggan',
+    'waha': 'WhatsApp HTTP API (WAHA) Gateway Manager',
     'ticker': 'Pengumuman Running Promo Ticker',
     'settings': 'Cadangan, Impor & Reset Data',
     'security': 'Vault Kunci API & Keamanan Database'
@@ -81,6 +85,7 @@ function switchTab(tabName, btnElement) {
   if (tabName === 'outlets') renderOutletsManager();
   if (tabName === 'outlet-categories') renderOutletCategoriesManager();
   if (tabName === 'cs') renderCsManager();
+  if (tabName === 'waha') renderWahaManager();
   if (tabName === 'ticker') renderTickerManager();
   if (tabName === 'security') renderSecurityVault();
 }
@@ -2649,6 +2654,15 @@ async function changeCsStatus(inquiryId, newStatus) {
     showCmsToast(`Status tiket #${inquiryId} diperbarui menjadi ${newStatus}.`, 'Status Diperbarui');
     renderCsManager();
     renderDashboard();
+
+    // Kirim notifikasi status WhatsApp via WAHA Gateway jika aktif
+    if (typeof notifyCustomerCsStatus === 'function') {
+      const allCs = typeof getCsInquiries === 'function' ? getCsInquiries() : (typeof AMANDA_CS_INQUIRIES !== 'undefined' ? AMANDA_CS_INQUIRIES : []);
+      const item = allCs.find(i => i.id === inquiryId);
+      if (item && item.phone) {
+        notifyCustomerCsStatus(item, newStatus);
+      }
+    }
   }
 }
 
@@ -2764,6 +2778,484 @@ function escapeHtml(text) {
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#039;');
 }
+
+// ===================================================================
+// WAHA (WHATSAPP HTTP API) GATEWAY MANAGER CONTROLLER
+// ===================================================================
+let wahaQrRefreshTimer = null;
+let currentWahaSessionStatus = 'UNKNOWN';
+
+function updateWahaStatusIndicator() {
+  const badge = document.getElementById('badge-waha-status');
+  if (!badge) return;
+
+  const config = typeof getWahaConfig === 'function' ? getWahaConfig() : null;
+  if (!config || !config.enabled) {
+    badge.textContent = 'OFF';
+    badge.style.background = 'rgba(100, 116, 139, 0.15)';
+    badge.style.color = '#64748b';
+    return;
+  }
+
+  // Jika enabled, update badge berdasarkan status sesi terakhir
+  if (currentWahaSessionStatus === 'WORKING') {
+    badge.textContent = 'ONLINE';
+    badge.style.background = 'rgba(34, 197, 94, 0.2)';
+    badge.style.color = '#15803d';
+  } else if (currentWahaSessionStatus === 'SCAN_QR_CODE') {
+    badge.textContent = 'SCAN QR';
+    badge.style.background = 'rgba(245, 158, 11, 0.2)';
+    badge.style.color = '#b45309';
+  } else if (currentWahaSessionStatus === 'STARTING') {
+    badge.textContent = 'STARTING';
+    badge.style.background = 'rgba(59, 130, 246, 0.2)';
+    badge.style.color = '#2563eb';
+  } else {
+    badge.textContent = 'STANDBY';
+    badge.style.background = 'rgba(34, 197, 94, 0.12)';
+    badge.style.color = '#16a34a';
+  }
+}
+
+async function renderWahaManager() {
+  if (typeof getWahaConfig !== 'function') return;
+  const config = getWahaConfig();
+
+  // 1. Populate form configuration
+  const enabledInput = document.getElementById('waha-cfg-enabled');
+  if (enabledInput) enabledInput.checked = Boolean(config.enabled);
+
+  const urlInput = document.getElementById('waha-cfg-url');
+  if (urlInput) urlInput.value = config.apiUrl || 'http://localhost:3000';
+
+  const keyInput = document.getElementById('waha-cfg-key');
+  if (keyInput) keyInput.value = config.apiKey || '';
+
+  const sessionInput = document.getElementById('waha-cfg-session');
+  if (sessionInput) sessionInput.value = config.session || 'default';
+
+  const adminPhoneInput = document.getElementById('waha-cfg-admin-phone');
+  if (adminPhoneInput) adminPhoneInput.value = config.adminPhone || '6281322119988';
+
+  // 2. Populate automations
+  const autoAdmin = document.getElementById('waha-auto-admin-ticket');
+  if (autoAdmin) autoAdmin.checked = Boolean(config.notifyAdminOnTicket);
+
+  const autoCustTicket = document.getElementById('waha-auto-cust-ticket');
+  if (autoCustTicket) autoCustTicket.checked = Boolean(config.notifyCustomerOnTicket);
+
+  const autoCustStatus = document.getElementById('waha-auto-cust-status');
+  if (autoCustStatus) autoCustStatus.checked = Boolean(config.notifyCustomerOnStatus);
+
+  // 3. Update Banner Info
+  const bannerUrl = document.getElementById('waha-banner-url');
+  if (bannerUrl) bannerUrl.textContent = config.apiUrl || 'http://localhost:3000';
+
+  const bannerSession = document.getElementById('waha-banner-session');
+  if (bannerSession) bannerSession.textContent = config.session || 'default';
+
+  // 4. Render Logs Table
+  renderWahaLogsTable();
+
+  // 5. Cek Status Sesi dari Server WAHA
+  await refreshWahaView();
+}
+
+async function refreshWahaView() {
+  const bannerBadge = document.getElementById('waha-banner-badge');
+  const bannerText = document.getElementById('waha-banner-status-text');
+  const cardBadge = document.getElementById('waha-card-session-badge');
+  const accountInfo = document.getElementById('waha-banner-account-info');
+
+  if (bannerText) bannerText.textContent = 'MEMERIKSA SESI...';
+
+  const config = typeof getWahaConfig === 'function' ? getWahaConfig() : null;
+  if (!config) return;
+
+  try {
+    const sessionData = await getWahaSessionStatus(config.session);
+    currentWahaSessionStatus = sessionData.status || 'UNKNOWN';
+    updateWahaStatusIndicator();
+
+    const statusUpper = (sessionData.status || 'UNKNOWN').toUpperCase();
+
+    // Update Status Pill Classes
+    let badgeClass = 'stopped';
+    if (statusUpper === 'WORKING') badgeClass = 'working';
+    else if (statusUpper === 'SCAN_QR_CODE' || statusUpper === 'STARTING') badgeClass = 'scan_qr_code';
+    else if (statusUpper === 'STOPPED' || statusUpper === 'FAILED' || statusUpper === 'DISCONNECTED') badgeClass = 'stopped';
+
+    if (bannerBadge) bannerBadge.className = `waha-status-badge ${badgeClass}`;
+    if (bannerText) bannerText.textContent = statusUpper;
+    if (cardBadge) {
+      cardBadge.className = `waha-status-badge ${badgeClass}`;
+      cardBadge.textContent = statusUpper;
+    }
+
+    // Update Account info
+    if (accountInfo) {
+      if (sessionData.me && sessionData.me.id) {
+        const cleanNumber = sessionData.me.id.split(':')[0].split('@')[0];
+        const pushName = sessionData.me.pushName ? `(${sessionData.me.pushName})` : '';
+        accountInfo.innerHTML = `<i class="fa-solid fa-circle-check" style="color: #22c55e;"></i> Terhubung: <strong>+${cleanNumber}</strong> ${pushName}`;
+      } else if (statusUpper === 'WORKING') {
+        accountInfo.innerHTML = `<i class="fa-solid fa-circle-check" style="color: #22c55e;"></i> WhatsApp Aktif & Siap Kirim Pesan`;
+      } else if (statusUpper === 'SCAN_QR_CODE') {
+        accountInfo.innerHTML = `<i class="fa-solid fa-qrcode" style="color: #f59e0b;"></i> Menunggu Scan QR Code di HP`;
+      } else {
+        accountInfo.innerHTML = `<i class="fa-regular fa-circle-xmark" style="color: #ef4444;"></i> Sesi Belum Terhubung`;
+      }
+    }
+
+    // Tampilkan QR Code atau Status Box
+    if (statusUpper === 'SCAN_QR_CODE') {
+      await loadWahaQrCode(false);
+    } else if (statusUpper === 'WORKING') {
+      const qrContent = document.getElementById('waha-qr-content');
+      if (qrContent) {
+        qrContent.innerHTML = `
+          <div style="width: 64px; height: 64px; border-radius: 50%; background: rgba(34, 197, 94, 0.15); display: flex; align-items: center; justify-content: center; margin: 0 auto 14px auto;">
+            <i class="fa-solid fa-circle-check" style="font-size: 32px; color: #16a34a;"></i>
+          </div>
+          <h4 style="font-size: 16px; font-weight: 700; color: #16a34a; margin-bottom: 6px;">WhatsApp Terhubung & Aktif!</h4>
+          <p style="font-size: 13px; color: var(--text-muted); max-width: 320px; margin: 0 auto;">
+            Server WAHA siap mengirim pesan otomatis untuk tiket CS, katalog, dan notifikasi pelanggan.
+          </p>
+        `;
+      }
+      stopWahaQrAutoRefresh();
+    } else {
+      const qrContent = document.getElementById('waha-qr-content');
+      if (qrContent) {
+        qrContent.innerHTML = `
+          <i class="fa-solid fa-qrcode" style="font-size: 52px; color: #d1c5b0; margin-bottom: 12px;"></i>
+          <p style="font-size: 13px; font-weight: 600; color: var(--text-muted); margin: 0;">
+            Sesi saat ini ${statusUpper}. Tekan tombol <strong>"Mulai Sesi (Start)"</strong> untuk mengaktifkan sesi & memuat QR Code.
+          </p>
+        `;
+      }
+      stopWahaQrAutoRefresh();
+    }
+
+  } catch (err) {
+    currentWahaSessionStatus = 'DISCONNECTED';
+    updateWahaStatusIndicator();
+    if (bannerBadge) bannerBadge.className = 'waha-status-badge stopped';
+    if (bannerText) bannerText.textContent = 'DISCONNECTED';
+    if (cardBadge) {
+      cardBadge.className = 'waha-status-badge stopped';
+      cardBadge.textContent = 'DISCONNECTED';
+    }
+    if (accountInfo) {
+      accountInfo.innerHTML = `<i class="fa-solid fa-triangle-exclamation" style="color: #ef4444;"></i> Server WAHA tidak merespons (Offline / URL Salah)`;
+    }
+  }
+}
+
+async function loadWahaQrCode(manual = false) {
+  const qrContent = document.getElementById('waha-qr-content');
+  const timerElem = document.getElementById('waha-qr-timer');
+  const config = typeof getWahaConfig === 'function' ? getWahaConfig() : null;
+  if (!config) return;
+
+  if (manual && qrContent) {
+    qrContent.innerHTML = '<div style="padding: 30px;"><i class="fa-solid fa-circle-notch fa-spin" style="font-size: 28px; color: var(--ch-olive);"></i><p style="font-size: 12.5px; margin-top: 10px; color: var(--text-muted);">Mengambil QR Code terbaru...</p></div>';
+  }
+
+  try {
+    const res = await fetchWahaQrCode(config.session);
+    if (res.success && res.dataUrl) {
+      if (qrContent) {
+        qrContent.innerHTML = `
+          <img src="${res.dataUrl}" class="waha-qr-img" alt="QR Code WhatsApp Pairing">
+          <div style="margin-top: 10px; font-size: 12px; font-weight: 600; color: var(--text-main);">
+            Scan QR Code ini dengan WhatsApp di HP Anda
+          </div>
+        `;
+      }
+      startWahaQrAutoRefresh();
+    } else {
+      if (qrContent && manual) {
+        qrContent.innerHTML = `
+          <i class="fa-solid fa-circle-exclamation" style="font-size: 40px; color: #f59e0b; margin-bottom: 10px;"></i>
+          <p style="font-size: 13px; color: var(--text-muted);">${res.message || 'QR Code belum siap. Pastikan sesi telah dimulai (Start).'}</p>
+        `;
+      }
+    }
+  } catch (err) {
+    if (qrContent && manual) {
+      qrContent.innerHTML = `
+        <i class="fa-solid fa-circle-xmark" style="font-size: 40px; color: #ef4444; margin-bottom: 10px;"></i>
+        <p style="font-size: 13px; color: var(--text-muted);">${err.message}</p>
+      `;
+    }
+  }
+}
+
+function startWahaQrAutoRefresh() {
+  stopWahaQrAutoRefresh();
+  const timerElem = document.getElementById('waha-qr-timer');
+  if (timerElem) timerElem.style.display = 'block';
+
+  wahaQrRefreshTimer = setInterval(async () => {
+    const config = typeof getWahaConfig === 'function' ? getWahaConfig() : null;
+    if (config) {
+      const statusData = await getWahaSessionStatus(config.session);
+      if (statusData.status === 'WORKING') {
+        stopWahaQrAutoRefresh();
+        refreshWahaView();
+      } else if (statusData.status === 'SCAN_QR_CODE') {
+        loadWahaQrCode(false);
+      }
+    }
+  }, 12000);
+}
+
+function stopWahaQrAutoRefresh() {
+  if (wahaQrRefreshTimer) {
+    clearInterval(wahaQrRefreshTimer);
+    wahaQrRefreshTimer = null;
+  }
+  const timerElem = document.getElementById('waha-qr-timer');
+  if (timerElem) timerElem.style.display = 'none';
+}
+
+async function handleWahaPingTest() {
+  if (typeof testWahaServer !== 'function') return;
+  showCmsToast('Menguji koneksi ke server WAHA...', 'Pemeriksaan Koneksi');
+  const res = await testWahaServer();
+  if (res.success) {
+    showCmsToast('Koneksi sukses! Server WAHA Gateway aktif dan merespons.', 'Koneksi Berhasil');
+  } else {
+    showCmsToast(res.message, 'Koneksi Gagal');
+  }
+  refreshWahaView();
+}
+
+async function handleWahaSaveConfig(event) {
+  if (event) event.preventDefault();
+  const enabled = document.getElementById('waha-cfg-enabled').checked;
+  const apiUrl = document.getElementById('waha-cfg-url').value.trim();
+  const apiKey = document.getElementById('waha-cfg-key').value.trim();
+  const session = document.getElementById('waha-cfg-session').value.trim() || 'default';
+  const adminPhone = document.getElementById('waha-cfg-admin-phone').value.trim();
+
+  const autoAdmin = document.getElementById('waha-auto-admin-ticket').checked;
+  const autoCustTicket = document.getElementById('waha-auto-cust-ticket').checked;
+  const autoCustStatus = document.getElementById('waha-auto-cust-status').checked;
+
+  const payload = {
+    enabled,
+    apiUrl,
+    apiKey,
+    session,
+    adminPhone,
+    notifyAdminOnTicket: autoAdmin,
+    notifyCustomerOnTicket: autoCustTicket,
+    notifyCustomerOnStatus: autoCustStatus,
+    autoRefreshQr: true
+  };
+
+  const res = await saveWahaConfig(payload, true);
+  if (res.success) {
+    showCmsToast(res.message, 'Tersimpan');
+    updateWahaStatusIndicator();
+    refreshWahaView();
+  } else {
+    showCmsToast(res.message, 'Gagal Menyimpan');
+  }
+}
+
+async function handleWahaAutoToggle() {
+  const config = getWahaConfig();
+  config.notifyAdminOnTicket = document.getElementById('waha-auto-admin-ticket').checked;
+  config.notifyCustomerOnTicket = document.getElementById('waha-auto-cust-ticket').checked;
+  config.notifyCustomerOnStatus = document.getElementById('waha-auto-cust-status').checked;
+  await saveWahaConfig(config, true);
+  showCmsToast('Pengaturan automasi notifikasi diperbarui.', 'Automasi Diperbarui');
+}
+
+async function handleWahaStartSession() {
+  const config = getWahaConfig();
+  showCmsToast(`Memulai sesi "${config.session}"...`, 'Proses Sesi');
+  const res = await startWahaSession(config.session);
+  if (res.success) {
+    showCmsToast(res.message, 'Sesi Dimulai');
+    await new Promise(r => setTimeout(r, 1500));
+    refreshWahaView();
+    loadWahaQrCode(true);
+  } else {
+    showCmsToast(res.message, 'Gagal Memulai Sesi');
+  }
+}
+
+async function handleWahaStopSession() {
+  const config = getWahaConfig();
+  if (!confirm(`Hentikan sesi WhatsApp "${config.session}"?`)) return;
+  const res = await stopWahaSession(config.session);
+  if (res.success) {
+    showCmsToast(res.message, 'Sesi Dihentikan');
+    refreshWahaView();
+  } else {
+    showCmsToast(res.message, 'Gagal');
+  }
+}
+
+async function handleWahaRestartSession() {
+  const config = getWahaConfig();
+  showCmsToast(`Merestart sesi "${config.session}"...`, 'Restarting');
+  const res = await restartWahaSession(config.session);
+  if (res.success) {
+    showCmsToast(res.message, 'Sesi Direstart');
+    await new Promise(r => setTimeout(r, 1500));
+    refreshWahaView();
+  } else {
+    showCmsToast(res.message, 'Gagal');
+  }
+}
+
+async function handleWahaLogoutSession() {
+  const config = getWahaConfig();
+  if (!confirm(`Putuskan tautan perangkat sesi "${config.session}"? Anda harus scan QR code ulang untuk menghubungkannya kembali.`)) return;
+  const res = await logoutWahaSession(config.session);
+  if (res.success) {
+    showCmsToast(res.message, 'Logout Berhasil');
+    refreshWahaView();
+  } else {
+    showCmsToast(res.message, 'Gagal Logout');
+  }
+}
+
+function toggleWahaTestMessageType(type) {
+  const imgGroup = document.getElementById('waha-test-image-group');
+  if (imgGroup) {
+    imgGroup.style.display = type === 'image' ? 'block' : 'none';
+  }
+}
+
+function insertWahaTemplate(type) {
+  const msgArea = document.getElementById('waha-test-message');
+  if (!msgArea) return;
+
+  if (type === 'cs_reply') {
+    msgArea.value = 'Halo Kak, terima kasih telah menghubungi CS Amanda Brownies Balikpapan. Laporan Kakak sedang kami koordinasikan dengan tim operasional cabang.';
+  } else if (type === 'promo') {
+    msgArea.value = '🍫 PROMO SPESIAL AMANDA BALIKPAPAN!\nNikmati kelembutan Brownies Kukus Original & Bakar dengan diskon spesial minggu ini. Kunjungi outlet resmi terdekat di Balikpapan!';
+  } else if (type === 'outlet_hours') {
+    msgArea.value = 'Halo Pelanggan Setia Amanda! Outlet MT Haryono Damai & Cabang Balikpapan buka setiap hari pukul 07.30 - 21.30 WITA. Tersedia juga di booth Bandara SAMS Sepinggan.';
+  }
+}
+
+async function handleWahaSendTestMessage(event) {
+  if (event) event.preventDefault();
+  const phone = document.getElementById('waha-test-phone').value.trim();
+  const type = document.getElementById('waha-test-type').value;
+  const message = document.getElementById('waha-test-message').value.trim();
+  const imageUrl = document.getElementById('waha-test-image-url') ? document.getElementById('waha-test-image-url').value.trim() : '';
+
+  const btn = document.getElementById('btn-waha-send-test');
+  const feedback = document.getElementById('waha-send-feedback');
+
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Mengirim via WAHA...';
+  if (feedback) feedback.textContent = '';
+
+  try {
+    let res = null;
+    if (type === 'image') {
+      if (!imageUrl) {
+        alert('Silakan isi URL gambar flyer terlebih dahulu.');
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa-brands fa-whatsapp"></i> Kirim Pesan Sekarang';
+        return;
+      }
+      res = await sendWahaMedia(phone, imageUrl, message);
+    } else {
+      res = await sendWahaText(phone, message);
+    }
+
+    if (res.success) {
+      showCmsToast('Pesan WhatsApp pengujian berhasil terkirim!', 'Pesan Terkirim');
+      if (feedback) {
+        feedback.style.color = '#15803d';
+        feedback.innerHTML = '<i class="fa-solid fa-circle-check"></i> Berhasil Terkirim!';
+      }
+      renderWahaLogsTable();
+    } else {
+      showCmsToast(res.message, 'Gagal Mengirim');
+      if (feedback) {
+        feedback.style.color = '#dc2626';
+        feedback.innerHTML = `<i class="fa-solid fa-circle-xmark"></i> ${res.message}`;
+      }
+    }
+  } catch (err) {
+    showCmsToast(err.message, 'Error Pengiriman');
+    if (feedback) {
+      feedback.style.color = '#dc2626';
+      feedback.innerHTML = `<i class="fa-solid fa-circle-xmark"></i> ${err.message}`;
+    }
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '<i class="fa-brands fa-whatsapp"></i> Kirim Pesan Sekarang';
+  }
+}
+
+function renderWahaLogsTable() {
+  const tbody = document.getElementById('waha-logs-tbody');
+  if (!tbody || typeof getWahaLogs !== 'function') return;
+
+  const logs = getWahaLogs();
+  if (logs.length === 0) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="5" style="text-align: center; padding: 28px; color: var(--text-dim);">
+          <i class="fa-regular fa-folder-open" style="font-size: 24px; margin-bottom: 6px; display: block;"></i>
+          Belum ada riwayat aktivitas pengiriman pesan WAHA.
+        </td>
+      </tr>
+    `;
+    return;
+  }
+
+  tbody.innerHTML = logs.map(log => {
+    const isSent = log.status === 'SENT' || log.status === 'SUCCESS';
+    const tagClass = isSent ? 'sent' : 'failed';
+    const tagIcon = isSent ? 'fa-check' : 'fa-xmark';
+    const timeStr = log.timestamp ? new Date(log.timestamp).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' }) : '-';
+    const dateStr = log.timestamp ? new Date(log.timestamp).toLocaleDateString('id-ID', { day: '2-digit', month: 'short' }) : '';
+    const recipient = escapeHtml(log.recipient || log.session || '-');
+    const snippet = escapeHtml(log.snippet || log.details || (log.error ? `Error: ${log.error}` : '-'));
+    const typeLabel = log.type === 'OUTGOING_MEDIA' ? 'Foto Flyer' : (log.type === 'OUTGOING_MESSAGE' ? 'Pesan Teks' : 'Aksi Sesi');
+
+    return `
+      <tr>
+        <td style="font-size: 11.5px; color: var(--text-dim); white-space: nowrap;">
+          <strong>${timeStr}</strong><br><span style="font-size: 10.5px;">${dateStr}</span>
+        </td>
+        <td style="font-weight: 600; color: var(--text-main);">${recipient}</td>
+        <td><span style="font-size: 11px; background: rgba(79, 91, 42, 0.08); padding: 2px 6px; border-radius: 4px;">${typeLabel}</span></td>
+        <td>
+          <span class="waha-chip-tag ${tagClass}">
+            <i class="fa-solid ${tagIcon}"></i> ${log.status}
+          </span>
+        </td>
+        <td style="max-width: 320px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${snippet}">
+          ${snippet}
+        </td>
+      </tr>
+    `;
+  }).join('');
+}
+
+function handleWahaClearLogs() {
+  if (!confirm('Hapus semua riwayat log pengiriman WAHA?')) return;
+  if (typeof clearWahaLogs === 'function') {
+    clearWahaLogs();
+    renderWahaLogsTable();
+    showCmsToast('Riwayat log berhasil dibersihkan.', 'Log Dihapus');
+  }
+}
+
 
 
 

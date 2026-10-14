@@ -19,23 +19,23 @@ function refreshAllLandingPageViews() {
   renderOutletLocatorList(selectedCityForOutlet || 'all');
 }
 
+// Cross-Tab Live Synchronization with CMS
+window.addEventListener('storage', (e) => {
+  if (!e.key || e.key.startsWith('amanda_')) {
+    refreshAllLandingPageViews();
+  }
+});
+
+// Same-Window / Custom Event Synchronization
+window.addEventListener('amanda_data_updated', () => {
+  refreshAllLandingPageViews();
+});
+
 document.addEventListener('DOMContentLoaded', () => {
   refreshAllLandingPageViews();
   setupEventListeners();
   initPromoFeatures();
   initFlyerZoomListeners();
-
-  // Cross-Tab Live Synchronization with CMS
-  window.addEventListener('storage', (e) => {
-    if (!e.key || e.key.startsWith('amanda_')) {
-      refreshAllLandingPageViews();
-    }
-  });
-
-  // Same-Window / Custom Event Synchronization
-  window.addEventListener('amanda_data_updated', () => {
-    refreshAllLandingPageViews();
-  });
 });
 
 // Render Navbar Outlet Dropdown List (With Sub-List of Booths)

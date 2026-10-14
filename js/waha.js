@@ -11,9 +11,9 @@ const WAHA_LOGS_STORAGE_KEY = 'amanda_waha_logs';
 const DEFAULT_WAHA_CONFIG = {
   enabled: true,
   apiUrl: 'https://waha.oodana.my.id',
-  apiKey: '',
+  apiKey: 'zNqV4kRkBjEymlCgNxTiKLWZw75EgNg',
   session: 'default',
-  adminPhone: '6281322119988',
+  adminPhone: '6287859771676',
   notifyAdminOnTicket: true,
   notifyCustomerOnTicket: true,
   notifyCustomerOnStatus: true,
@@ -34,12 +34,23 @@ function getWahaConfig() {
         currentUrl = 'https://waha.oodana.my.id';
       }
 
+      let currentKey = (parsed.apiKey || '').trim();
+      // Auto-populate active API key if missing
+      if (!currentKey) {
+        currentKey = 'zNqV4kRkBjEymlCgNxTiKLWZw75EgNg';
+      }
+
+      let currentPhone = (parsed.adminPhone || '').trim();
+      if (!currentPhone || currentPhone === '6281322119988') {
+        currentPhone = '6287859771676';
+      }
+
       return {
         enabled: parsed.enabled ?? true,
         apiUrl: currentUrl,
-        apiKey: (parsed.apiKey || '').trim(),
+        apiKey: currentKey,
         session: (parsed.session || '').trim() || DEFAULT_WAHA_CONFIG.session,
-        adminPhone: (parsed.adminPhone || '').trim() || DEFAULT_WAHA_CONFIG.adminPhone,
+        adminPhone: currentPhone,
         notifyAdminOnTicket: parsed.notifyAdminOnTicket ?? true,
         notifyCustomerOnTicket: parsed.notifyCustomerOnTicket ?? true,
         notifyCustomerOnStatus: parsed.notifyCustomerOnStatus ?? true,

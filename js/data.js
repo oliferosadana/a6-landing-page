@@ -360,6 +360,89 @@ function notifyAmandaDataChanged() {
 // Default Customer Service Sample Inquiries (Kosong secara default agar hanya memuat pengaduan asli dari Supabase)
 const DEFAULT_CS_INQUIRIES = [];
 
+// ===================================================================
+// COOKIE & CACHE EXPIRATION / AUTO-UPDATE MANAGEMENT
+// ===================================================================
+const AMANDA_SYSTEM_VERSION = '4.2.0';
+const AMANDA_CACHE_TTL_SECONDS = 1800; // 30 Menit masa berlaku cookie cache
+
+/**
+ * Atur cookie dengan masa berlaku (Max-Age detik)
+ */
+function setAmandaCookie(name, value, maxAgeSeconds = AMANDA_CACHE_TTL_SECONDS) {
+  try {
+    const isHttps = typeof window !== 'undefined' && window.location && window.location.protocol === 'https:';
+    const secureFlag = isHttps ? '; Secure' : '';
+    document.cookie = `${encodeURIComponent(name)}=${encodeURIComponent(value)}; max-age=${maxAgeSeconds}; path=/; SameSite=Lax${secureFlag}`;
+  } catch (e) {
+    console.warn('Gagal mengatur cookie:', e);
+  }
+}
+
+/**
+ * Baca nilai cookie berdasarkan nama
+ */
+function getAmandaCookie(name) {
+  try {
+    if (typeof document === 'undefined' || !document.cookie) return null;
+    const matches = document.cookie.match(new RegExp('(?:^|; )' + encodeURIComponent(name).replace(/[\-\.\+\*]/g, '\\$&') + '=([^;]*)'));
+    return matches ? decodeURIComponent(matches[1]) : null;
+  } catch (e) {
+    return null;
+  }
+}
+
+/**
+ * Hapus cookie dengan mengatur masa berlakunya ke 0
+ */
+function deleteAmandaCookie(name) {
+  try {
+    if (typeof document !== 'undefined') {
+      document.cookie = `${encodeURIComponent(name)}=; max-age=0; path=/; SameSite=Lax`;
+    }
+  } catch (e) {}
+}
+
+/**
+ * Memeriksa masa berlaku cookie cache dan versi landing page.
+ * Jika versi sistem berubah atau masa berlaku cookie (30 menit) habis,
+ * cache lokal dibersihkan otomatis agar user yang pernah membuka web mendapatkan
+ * data dan update tampilan terbaru mengikuti sistem database Supabase.
+ */
+function enforceCacheAndCookieExpiration() {
+  try {
+    if (typeof window === 'undefined' || typeof localStorage === 'undefined') return;
+
+    const currentVersion = AMANDA_SYSTEM_VERSION;
+    const storedVersion = localStorage.getItem('amanda_system_version');
+    const versionCookie = getAmandaCookie('amanda_version');
+    const cacheCookie = getAmandaCookie('amanda_cache_active');
+
+    const isVersionMismatch = storedVersion !== currentVersion || versionCookie !== currentVersion;
+    const isCacheExpired = !cacheCookie; // Browser otomatis menghapus cookie saat masa berlakunya (30 menit) habis
+
+    if (isVersionMismatch || isCacheExpired) {
+      console.log(`🔄 [Cache Invalidation] Versi baru: ${isVersionMismatch}, Cookie expired: ${isCacheExpired}. Membersihkan cache lokal lama...`);
+
+      // Bersihkan data dinamis agar browser langsung mengambil data terbaru dari Supabase
+      localStorage.removeItem('amanda_products');
+      localStorage.removeItem('amanda_promos');
+      localStorage.removeItem('amanda_pricelists');
+      localStorage.removeItem('amanda_ticker');
+
+      // Catat versi terbaru di localStorage dan Cookie
+      localStorage.setItem('amanda_system_version', currentVersion);
+      localStorage.setItem('amanda_last_cache_refresh', Date.now().toString());
+
+      // Atur masa berlaku cookie: 30 hari untuk versi, 30 menit (1800 detik) untuk validitas cache
+      setAmandaCookie('amanda_version', currentVersion, 86400 * 30);
+      setAmandaCookie('amanda_cache_active', Date.now().toString(), AMANDA_CACHE_TTL_SECONDS);
+    }
+  } catch (err) {
+    console.warn('Cache & Cookie expiration check warning:', err);
+  }
+}
+
 // Global active datasets loaded from localStorage or defaults
 let AMANDA_OUTLETS = [];
 let AMANDA_OUTLET_CATEGORIES = [];
@@ -370,6 +453,7 @@ let AMANDA_TICKER = [];
 let AMANDA_CS_INQUIRIES = [];
 
 function reloadAmandaData() {
+  enforceCacheAndCookieExpiration();
   AMANDA_OUTLET_CATEGORIES = getStoredData('amanda_outlet_categories', DEFAULT_OUTLET_CATEGORIES);
   AMANDA_OUTLETS = getStoredData('amanda_outlets', DEFAULT_OUTLETS).map(out => {
     return {

@@ -521,6 +521,15 @@ async function pullAllDataFromSupabase() {
 
     isInitialSupabaseSyncDone = true;
     notifyAmandaDataChanged();
+
+    // Perbarui cookie masa berlaku cache (30 menit) & versi
+    if (typeof setAmandaCookie === 'function') {
+      const ttl = typeof AMANDA_CACHE_TTL_SECONDS !== 'undefined' ? AMANDA_CACHE_TTL_SECONDS : 1800;
+      const ver = typeof AMANDA_SYSTEM_VERSION !== 'undefined' ? AMANDA_SYSTEM_VERSION : '4.2.0';
+      setAmandaCookie('amanda_cache_active', Date.now().toString(), ttl);
+      setAmandaCookie('amanda_version', ver, 86400 * 30);
+    }
+
     console.log('⚡ Semua data Supabase berhasil dimuat secara paralel!');
     return true;
   } catch (err) {

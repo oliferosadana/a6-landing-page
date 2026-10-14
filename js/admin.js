@@ -3022,12 +3022,26 @@ function stopWahaQrAutoRefresh() {
 
 async function handleWahaPingTest() {
   if (typeof testWahaServer !== 'function') return;
+  const urlInput = document.getElementById('waha-cfg-url');
+  const keyInput = document.getElementById('waha-cfg-key');
+  const targetUrl = urlInput ? urlInput.value.trim() : null;
+  const targetKey = keyInput ? keyInput.value.trim() : null;
+
   showCmsToast('Menguji koneksi ke server WAHA...', 'Pemeriksaan Koneksi');
-  const res = await testWahaServer();
+  const res = await testWahaServer(targetUrl, targetKey);
   if (res.success) {
     showCmsToast('Koneksi sukses! Server WAHA Gateway aktif dan merespons.', 'Koneksi Berhasil');
+    // Jika pengujian sukses dengan input form, auto-save agar sinkron ke DB
+    if (targetUrl && typeof saveWahaConfig === 'function') {
+      const currentConfig = getWahaConfig();
+      await saveWahaConfig({
+        ...currentConfig,
+        apiUrl: targetUrl,
+        apiKey: targetKey !== null ? targetKey : currentConfig.apiKey
+      }, true);
+    }
   } else {
-    showCmsToast(res.message, 'Koneksi Gagal');
+    showCmsToast(res.message, res.isAuthError ? 'Perlu API Key (401)' : 'Koneksi Gagal');
   }
   refreshWahaView();
 }
@@ -3155,6 +3169,38 @@ async function handleWahaSendTestMessage(event) {
 
   const btn = document.getElementById('btn-waha-send-test');
   const feedback = document.getElementById('waha-send-feedback');
+
+  if (!phone) {
+    showCmsToast('Masukkan nomor WhatsApp tujuan uji coba terlebih dahulu.', 'Nomor Kosong');
+    if (feedback) {
+      feedback.style.color = '#dc2626';
+      feedback.innerHTML = '<i class="fa-solid fa-circle-exclamation"></i> Masukkan nomor WhatsApp tujuan pengujian.';
+    }
+    return;
+  }
+
+  // Cek apakah sesi WhatsApp aktif (WORKING)
+  const config = typeof getWahaConfig === 'function' ? getWahaConfig() : null;
+  if (config && typeof getWahaSessionStatus === 'function') {
+    try {
+      const sessStatus = await getWahaSessionStatus(config.session);
+      if (sessStatus.status !== 'WORKING') {
+        const readableStatus = sessStatus.status === 'STOPPED' 
+          ? 'Belum Dimulai (STOPPED)' 
+          : (sessStatus.status === 'SCAN_QR_CODE' ? 'Menunggu Scan QR Code (SCAN_QR_CODE)' : sessStatus.status);
+
+        const guidance = `Sesi WhatsApp "${config.session}" berstatus [${readableStatus}]. Harap klik "Mulai Sesi" dan lakukan "Scan QR Code" di HP terlebih dahulu sebelum mengirim pesan.`;
+        showCmsToast(guidance, 'WhatsApp Belum Terhubung');
+        if (feedback) {
+          feedback.style.color = '#dc2626';
+          feedback.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> <strong>Sesi Belum Terhubung:</strong> ${guidance}`;
+        }
+        return;
+      }
+    } catch (statusErr) {
+      console.warn('Gagal memverifikasi status sesi sebelum pengiriman:', statusErr);
+    }
+  }
 
   btn.disabled = true;
   btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Mengirim via WAHA...';

@@ -130,8 +130,9 @@ async function saveWahaConfig(config, syncCloud = true) {
 /**
  * Helper Request HTTP ke Server WAHA dengan Timeout & Auth Headers
  */
-async function wahaRequest(endpoint, method = 'GET', body = null, timeoutMs = 9000) {
-  const config = getWahaConfig();
+async function wahaRequest(endpoint, method = 'GET', body = null, timeoutMs = 9000, overrideConfig = null) {
+  const baseConfig = getWahaConfig();
+  const config = overrideConfig ? { ...baseConfig, ...overrideConfig } : baseConfig;
   if (!config.apiUrl) {
     throw new Error('URL Server WAHA belum dikonfigurasi.');
   }
@@ -230,23 +231,30 @@ function formatWahaChatId(phone) {
 /**
  * Tes Koneksi ke Server WAHA (Ping / Version Check)
  */
-async function testWahaServer() {
+async function testWahaServer(overrideUrl = null, overrideApiKey = null) {
   const config = getWahaConfig();
+  const customConfig = (overrideUrl !== null || overrideApiKey !== null) ? {
+    apiUrl: (overrideUrl !== null ? overrideUrl : config.apiUrl).trim(),
+    apiKey: (overrideApiKey !== null ? overrideApiKey : config.apiKey).trim()
+  } : null;
+
+  const targetUrl = customConfig ? customConfig.apiUrl : config.apiUrl;
+
   try {
     // 1. Coba endpoint /api/server/version
     try {
-      const versionData = await wahaRequest('/api/server/version', 'GET');
+      const versionData = await wahaRequest('/api/server/version', 'GET', null, 9000, customConfig);
       return { success: true, message: 'Berhasil terhubung ke WAHA Gateway (GOWS Engine)!', data: versionData };
     } catch (e1) {
       if (e1.message && e1.message.includes('401')) {
         return { 
           success: false, 
           isAuthError: true, 
-          message: `Server WAHA aktif di "${config.apiUrl}", namun memerlukan API Key yang valid (401 Unauthorized). Silakan masukkan API Key Anda di formulir lalu simpan.` 
+          message: `Server WAHA aktif di "${targetUrl}", namun memerlukan API Key yang valid (401 Unauthorized). Silakan periksa kembali API Key Anda.` 
         };
       }
       // 2. Coba endpoint /api/sessions
-      const sessions = await wahaRequest('/api/sessions', 'GET');
+      const sessions = await wahaRequest('/api/sessions', 'GET', null, 9000, customConfig);
       return { success: true, message: 'Berhasil terhubung ke WAHA Gateway (GOWS Engine)!', data: sessions };
     }
   } catch (err) {
@@ -254,7 +262,7 @@ async function testWahaServer() {
       return { 
         success: false, 
         isAuthError: true, 
-        message: `Server WAHA aktif di "${config.apiUrl}", namun memerlukan API Key yang valid (401 Unauthorized). Silakan masukkan API Key Anda di formulir lalu simpan.` 
+        message: `Server WAHA aktif di "${targetUrl}", namun memerlukan API Key yang valid (401 Unauthorized). Silakan periksa kembali API Key Anda.` 
       };
     }
     return { success: false, message: `Gagal terhubung: ${err.message}` };

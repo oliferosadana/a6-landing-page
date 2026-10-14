@@ -9,8 +9,8 @@ const WAHA_CONFIG_STORAGE_KEY = 'amanda_waha_config';
 const WAHA_LOGS_STORAGE_KEY = 'amanda_waha_logs';
 
 const DEFAULT_WAHA_CONFIG = {
-  enabled: false,
-  apiUrl: 'http://localhost:3000',
+  enabled: true,
+  apiUrl: 'https://waha.oodana.my.id',
   apiKey: '',
   session: 'default',
   adminPhone: '6281322119988',
@@ -28,9 +28,15 @@ function getWahaConfig() {
     const raw = localStorage.getItem(WAHA_CONFIG_STORAGE_KEY);
     if (raw) {
       const parsed = JSON.parse(raw);
+      let currentUrl = (parsed.apiUrl || '').trim();
+      // Auto-migrate if previously defaulted to localhost
+      if (!currentUrl || currentUrl === 'http://localhost:3000') {
+        currentUrl = 'https://waha.oodana.my.id';
+      }
+
       return {
-        enabled: parsed.enabled ?? DEFAULT_WAHA_CONFIG.enabled,
-        apiUrl: (parsed.apiUrl || '').trim() || DEFAULT_WAHA_CONFIG.apiUrl,
+        enabled: parsed.enabled ?? true,
+        apiUrl: currentUrl,
         apiKey: (parsed.apiKey || '').trim(),
         session: (parsed.session || '').trim() || DEFAULT_WAHA_CONFIG.session,
         adminPhone: (parsed.adminPhone || '').trim() || DEFAULT_WAHA_CONFIG.adminPhone,
@@ -131,7 +137,13 @@ async function wahaRequest(endpoint, method = 'GET', body = null, timeoutMs = 90
   }
 
   const cleanBase = config.apiUrl.replace(/\/+$/, '');
-  const url = `${cleanBase}${endpoint.startsWith('/') ? endpoint : '/' + endpoint}`;
+  let url = `${cleanBase}${endpoint.startsWith('/') ? endpoint : '/' + endpoint}`;
+
+  // Tambahkan secret query parameter jika API Key tersedia (kompatibilitas query param WAHA)
+  if (config.apiKey) {
+    const separator = url.includes('?') ? '&' : '?';
+    url += `${separator}secret=${encodeURIComponent(config.apiKey)}`;
+  }
 
   const headers = {
     'Accept': 'application/json, image/*, */*'
@@ -168,7 +180,8 @@ async function wahaRequest(endpoint, method = 'GET', body = null, timeoutMs = 90
     if (contentType.includes('application/json')) {
       const data = await response.json();
       if (!response.ok) {
-        throw new Error(data.message || data.error || `WAHA HTTP Error ${response.status}`);
+        const errMsg = data.message || data.error || `WAHA HTTP Error ${response.status}`;
+        throw new Error(`${errMsg} (HTTP ${response.status})`);
       }
       return data;
     } else if (contentType.includes('image/')) {
@@ -177,7 +190,7 @@ async function wahaRequest(endpoint, method = 'GET', body = null, timeoutMs = 90
     } else {
       const text = await response.text();
       if (!response.ok) {
-        throw new Error(text || `WAHA HTTP Error ${response.status}`);
+        throw new Error(`${text || 'WAHA Error'} (HTTP ${response.status})`);
       }
       return text;
     }
@@ -193,7 +206,7 @@ async function wahaRequest(endpoint, method = 'GET', body = null, timeoutMs = 90
       if (isHttpsPage && config.apiUrl.startsWith('http://') && !config.apiUrl.includes('localhost') && !config.apiUrl.includes('127.0.0.1')) {
         throw new Error(`Koneksi diblokir oleh browser (Mixed Content Blocker): Halaman web ini berjalan di HTTPS, sedangkan URL WAHA "${config.apiUrl}" menggunakan HTTP biasa. Gunakan domain ber-SSL (HTTPS) untuk server WAHA.`);
       }
-      throw new Error(`Tidak dapat menghubungi server WAHA di "${config.apiUrl}". Pastikan server/container WAHA sudah dijalankan (running di port 3000) dan dapat diakses.`);
+      throw new Error(`Tidak dapat menghubungi server WAHA di "${config.apiUrl}". Pastikan server/container WAHA sudah dijalankan dan dapat diakses.`);
     }
 
     throw err;
@@ -218,16 +231,32 @@ function formatWahaChatId(phone) {
  * Tes Koneksi ke Server WAHA (Ping / Version Check)
  */
 async function testWahaServer() {
+  const config = getWahaConfig();
   try {
-    // Coba endpoint /api/server/version atau /api/sessions
+    // 1. Coba endpoint /api/server/version
     try {
       const versionData = await wahaRequest('/api/server/version', 'GET');
-      return { success: true, message: 'Terhubung ke WAHA Gateway!', data: versionData };
+      return { success: true, message: 'Berhasil terhubung ke WAHA Gateway (GOWS Engine)!', data: versionData };
     } catch (e1) {
+      if (e1.message && e1.message.includes('401')) {
+        return { 
+          success: false, 
+          isAuthError: true, 
+          message: `Server WAHA aktif di "${config.apiUrl}", namun memerlukan API Key yang valid (401 Unauthorized). Silakan masukkan API Key Anda di formulir lalu simpan.` 
+        };
+      }
+      // 2. Coba endpoint /api/sessions
       const sessions = await wahaRequest('/api/sessions', 'GET');
-      return { success: true, message: 'Terhubung ke WAHA Gateway!', data: sessions };
+      return { success: true, message: 'Berhasil terhubung ke WAHA Gateway (GOWS Engine)!', data: sessions };
     }
   } catch (err) {
+    if (err.message && err.message.includes('401')) {
+      return { 
+        success: false, 
+        isAuthError: true, 
+        message: `Server WAHA aktif di "${config.apiUrl}", namun memerlukan API Key yang valid (401 Unauthorized). Silakan masukkan API Key Anda di formulir lalu simpan.` 
+      };
+    }
     return { success: false, message: `Gagal terhubung: ${err.message}` };
   }
 }
@@ -393,9 +422,9 @@ async function fetchWahaQrCode(sessionName = null) {
   const config = getWahaConfig();
   const name = sessionName || config.session || 'default';
 
-  // 1. Coba endpoint gambar langsung /api/{session}/auth/qr
+  // 1. Coba endpoint gambar langsung /api/{session}/auth/qr?format=image (Format standar WAHA GOWS)
   try {
-    const blob = await wahaRequest(`/api/${encodeURIComponent(name)}/auth/qr`, 'GET', null, 8000);
+    const blob = await wahaRequest(`/api/${encodeURIComponent(name)}/auth/qr?format=image`, 'GET', null, 8000);
     if (blob instanceof Blob) {
       return {
         success: true,
@@ -406,27 +435,48 @@ async function fetchWahaQrCode(sessionName = null) {
     } else if (typeof blob === 'object' && blob.qr) {
       return {
         success: true,
-        type: 'raw',
+        type: 'image',
+        dataUrl: `https://api.qrserver.com/v1/create-qr-code/?size=260x260&data=${encodeURIComponent(blob.qr)}`,
         qrString: blob.qr
       };
     }
-  } catch (err1) {
-    // 2. Coba endpoint screenshot /api/screenshot?session={session}
+  } catch (errGows) {
+    // 2. Coba endpoint default /api/{session}/auth/qr
     try {
-      const shotBlob = await wahaRequest(`/api/screenshot?session=${encodeURIComponent(name)}`, 'GET', null, 8000);
-      if (shotBlob instanceof Blob) {
+      const fallbackBlob = await wahaRequest(`/api/${encodeURIComponent(name)}/auth/qr`, 'GET', null, 8000);
+      if (fallbackBlob instanceof Blob) {
         return {
           success: true,
           type: 'image',
-          dataUrl: URL.createObjectURL(shotBlob),
-          raw: shotBlob
+          dataUrl: URL.createObjectURL(fallbackBlob),
+          raw: fallbackBlob
+        };
+      } else if (typeof fallbackBlob === 'object' && fallbackBlob.qr) {
+        return {
+          success: true,
+          type: 'image',
+          dataUrl: `https://api.qrserver.com/v1/create-qr-code/?size=260x260&data=${encodeURIComponent(fallbackBlob.qr)}`,
+          qrString: fallbackBlob.qr
         };
       }
-    } catch (err2) {
-      return {
-        success: false,
-        message: err1.message || err2.message || 'QR Code belum tersedia atau sesi sudah terhubung.'
-      };
+    } catch (err1) {
+      // 3. Coba endpoint screenshot /api/screenshot?session={session}
+      try {
+        const shotBlob = await wahaRequest(`/api/screenshot?session=${encodeURIComponent(name)}`, 'GET', null, 8000);
+        if (shotBlob instanceof Blob) {
+          return {
+            success: true,
+            type: 'image',
+            dataUrl: URL.createObjectURL(shotBlob),
+            raw: shotBlob
+          };
+        }
+      } catch (err2) {
+        return {
+          success: false,
+          message: errGows.message || err1.message || err2.message || 'QR Code belum siap. Pastikan sesi telah di-start.'
+        };
+      }
     }
   }
 

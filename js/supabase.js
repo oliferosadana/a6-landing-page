@@ -514,7 +514,52 @@ async function pullAllDataFromSupabase() {
           }
         });
 
-      tasks.push(fetchTenants, fetchInvoices, fetchCs);
+      // Fetch platform_settings (termasuk waha_gateway_config) dari Supabase
+      const fetchSettings = supabaseClient
+        .from('platform_settings')
+        .select('*')
+        .then(({ data: dbSettings, error: errSettings }) => {
+          if (!errSettings && dbSettings && Array.isArray(dbSettings)) {
+            const wahaRecord = dbSettings.find(s => s.key === 'waha_gateway_config');
+            if (wahaRecord && wahaRecord.value) {
+              try {
+                const currentWaha = typeof getWahaConfig === 'function' ? getWahaConfig() : {};
+                const merged = { ...currentWaha, ...wahaRecord.value };
+                localStorage.setItem('amanda_waha_config', JSON.stringify(merged));
+                if (typeof updateWahaStatusIndicator === 'function') updateWahaStatusIndicator();
+                window.dispatchEvent(new CustomEvent('amanda_waha_config_updated', { detail: merged }));
+              } catch (e) {}
+            }
+          }
+        });
+
+      // Fetch waha_logs dari Supabase
+      const fetchWahaLogs = supabaseClient
+        .from('waha_logs')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(60)
+        .then(({ data: dbLogs, error: errLogs }) => {
+          if (!errLogs && dbLogs && Array.isArray(dbLogs) && dbLogs.length > 0) {
+            const formatted = dbLogs.map(l => ({
+              id: l.id,
+              type: l.type,
+              recipient: l.recipient,
+              chatId: l.chat_id,
+              session: l.session,
+              status: l.status,
+              snippet: l.snippet,
+              error: l.error,
+              timestamp: l.created_at
+            }));
+            try {
+              localStorage.setItem('amanda_waha_logs', JSON.stringify(formatted));
+            } catch (e) {}
+            if (typeof renderWahaLogsTable === 'function') renderWahaLogsTable();
+          }
+        });
+
+      tasks.push(fetchTenants, fetchInvoices, fetchCs, fetchSettings, fetchWahaLogs);
     }
 
     await Promise.all(tasks);

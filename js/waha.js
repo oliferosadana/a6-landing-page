@@ -47,7 +47,34 @@ function getWahaConfig() {
 }
 
 /**
- * Menyimpan Konfigurasi WAHA ke LocalStorage & Cloud Supabase
+ * Tarik Konfigurasi WAHA dari Cloud Database Supabase (tabel platform_settings)
+ */
+async function loadWahaConfigFromDatabase() {
+  if (typeof isSupabaseActive === 'function' && isSupabaseActive() && typeof supabaseClient !== 'undefined' && supabaseClient) {
+    try {
+      const { data, error } = await supabaseClient
+        .from('platform_settings')
+        .select('*')
+        .eq('key', 'waha_gateway_config')
+        .maybeSingle();
+
+      if (!error && data && data.value) {
+        const local = getWahaConfig();
+        const merged = { ...local, ...data.value };
+        localStorage.setItem(WAHA_CONFIG_STORAGE_KEY, JSON.stringify(merged));
+        console.log('☁️ Konfigurasi WAHA berhasil disinkronkan dari Database Supabase (platform_settings)');
+        window.dispatchEvent(new CustomEvent('amanda_waha_config_updated', { detail: merged }));
+        return merged;
+      }
+    } catch (e) {
+      console.warn('Gagal membaca config WAHA dari Supabase:', e);
+    }
+  }
+  return getWahaConfig();
+}
+
+/**
+ * Menyimpan Konfigurasi WAHA ke LocalStorage & Cloud Supabase (platform_settings)
  */
 async function saveWahaConfig(config, syncCloud = true) {
   try {
@@ -66,16 +93,28 @@ async function saveWahaConfig(config, syncCloud = true) {
     localStorage.setItem(WAHA_CONFIG_STORAGE_KEY, JSON.stringify(cleanConfig));
 
     // Sinkronisasi ke Supabase platform_settings jika tersedia
-    if (syncCloud && typeof syncSettingsToSupabase === 'function' && typeof isSupabaseActive === 'function' && isSupabaseActive()) {
+    if (syncCloud && typeof isSupabaseActive === 'function' && isSupabaseActive() && typeof supabaseClient !== 'undefined' && supabaseClient) {
       try {
-        await syncSettingsToSupabase('waha_gateway_config', cleanConfig);
+        const { error } = await supabaseClient
+          .from('platform_settings')
+          .upsert({
+            key: 'waha_gateway_config',
+            value: cleanConfig,
+            updated_at: new Date().toISOString()
+          }, { onConflict: 'key' });
+
+        if (error) {
+          console.warn('Gagal upsert config WAHA ke platform_settings:', error.message);
+        } else {
+          console.log('☁️ Konfigurasi WAHA berhasil disimpan ke Database Cloud Supabase!');
+        }
       } catch (errSync) {
         console.warn('Gagal sinkron config WAHA ke Supabase:', errSync);
       }
     }
 
     window.dispatchEvent(new CustomEvent('amanda_waha_config_updated', { detail: cleanConfig }));
-    return { success: true, message: 'Konfigurasi WAHA Gateway berhasil disimpan.' };
+    return { success: true, message: 'Konfigurasi WAHA Gateway berhasil disimpan & tersinkron ke Database!' };
   } catch (err) {
     console.error('Save WAHA config error:', err);
     return { success: false, message: err.message || 'Gagal menyimpan konfigurasi WAHA.' };
@@ -147,6 +186,16 @@ async function wahaRequest(endpoint, method = 'GET', body = null, timeoutMs = 90
     if (err.name === 'AbortError') {
       throw new Error(`Koneksi ke WAHA Gateway timed out setelah ${timeoutMs / 1000} detik. Periksa apakah server WAHA sedang aktif.`);
     }
+
+    // Diagnosa ramah untuk error "Failed to fetch"
+    if (err.message && err.message.includes('Failed to fetch')) {
+      const isHttpsPage = typeof window !== 'undefined' && window.location && window.location.protocol === 'https:';
+      if (isHttpsPage && config.apiUrl.startsWith('http://') && !config.apiUrl.includes('localhost') && !config.apiUrl.includes('127.0.0.1')) {
+        throw new Error(`Koneksi diblokir oleh browser (Mixed Content Blocker): Halaman web ini berjalan di HTTPS, sedangkan URL WAHA "${config.apiUrl}" menggunakan HTTP biasa. Gunakan domain ber-SSL (HTTPS) untuk server WAHA.`);
+      }
+      throw new Error(`Tidak dapat menghubungi server WAHA di "${config.apiUrl}". Pastikan server/container WAHA sudah dijalankan (running di port 3000) dan dapat diakses.`);
+    }
+
     throw err;
   }
 }
@@ -609,6 +658,25 @@ function addWahaLog(entry) {
     if (logs.length > 60) logs.pop();
     localStorage.setItem(WAHA_LOGS_STORAGE_KEY, JSON.stringify(logs));
     window.dispatchEvent(new CustomEvent('amanda_waha_logs_updated', { detail: logs }));
+
+    // Simpan ke database Cloud Supabase (tabel waha_logs) jika aktif
+    if (typeof isSupabaseActive === 'function' && isSupabaseActive() && typeof supabaseClient !== 'undefined' && supabaseClient) {
+      supabaseClient.from('waha_logs').insert({
+        id: newEntry.id,
+        type: newEntry.type || 'OUTGOING_MESSAGE',
+        recipient: newEntry.recipient || null,
+        chat_id: newEntry.chatId || null,
+        session: newEntry.session || 'default',
+        status: newEntry.status || 'SENT',
+        snippet: newEntry.snippet || null,
+        error: newEntry.error || null,
+        created_at: newEntry.timestamp
+      }).then(({ error }) => {
+        if (error && error.code !== '42P01') {
+          console.warn('Sync log ke waha_logs Supabase warning:', error.message);
+        }
+      });
+    }
   } catch (e) {}
 }
 
@@ -616,6 +684,10 @@ function clearWahaLogs() {
   try {
     localStorage.removeItem(WAHA_LOGS_STORAGE_KEY);
     window.dispatchEvent(new CustomEvent('amanda_waha_logs_updated', { detail: [] }));
+
+    if (typeof isSupabaseActive === 'function' && isSupabaseActive() && typeof supabaseClient !== 'undefined' && supabaseClient) {
+      supabaseClient.from('waha_logs').delete().neq('id', 'NONE').then(() => {});
+    }
     return true;
   } catch (e) {
     return false;

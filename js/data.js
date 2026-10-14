@@ -418,25 +418,23 @@ function enforceCacheAndCookieExpiration() {
     const versionCookie = getAmandaCookie('amanda_version');
     const cacheCookie = getAmandaCookie('amanda_cache_active');
 
-    const isVersionMismatch = storedVersion !== currentVersion || versionCookie !== currentVersion;
-    const isCacheExpired = !cacheCookie; // Browser otomatis menghapus cookie saat masa berlakunya (30 menit) habis
+    const isVersionMismatch = storedVersion !== currentVersion || (versionCookie && versionCookie !== currentVersion);
 
-    if (isVersionMismatch || isCacheExpired) {
-      console.log(`🔄 [Cache Invalidation] Versi baru: ${isVersionMismatch}, Cookie expired: ${isCacheExpired}. Membersihkan cache lokal lama...`);
-
-      // Bersihkan data dinamis agar browser langsung mengambil data terbaru dari Supabase
-      localStorage.removeItem('amanda_products');
-      localStorage.removeItem('amanda_promos');
-      localStorage.removeItem('amanda_pricelists');
-      localStorage.removeItem('amanda_ticker');
-
-      // Catat versi terbaru di localStorage dan Cookie
+    if (isVersionMismatch) {
+      console.log(`🔄 [Version Upgrade] Versi baru terdeteksi: ${currentVersion}. Menyinkronkan ulang database...`);
       localStorage.setItem('amanda_system_version', currentVersion);
       localStorage.setItem('amanda_last_cache_refresh', Date.now().toString());
-
-      // Atur masa berlaku cookie: 30 hari untuk versi, 30 menit (1800 detik) untuk validitas cache
       setAmandaCookie('amanda_version', currentVersion, 86400 * 30);
       setAmandaCookie('amanda_cache_active', Date.now().toString(), AMANDA_CACHE_TTL_SECONDS);
+      if (typeof pullAllDataFromSupabase === 'function') {
+        pullAllDataFromSupabase();
+      }
+    } else if (!cacheCookie) {
+      setAmandaCookie('amanda_version', currentVersion, 86400 * 30);
+      setAmandaCookie('amanda_cache_active', Date.now().toString(), AMANDA_CACHE_TTL_SECONDS);
+      if (typeof pullAllDataFromSupabase === 'function') {
+        pullAllDataFromSupabase();
+      }
     }
   } catch (err) {
     console.warn('Cache & Cookie expiration check warning:', err);
@@ -461,49 +459,26 @@ function reloadAmandaData() {
       booths: Array.isArray(out.booths) ? out.booths : []
     };
   });
-  // Promos: Hanya muat data asli database, bersihkan data default legacy
+
+  // Promos: Langsung muat dari database
   const storedPromos = getStoredData('amanda_promos', []);
-  AMANDA_PROMOS = Array.isArray(storedPromos)
-    ? storedPromos.filter(p => p && p.id && !p.id.startsWith('promo-0'))
-    : [];
-  if (Array.isArray(storedPromos) && storedPromos.some(p => p && p.id && p.id.startsWith('promo-0'))) {
-    try { localStorage.setItem('amanda_promos', JSON.stringify(AMANDA_PROMOS)); } catch (e) {}
-  }
+  AMANDA_PROMOS = Array.isArray(storedPromos) ? storedPromos : [];
 
-  // Price Lists: Hanya muat data asli database, bersihkan data default legacy
+  // Price Lists: Langsung muat dari database
   const storedPricelists = getStoredData('amanda_pricelists', []);
-  AMANDA_PRICELISTS = Array.isArray(storedPricelists)
-    ? storedPricelists.filter(p => p && p.id && !p.id.startsWith('price-0'))
-    : [];
-  if (Array.isArray(storedPricelists) && storedPricelists.some(p => p && p.id && p.id.startsWith('price-0'))) {
-    try { localStorage.setItem('amanda_pricelists', JSON.stringify(AMANDA_PRICELISTS)); } catch (e) {}
-  }
+  AMANDA_PRICELISTS = Array.isArray(storedPricelists) ? storedPricelists : [];
 
-  // Products: Hanya muat data asli database, bersihkan data default legacy
+  // Products: Langsung muat seluruh produk database (termasuk prod-01 s/d prod-06 dan produk baru)
   const storedProducts = getStoredData('amanda_products', []);
-  AMANDA_PRODUCTS = Array.isArray(storedProducts)
-    ? storedProducts.filter(p => p && p.id && !p.id.startsWith('prod-0'))
-    : [];
-  if (Array.isArray(storedProducts) && storedProducts.some(p => p && p.id && p.id.startsWith('prod-0'))) {
-    try { localStorage.setItem('amanda_products', JSON.stringify(AMANDA_PRODUCTS)); } catch (e) {}
-  }
+  AMANDA_PRODUCTS = Array.isArray(storedProducts) ? storedProducts : [];
 
-  // Ticker: Hanya muat data asli database, bersihkan data default legacy
+  // Ticker: Langsung muat seluruh ticker pengumuman database (tick-1 s/d tick-5)
   const storedTicker = getStoredData('amanda_ticker', []);
-  AMANDA_TICKER = Array.isArray(storedTicker)
-    ? storedTicker.filter(t => t && t.id && !t.id.startsWith('tick-'))
-    : [];
-  if (Array.isArray(storedTicker) && storedTicker.some(t => t && t.id && t.id.startsWith('tick-'))) {
-    try { localStorage.setItem('amanda_ticker', JSON.stringify(AMANDA_TICKER)); } catch (e) {}
-  }
+  AMANDA_TICKER = Array.isArray(storedTicker) ? storedTicker : [];
 
-  // CS Inquiries: Hanya muat data asli database, jangan muat dummy sampel
-  if (!Array.isArray(AMANDA_CS_INQUIRIES) || AMANDA_CS_INQUIRIES.length === 0) {
-    const storedCs = getStoredData('amanda_cs_inquiries', []);
-    AMANDA_CS_INQUIRIES = Array.isArray(storedCs)
-      ? storedCs.filter(c => c && c.id && !c.id.startsWith('CS-BPN-K8') && !c.id.startsWith('CS-BPN-L2'))
-      : [];
-  }
+  // CS Inquiries: Langsung muat dari database
+  const storedCs = getStoredData('amanda_cs_inquiries', []);
+  AMANDA_CS_INQUIRIES = Array.isArray(storedCs) ? storedCs : [];
 }
 
 // Initial data load

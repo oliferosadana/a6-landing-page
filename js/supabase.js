@@ -192,14 +192,40 @@ function createSupabaseClient() {
       console.log('⚡ Connected directly to Supabase Cloud Database:', supabaseConfig.url);
       initSupabaseRealtime();
       pullAllDataFromSupabase();
+      updateSupabaseStatusIndicator();
     } catch (e) {
       console.error('Failed to create Supabase client:', e);
       supabaseClient = null;
     }
   } else {
-    // Wait for Supabase CDN script to load
-    window.addEventListener('load', () => {
+    // Quick polling for CDN readiness without waiting for all page images to finish loading
+    let retries = 0;
+    const interval = setInterval(() => {
+      retries++;
       if (typeof supabase !== 'undefined' && supabase.createClient) {
+        clearInterval(interval);
+        try {
+          supabaseClient = supabase.createClient(supabaseConfig.url, supabaseConfig.key, {
+            auth: {
+              persistSession: true,
+              autoRefreshToken: true
+            }
+          });
+          console.log('⚡ Supabase client initialized via fast poll');
+          initSupabaseRealtime();
+          pullAllDataFromSupabase();
+          updateSupabaseStatusIndicator();
+        } catch (e) {
+          console.error('Failed to init Supabase:', e);
+        }
+      } else if (retries >= 60) {
+        clearInterval(interval);
+      }
+    }, 50);
+
+    window.addEventListener('load', () => {
+      if (!supabaseClient && typeof supabase !== 'undefined' && supabase.createClient) {
+        clearInterval(interval);
         try {
           supabaseClient = supabase.createClient(supabaseConfig.url, supabaseConfig.key, {
             auth: {
@@ -403,6 +429,8 @@ async function pullAllDataFromSupabase() {
           try { localStorage.setItem('amanda_products', JSON.stringify(AMANDA_PRODUCTS)); } catch(e) {}
           if (typeof renderProductGrid === 'function') renderProductGrid();
           window.dispatchEvent(new CustomEvent('amanda_data_updated'));
+        } else if (errProd) {
+          console.warn('Gagal memuat produk dari Supabase:', errProd.message);
         }
       });
 

@@ -300,154 +300,9 @@ const DEFAULT_OUTLET_CATEGORIES = [
 const DEFAULT_PROMOS = [];
 const DEFAULT_PRICELISTS = [];
 
-const DEFAULT_PRODUCTS = [
-  {
-    id: "prod-01",
-    name: "Brownies Kukus Original",
-    category: "kukus",
-    categoryLabel: "Brownies Kukus",
-    badge: "Varian Ikonik",
-    badgeColor: "gold",
-    price: 48000,
-    image: "assets/amanda_brownies_hero_1790255505694.jpg",
-    description: "Kelezatan brownies kukus original dengan tekstur lembut legit, aroma cokelat pekat, serta lapisan cokelat leleh khas di bagian tengah.",
-    weight: "700 gram",
-    shelfLife: "4 Hari (Suhu Ruang) / 7 Hari (Kulkas)",
-    sweetness: "Sedang & Gurih",
-    ingredients: "Dark Chocolate, Telur Segar, Tepung Terigu, Gula Murni, Butter Khusus",
-    outlets: [
-      { outletId: "out-bpn-01", status: "Tersedia", stock: "Stok Melimpah (50+ box)", lastRestock: "15 menit lalu" },
-      { outletId: "out-bpn-02", status: "Tersedia", stock: "Stok Melimpah (40+ box)", lastRestock: "30 menit lalu" },
-      { outletId: "out-bpn-03", status: "Tersedia", stock: "Stok Melimpah (35+ box)", lastRestock: "Baru saja" },
-      { outletId: "out-bpn-04", status: "Tersedia", stock: "Stok Melimpah (45+ box)", lastRestock: "20 menit lalu" },
-      { outletId: "out-bpn-05", status: "Tersedia", stock: "Stok Melimpah (30+ box)", lastRestock: "1 jam lalu" },
-      { outletId: "out-bpn-06", status: "Tersedia", stock: "Stok Melimpah (25+ box)", lastRestock: "45 menit lalu" }
-    ]
-  },
-  {
-    id: "prod-02",
-    name: "Brownies Kukus Cheese Cream",
-    category: "kukus",
-    categoryLabel: "Brownies Kukus",
-    badge: "Lapis Keju",
-    badgeColor: "cheese",
-    price: 55000,
-    image: "assets/brownies_cheese_cream_1790255567593.jpg",
-    description: "Kombinasi cake brownies cokelat lembut dengan lapisan cream cheese gurih di tengah serta taburan keju cheddar parut di atasnya.",
-    weight: "700 gram",
-    shelfLife: "3 Hari (Suhu Ruang) / 6 Hari (Kulkas)",
-    sweetness: "Gurih Manis Pas",
-    ingredients: "Cream Cheese, Dark Cocoa, Keju Cheddar Pilihan, Butter",
-    outlets: [
-      { outletId: "out-bpn-01", status: "Tersedia", stock: "Stok Melimpah (30+ box)", lastRestock: "30 menit lalu" },
-      { outletId: "out-bpn-02", status: "Tersedia", stock: "Stok Melimpah (25+ box)", lastRestock: "1 jam lalu" },
-      { outletId: "out-bpn-03", status: "Terbatas", stock: "Sisa 5 box (Cepat Habis)", lastRestock: "2 jam lalu" },
-      { outletId: "out-bpn-04", status: "Tersedia", stock: "Stok Melimpah (28+ box)", lastRestock: "45 menit lalu" },
-      { outletId: "out-bpn-05", status: "Tersedia", stock: "Stok Melimpah (15+ box)", lastRestock: "1 jam lalu" },
-      { outletId: "out-bpn-06", status: "Tersedia", stock: "Stok Melimpah (20+ box)", lastRestock: "30 menit lalu" }
-    ]
-  },
-  {
-    id: "prod-03",
-    name: "Brownies Tiramisu Marble",
-    category: "marble",
-    categoryLabel: "Premium & Marble",
-    badge: "Espresso & Cokelat",
-    badgeColor: "coffee",
-    price: 56000,
-    image: "assets/brownies_tiramisu_marble_1790255612507.jpg",
-    description: "Perpaduan rasa kopi espresso khas tiramisu dengan brownies cokelat dalam motif marmer elegan dan aroma harum lembut.",
-    weight: "720 gram",
-    shelfLife: "4 Hari (Suhu Ruang) / 7 Hari (Kulkas)",
-    sweetness: "Aroma Kopi Mantap",
-    ingredients: "Ekstrak Kopi Espresso, Tiramisu Glaze, Dark Cocoa, Telur Segar",
-    outlets: [
-      { outletId: "out-bpn-01", status: "Tersedia", stock: "Stok Melimpah (25+ box)", lastRestock: "40 menit lalu" },
-      { outletId: "out-bpn-02", status: "Tersedia", stock: "Stok Melimpah (18+ box)", lastRestock: "1 jam lalu" },
-      { outletId: "out-bpn-03", status: "Tersedia", stock: "Stok Melimpah (20+ box)", lastRestock: "30 menit lalu" },
-      { outletId: "out-bpn-04", status: "Terbatas", stock: "Sisa 4 box", lastRestock: "3 jam lalu" },
-      { outletId: "out-bpn-05", status: "Tersedia", stock: "Stok Melimpah (12+ box)", lastRestock: "2 jam lalu" },
-      { outletId: "out-bpn-06", status: "Tersedia", stock: "Stok Melimpah (15+ box)", lastRestock: "1 jam lalu" }
-    ]
-  },
-  {
-    id: "prod-04",
-    name: "Brownies Sarikaya Pandan",
-    category: "kukus",
-    categoryLabel: "Brownies Kukus",
-    badge: "Pandan Asli",
-    badgeColor: "pandan",
-    price: 52000,
-    image: "assets/brownies_sarikaya_pandan_1790255635549.jpg",
-    description: "Lapisan custard sarikaya pandan wangi alami berpadu harmonis dengan legitnya brownies cokelat kukus Amanda.",
-    weight: "700 gram",
-    shelfLife: "3 Hari (Suhu Ruang) / 5 Hari (Kulkas)",
-    sweetness: "Wangi Gurih Pandan",
-    ingredients: "Ekstrak Daun Pandan Asli, Santan Kelapa Murni, Dark Chocolate, Telur",
-    outlets: [
-      { outletId: "out-bpn-01", status: "Tersedia", stock: "Stok Melimpah (20+ box)", lastRestock: "1 jam lalu" },
-      { outletId: "out-bpn-02", status: "Tersedia", stock: "Stok Melimpah (15+ box)", lastRestock: "2 jam lalu" },
-      { outletId: "out-bpn-03", status: "Tersedia", stock: "Stok Melimpah (18+ box)", lastRestock: "40 menit lalu" },
-      { outletId: "out-bpn-04", status: "Tersedia", stock: "Stok Melimpah (22+ box)", lastRestock: "30 menit lalu" },
-      { outletId: "out-bpn-05", status: "Terbatas", stock: "Sisa 3 box", lastRestock: "3 jam lalu" },
-      { outletId: "out-bpn-06", status: "Tersedia", stock: "Stok Melimpah (14+ box)", lastRestock: "1 jam lalu" }
-    ]
-  },
-  {
-    id: "prod-05",
-    name: "Brownies Bakar Crunchy Almond",
-    category: "bakar",
-    categoryLabel: "Brownies Bakar",
-    badge: "Panggang Renyah",
-    badgeColor: "bakar",
-    price: 53000,
-    image: "assets/brownies_bakar_almond_1790255717334.jpg",
-    description: "Brownies panggang dengan kerak renyah di luar, tekstur fudgy di dalam, dan taburan kacang almond panggang melimpah.",
-    weight: "650 gram",
-    shelfLife: "7 Hari (Suhu Ruang) / 14 Hari (Kulkas)",
-    sweetness: "Fudge Gurih Almond",
-    ingredients: "Kacang Almond Panggang, Couverture Cacao, Mentega, Gula Pasir",
-    outlets: [
-      { outletId: "out-bpn-01", status: "Tersedia", stock: "Stok Melimpah (35+ box)", lastRestock: "30 menit lalu" },
-      { outletId: "out-bpn-02", status: "Tersedia", stock: "Stok Melimpah (25+ box)", lastRestock: "1 jam lalu" },
-      { outletId: "out-bpn-03", status: "Tersedia", stock: "Stok Melimpah (20+ box)", lastRestock: "1 jam lalu" },
-      { outletId: "out-bpn-04", status: "Tersedia", stock: "Stok Melimpah (30+ box)", lastRestock: "45 menit lalu" },
-      { outletId: "out-bpn-05", status: "Tersedia", stock: "Stok Melimpah (18+ box)", lastRestock: "2 jam lalu" },
-      { outletId: "out-bpn-06", status: "Tersedia", stock: "Stok Melimpah (22+ box)", lastRestock: "1 jam lalu" }
-    ]
-  },
-  {
-    id: "prod-06",
-    name: "Brownies Kukus Choco Marble",
-    category: "marble",
-    categoryLabel: "Premium & Marble",
-    badge: "Dua Cokelat",
-    badgeColor: "gold",
-    price: 52000,
-    image: "assets/brownies_tiramisu_marble_1790255612507.jpg",
-    description: "Kombinasi klasik milk chocolate manis lembut dan dark chocolate pekat dalam motif marmer cantik yang disukai keluarga.",
-    weight: "700 gram",
-    shelfLife: "4 Hari (Suhu Ruang) / 7 Hari (Kulkas)",
-    sweetness: "Manis Lembut Seimbang",
-    ingredients: "Milk & Dark Chocolate, Telur Segar, Tepung, Mentega",
-    outlets: [
-      { outletId: "out-bpn-01", status: "Tersedia", stock: "Stok Melimpah (20+ box)", lastRestock: "1 jam lalu" },
-      { outletId: "out-bpn-02", status: "Tersedia", stock: "Stok Melimpah (15+ box)", lastRestock: "2 jam lalu" },
-      { outletId: "out-bpn-03", status: "Tersedia", stock: "Stok Melimpah (18+ box)", lastRestock: "1 jam lalu" },
-      { outletId: "out-bpn-04", status: "Tersedia", stock: "Stok Melimpah (20+ box)", lastRestock: "30 menit lalu" },
-      { outletId: "out-bpn-05", status: "Terbatas", stock: "Sisa 4 box", lastRestock: "3 jam lalu" },
-      { outletId: "out-bpn-06", status: "Tersedia", stock: "Stok Melimpah (12+ box)", lastRestock: "1 jam lalu" }
-    ]
-  }
-];
+const DEFAULT_PRODUCTS = [];
 
-const DEFAULT_TICKER = [
-  { id: "tick-1", icon: "fa-solid fa-tag", title: "FLASH SALE BPN:", text: "Diskon 20% Brownies Cheese Cream & Tiramisu Marble" },
-  { id: "tick-2", icon: "fa-solid fa-gift", title: "PROMO SPESIAL:", text: "Potongan harga langsung untuk seluruh varian pilihan di outlet resmi Balikpapan" },
-  { id: "tick-3", icon: "fa-solid fa-truck-fast", title: "GRATIS ONGKIR:", text: "Pengiriman s/d 5 Km dari seluruh outlet resmi Balikpapan" },
-  { id: "tick-4", icon: "fa-solid fa-store", title: "CABANG RESMI BPN:", text: "MT Haryono • Ruhui Rahayu • Sepinggan • Ahmad Yani • KM 4.5 • Balikpapan Baru" },
-  { id: "tick-5", icon: "fa-solid fa-clock", title: "PENAWARAN HARI INI:", text: "Khusus pemesanan hari ini s/d pukul 21:30 WITA" }
-];
+const DEFAULT_TICKER = [];
 
 // ===================================================================
 // STORAGE HELPER FUNCTIONS (LOCALSTORAGE SYNC)
@@ -540,8 +395,23 @@ function reloadAmandaData() {
     try { localStorage.setItem('amanda_pricelists', JSON.stringify(AMANDA_PRICELISTS)); } catch (e) {}
   }
 
-  AMANDA_PRODUCTS = getStoredData('amanda_products', DEFAULT_PRODUCTS);
-  AMANDA_TICKER = getStoredData('amanda_ticker', DEFAULT_TICKER);
+  // Products: Hanya muat data asli database, bersihkan data default legacy
+  const storedProducts = getStoredData('amanda_products', []);
+  AMANDA_PRODUCTS = Array.isArray(storedProducts)
+    ? storedProducts.filter(p => p && p.id && !p.id.startsWith('prod-0'))
+    : [];
+  if (Array.isArray(storedProducts) && storedProducts.some(p => p && p.id && p.id.startsWith('prod-0'))) {
+    try { localStorage.setItem('amanda_products', JSON.stringify(AMANDA_PRODUCTS)); } catch (e) {}
+  }
+
+  // Ticker: Hanya muat data asli database, bersihkan data default legacy
+  const storedTicker = getStoredData('amanda_ticker', []);
+  AMANDA_TICKER = Array.isArray(storedTicker)
+    ? storedTicker.filter(t => t && t.id && !t.id.startsWith('tick-'))
+    : [];
+  if (Array.isArray(storedTicker) && storedTicker.some(t => t && t.id && t.id.startsWith('tick-'))) {
+    try { localStorage.setItem('amanda_ticker', JSON.stringify(AMANDA_TICKER)); } catch (e) {}
+  }
 
   // CS Inquiries: Hanya muat data asli database, jangan muat dummy sampel
   if (!Array.isArray(AMANDA_CS_INQUIRIES) || AMANDA_CS_INQUIRIES.length === 0) {

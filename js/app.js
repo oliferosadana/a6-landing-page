@@ -161,6 +161,18 @@ function renderProductGrid() {
   const gridContainer = document.getElementById('products-grid');
   if (!gridContainer) return;
 
+  if (typeof AMANDA_PRODUCTS === 'undefined' || AMANDA_PRODUCTS.length === 0) {
+    gridContainer.innerHTML = `
+      <div style="grid-column: 1/-1; display:flex; justify-content:center; align-items:center; min-height:280px; width:100%; color:var(--text-dim); text-align:center; padding: 40px 20px;">
+        <div>
+          <i class="fa-solid fa-spinner fa-spin" style="font-size:26px; color:var(--primary-gold); margin-bottom:12px; display:block;"></i>
+          <span style="font-size:14px; font-weight:600; color:var(--text-main);">Memuat Menu Brownies Amanda...</span>
+        </div>
+      </div>
+    `;
+    return;
+  }
+
   const filtered = AMANDA_PRODUCTS.filter(prod => {
     const matchesCat = (currentCategory === 'all') || (prod.category === currentCategory);
     const matchesSearch = prod.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -222,6 +234,18 @@ function setupEventListeners() {
 function renderOutletLocatorList(filterCity = 'all') {
   const container = document.getElementById('locator-outlets-list');
   if (!container) return;
+
+  if (typeof AMANDA_OUTLETS === 'undefined' || AMANDA_OUTLETS.length === 0) {
+    container.innerHTML = `
+      <div style="display:flex; justify-content:center; align-items:center; min-height:220px; width:100%; color:var(--text-dim); text-align:center; grid-column:1/-1;">
+        <div>
+          <i class="fa-solid fa-spinner fa-spin" style="font-size:24px; color:var(--primary-gold); margin-bottom:10px; display:block;"></i>
+          <span style="font-size:13px; font-weight:600;">Memuat Data Outlet & Booth Amanda...</span>
+        </div>
+      </div>
+    `;
+    return;
+  }
 
   let filteredOutlets = AMANDA_OUTLETS;
   if (filterCity !== 'all') {

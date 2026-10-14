@@ -402,6 +402,7 @@ async function pullAllDataFromSupabase() {
           }));
           try { localStorage.setItem('amanda_products', JSON.stringify(AMANDA_PRODUCTS)); } catch(e) {}
           if (typeof renderProductGrid === 'function') renderProductGrid();
+          window.dispatchEvent(new CustomEvent('amanda_data_updated'));
         }
       });
 

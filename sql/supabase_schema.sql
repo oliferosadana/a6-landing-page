@@ -148,20 +148,6 @@ CREATE TABLE IF NOT EXISTS public.cs_inquiries (
     created_at TIMESTAMPTZ DEFAULT NOW(),
     updated_at TIMESTAMPTZ DEFAULT NOW()
 );
-
--- 9. TABEL RIWAYAT LOG WAHA GATEWAY
-CREATE TABLE IF NOT EXISTS public.waha_logs (
-    id TEXT PRIMARY KEY,
-    type TEXT NOT NULL,
-    recipient TEXT,
-    chat_id TEXT,
-    session TEXT,
-    status TEXT NOT NULL,
-    snippet TEXT,
-    error TEXT,
-    created_at TIMESTAMPTZ DEFAULT NOW()
-);
-
 -- ===================================================================
 -- ROW LEVEL SECURITY (RLS) POLICIES
 -- Aktifkan RLS dengan akses publik anon untuk prototype/production
@@ -176,7 +162,6 @@ ALTER TABLE public.ticker ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.invoices ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.platform_settings ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.cs_inquiries ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.waha_logs ENABLE ROW LEVEL SECURITY;
 
 -- 1. Batasi tabel sensitif & internal hanya untuk Admin Terautentikasi (authenticated)
 DROP POLICY IF EXISTS "Public full access to invoices" ON public.invoices;
@@ -191,10 +176,6 @@ DROP POLICY IF EXISTS "Public write settings" ON public.platform_settings;
 CREATE POLICY "Public read settings" ON public.platform_settings 
   FOR SELECT USING (true);
 CREATE POLICY "Public write settings" ON public.platform_settings 
-  FOR ALL USING (true) WITH CHECK (true);
-
-DROP POLICY IF EXISTS "Public full access to waha_logs" ON public.waha_logs;
-CREATE POLICY "Public full access to waha_logs" ON public.waha_logs 
   FOR ALL USING (true) WITH CHECK (true);
 
 DROP POLICY IF EXISTS "Public full access to tenants" ON public.tenants;
@@ -290,9 +271,6 @@ BEGIN
   END IF;
   IF NOT EXISTS (SELECT 1 FROM pg_publication_tables WHERE pubname = 'supabase_realtime' AND tablename = 'cs_inquiries') THEN
     ALTER PUBLICATION supabase_realtime ADD TABLE public.cs_inquiries;
-  END IF;
-  IF NOT EXISTS (SELECT 1 FROM pg_publication_tables WHERE pubname = 'supabase_realtime' AND tablename = 'waha_logs') THEN
-    ALTER PUBLICATION supabase_realtime ADD TABLE public.waha_logs;
   END IF;
 END $$;
 

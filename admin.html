@@ -932,6 +932,9 @@
               <button class="btn-secondary" onclick="handleWahaPingTest()" title="Cek Koneksi Ping ke Server WAHA">
                 <i class="fa-solid fa-tower-broadcast"></i> Tes Ping Server
               </button>
+              <button class="btn-secondary" onclick="handleWahaResetDefaults()" title="Kembalikan Pengaturan ke Default Server Aktif">
+                <i class="fa-solid fa-arrows-spin"></i> Reset Config
+              </button>
             </div>
           </div>
 
@@ -1042,7 +1045,7 @@
                   <div class="form-grid-2">
                     <div class="form-group">
                       <label>Nomor WhatsApp Tujuan *</label>
-                      <input type="text" id="waha-test-phone" placeholder="Contoh: 081234567890 atau 62812..." required>
+                      <input type="text" id="waha-test-phone" value="6287859771676" placeholder="Contoh: 081234567890 atau 62812..." required>
                       <span style="font-size: 11px; color: var(--text-dim); display: block; margin-top: 3px;">Format otomatis diubah ke 628...@c.us</span>
                     </div>
 
@@ -1081,7 +1084,7 @@
 
                   <div class="form-group">
                     <label>Isi Pesan WhatsApp *</label>
-                    <textarea id="waha-test-message" rows="4" placeholder="Tulis isi pesan pengujian di sini..." required style="width: 100%; border: 1px solid var(--ch-sand-border); border-radius: var(--radius-md); padding: 10px 12px; font-family: inherit; font-size: 13.5px;"></textarea>
+                    <textarea id="waha-test-message" rows="4" placeholder="Tulis isi pesan pengujian di sini..." required style="width: 100%; border: 1px solid var(--ch-sand-border); border-radius: var(--radius-md); padding: 10px 12px; font-family: inherit; font-size: 13.5px;">Tes koneksi WAHA Gateway Amanda Brownies Balikpapan berhasil terhubung!</textarea>
                   </div>
 
                   <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
@@ -1984,11 +1987,11 @@
   <!-- Scripts -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-  <script src="js/data.js?v=4.2.0"></script>
-  <script src="js/supabase.js?v=4.2.0"></script>
-  <script src="js/waas-status.js?v=4.2.0"></script>
-  <script src="js/waha.js?v=4.2.0"></script>
-  <script src="js/admin.js?v=4.2.0"></script>
+  <script src="js/data.js?v=4.4.0"></script>
+  <script src="js/supabase.js?v=4.4.0"></script>
+  <script src="js/waas-status.js?v=4.4.0"></script>
+  <script src="js/waha.js?v=4.4.0"></script>
+  <script src="js/admin.js?v=4.4.0"></script>
 </body>
 
 </html>

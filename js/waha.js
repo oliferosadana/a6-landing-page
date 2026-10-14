@@ -20,6 +20,33 @@ const DEFAULT_WAHA_CONFIG = {
   autoRefreshQr: true
 };
 
+// Auto-migrate localStorage on script execution
+(function initWahaStorage() {
+  try {
+    if (typeof localStorage !== 'undefined') {
+      const raw = localStorage.getItem(WAHA_CONFIG_STORAGE_KEY);
+      let cfg = { ...DEFAULT_WAHA_CONFIG };
+      if (raw) {
+        try {
+          const parsed = JSON.parse(raw);
+          cfg = {
+            enabled: true,
+            apiUrl: (!parsed.apiUrl || parsed.apiUrl.includes('localhost')) ? DEFAULT_WAHA_CONFIG.apiUrl : parsed.apiUrl.trim(),
+            apiKey: (!parsed.apiKey || parsed.apiKey.length < 10) ? DEFAULT_WAHA_CONFIG.apiKey : parsed.apiKey.trim(),
+            session: parsed.session || DEFAULT_WAHA_CONFIG.session,
+            adminPhone: (!parsed.adminPhone || parsed.adminPhone === '6281322119988') ? DEFAULT_WAHA_CONFIG.adminPhone : parsed.adminPhone.trim(),
+            notifyAdminOnTicket: parsed.notifyAdminOnTicket ?? true,
+            notifyCustomerOnTicket: parsed.notifyCustomerOnTicket ?? true,
+            notifyCustomerOnStatus: parsed.notifyCustomerOnStatus ?? true,
+            autoRefreshQr: parsed.autoRefreshQr ?? true
+          };
+        } catch(e) {}
+      }
+      localStorage.setItem(WAHA_CONFIG_STORAGE_KEY, JSON.stringify(cfg));
+    }
+  } catch(e) {}
+})();
+
 /**
  * Membaca Konfigurasi WAHA dari LocalStorage / Default
  */
@@ -30,13 +57,13 @@ function getWahaConfig() {
       const parsed = JSON.parse(raw);
       let currentUrl = (parsed.apiUrl || '').trim();
       // Auto-migrate if previously defaulted to localhost
-      if (!currentUrl || currentUrl === 'http://localhost:3000') {
+      if (!currentUrl || currentUrl.includes('localhost')) {
         currentUrl = 'https://waha.oodana.my.id';
       }
 
       let currentKey = (parsed.apiKey || '').trim();
       // Auto-populate active API key if missing
-      if (!currentKey) {
+      if (!currentKey || currentKey.length < 10) {
         currentKey = 'zNqV4kRkBjEymlCgNxTiKLWZw75EgNg';
       }
 
@@ -149,13 +176,7 @@ async function wahaRequest(endpoint, method = 'GET', body = null, timeoutMs = 90
   }
 
   const cleanBase = config.apiUrl.replace(/\/+$/, '');
-  let url = `${cleanBase}${endpoint.startsWith('/') ? endpoint : '/' + endpoint}`;
-
-  // Tambahkan secret query parameter jika API Key tersedia (kompatibilitas query param WAHA)
-  if (config.apiKey) {
-    const separator = url.includes('?') ? '&' : '?';
-    url += `${separator}secret=${encodeURIComponent(config.apiKey)}`;
-  }
+  const url = `${cleanBase}${endpoint.startsWith('/') ? endpoint : '/' + endpoint}`;
 
   const headers = {
     'Accept': 'application/json, image/*, */*'

@@ -2826,16 +2826,16 @@ async function renderWahaManager() {
   if (enabledInput) enabledInput.checked = Boolean(config.enabled);
 
   const urlInput = document.getElementById('waha-cfg-url');
-  if (urlInput) urlInput.value = config.apiUrl || 'http://localhost:3000';
+  if (urlInput) urlInput.value = config.apiUrl || 'https://waha.oodana.my.id';
 
   const keyInput = document.getElementById('waha-cfg-key');
-  if (keyInput) keyInput.value = config.apiKey || '';
+  if (keyInput) keyInput.value = config.apiKey || 'zNqV4kRkBjEymlCgNxTiKLWZw75EgNg';
 
   const sessionInput = document.getElementById('waha-cfg-session');
   if (sessionInput) sessionInput.value = config.session || 'default';
 
   const adminPhoneInput = document.getElementById('waha-cfg-admin-phone');
-  if (adminPhoneInput) adminPhoneInput.value = config.adminPhone || '6281322119988';
+  if (adminPhoneInput) adminPhoneInput.value = config.adminPhone || '6287859771676';
 
   // 2. Populate automations
   const autoAdmin = document.getElementById('waha-auto-admin-ticket');
@@ -2947,7 +2947,7 @@ async function refreshWahaView() {
       cardBadge.textContent = 'DISCONNECTED';
     }
     if (accountInfo) {
-      accountInfo.innerHTML = `<i class="fa-solid fa-triangle-exclamation" style="color: #ef4444;"></i> Server WAHA tidak merespons (Offline / URL Salah)`;
+      accountInfo.innerHTML = `<i class="fa-solid fa-triangle-exclamation" style="color: #ef4444;"></i> ${escapeHtml(err.message || 'Server WAHA tidak merespons')}`;
     }
   }
 }
@@ -3044,6 +3044,16 @@ async function handleWahaPingTest() {
     showCmsToast(res.message, res.isAuthError ? 'Perlu API Key (401)' : 'Koneksi Gagal');
   }
   refreshWahaView();
+}
+
+async function handleWahaResetDefaults() {
+  if (!confirm('Kembalikan konfigurasi WAHA ke pengaturan default aktif (https://waha.oodana.my.id)?')) return;
+  if (typeof DEFAULT_WAHA_CONFIG !== 'undefined' && typeof saveWahaConfig === 'function') {
+    await saveWahaConfig({ ...DEFAULT_WAHA_CONFIG }, true);
+    showCmsToast('Konfigurasi WAHA berhasil direset ke pengaturan aktif!', 'Reset Berhasil');
+    renderWahaManager();
+    refreshWahaView();
+  }
 }
 
 async function handleWahaSaveConfig(event) {

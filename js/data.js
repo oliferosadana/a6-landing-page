@@ -5,212 +5,332 @@
 
 const DEFAULT_OUTLETS = [
   {
-    id: "out-bpn-01",
-    name: "Amanda Brownies Outlet MT Haryono (Pusat Balikpapan)",
-    city: "Balikpapan Selatan",
-    region: "Kota Balikpapan",
-    image: "assets/outlet_mt_haryono.jpg",
-    address: "Jl. MT Haryono No. 15, RT. 45, Kel. Damai, Balikpapan Selatan",
-    phone: "(0542) 876-5432",
-    wa: "6281322119988",
-    hours: "07.30 - 21.30 WITA",
-    mapsUrl: "https://maps.google.com/?q=Amanda+Brownies+MT+Haryono+Balikpapan",
-    distance: "1.2 km",
-    booths: [
+    "id": "out-bpn-1791633417474",
+    "name": "Amanda Brownies Balikpapan",
+    "city": "Balikpapan",
+    "region": "Kota Balikpapan",
+    "image": "assets/outlet_mt_haryono.jpg",
+    "address": "Jl. MT Haryono No. 15, RT. 45, Kel. Damai, Balikpapan Selatan",
+    "phone": "+6281241075981",
+    "wa": "6281241075981",
+    "hours": "07.00 - 22.00 WITA",
+    "mapsUrl": "https://www.google.com/maps/search/?api=1&query=Amanda%20Brownies%20Balikpapan%20Balikpapan",
+    "distance": "1.0 km",
+    "booths": [
       {
-        id: "bth-01-a",
-        name: "Booth Living Plaza Balikpapan",
-        location: "Lantai Dasar (Depan Informa / ACE Hardware)",
-        hours: "10.00 - 22.00 WITA",
-        status: "Tersedia",
-        wa: "6281322119988"
+        "id": "bth-1791633417673",
+        "wa": "6289675668175",
+        "name": "Point Sales Balikpapan - Karang Anyar",
+        "hours": "07.00 - 21.00 WITA",
+        "status": "Tersedia",
+        "mapsUrl": "https://www.google.com/maps/search/?api=1&query=Point Sales%20Balikpapan%20-%20Karang%20Anyar%20Balikpapan",
+        "location": "Lantai Dasar Depan Informa / ACE Hardware"
       },
       {
-        id: "bth-01-b",
-        name: "Booth SPBU MT Haryono Damai",
-        location: "Rest Area & Convenience SPBU 64.761.02",
-        hours: "08.00 - 21.00 WITA",
-        status: "Tersedia",
-        wa: "6281322119988"
+        "id": "bth-1791633417774",
+        "wa": "62895385964263",
+        "name": "Point Sales Balikpapan - Manggar",
+        "hours": "07.00 - 21.00 WITA",
+        "status": "Tersedia",
+        "mapsUrl": "https://www.google.com/maps/search/?api=1&query=Point Sales%20Balikpapan%20-%20Manggar%20Balikpapan",
+        "location": "Rest Area & Convenience SPBU"
       },
       {
-        id: "bth-01-c",
-        name: "Booth Bandara SAMS Sepinggan Gate 4",
-        location: "Ruang Tunggu Keberangkatan Domestik",
-        hours: "06.00 - 20.30 WITA",
-        status: "Tersedia",
-        wa: "6281322119988"
-      },
-      {
-        id: "bth-01-d",
-        name: "Booth MaxOne Hotel Balikpapan",
-        location: "Lobby Utama & Cafe Courtyard",
-        hours: "09.00 - 21.00 WITA",
-        status: "Tersedia",
-        wa: "6281322119988"
-      },
-      {
-        id: "bth-01-e",
-        name: "Booth RS Siloam Balikpapan Hall",
-        location: "Lobby Timur Pavilion Rawat Jalan",
-        hours: "08.00 - 20.00 WITA",
-        status: "Tersedia",
-        wa: "6281322119988"
+        "id": "bth-1791633417875",
+        "wa": "6287872639025",
+        "name": "Point Sales Balikpapan - Sepinggan",
+        "hours": "07.00 - 21.00 WITA",
+        "status": "Tersedia",
+        "mapsUrl": "https://www.google.com/maps/search/?api=1&query=Point Sales%20Balikpapan%20-%20Sepinggan%20Balikpapan",
+        "location": "RT 02 No.78, baru Sel, Jl. Ruhui Rahayu II, Sepinggan, Kecamatan Balikpapan Selatan, Kota Balikpapan, Kalimantan Timur 76115"
       }
     ]
   },
   {
-    id: "out-bpn-02",
-    name: "Amanda Brownies Cabang Ruhui Rahayu (Ring Road Dome)",
-    city: "Balikpapan Selatan",
-    region: "Kota Balikpapan",
-    image: "assets/outlet_ruhui_dome.jpg",
-    address: "Jl. Ruhui Rahayu No. 88, Gunung Bahagia, Balikpapan Selatan (Dekat Gedung BSCC Dome)",
-    phone: "(0542) 887-2233",
-    wa: "6281255443322",
-    hours: "08.00 - 21.30 WITA",
-    mapsUrl: "https://maps.google.com/?q=Amanda+Brownies+Ruhui+Rahayu+Balikpapan",
-    distance: "2.4 km",
-    booths: [
+    "id": "out-bpn-1791633417478",
+    "name": "Amanda Brownies Rapak Balikpapan",
+    "city": "Balikpapan",
+    "region": "Kota Balikpapan",
+    "image": "assets/outlet_mt_haryono.jpg",
+    "address": "Jl. Soekarno Hatta Km.2,5, No.96, Batu Ampar, Balikpapan Utara, Balikpapan City, East Kalimantan 76125",
+    "phone": "+6282148048956",
+    "wa": "6282148048956",
+    "hours": "07.00 - 22.00 WITA",
+    "mapsUrl": "https://www.google.com/maps/search/?api=1&query=Amanda%20Brownies%20Rapak%20Balikpapan%20Balikpapan",
+    "distance": "1.0 km",
+    "booths": []
+  },
+  {
+    "id": "out-bpn-1791633417480",
+    "name": "Amanda Brownies Samarinda",
+    "city": "Samarinda",
+    "region": "Kota Balikpapan",
+    "image": "assets/outlet_mt_haryono.jpg",
+    "address": "Jl. Jenderal Ahmad Yani No.11, RT.18, Sungai Pinang, Kec. Samarinda Utara, Kota Samarinda, Kalimantan Timur 75117",
+    "phone": "+6282155108713",
+    "wa": "6282155108713",
+    "hours": "07.00 - 22.00 WITA",
+    "mapsUrl": "https://www.google.com/maps/search/?api=1&query=Amanda%20Brownies%20Samarinda%20Samarinda",
+    "distance": "1.0 km",
+    "booths": [
       {
-        id: "bth-02-aa",
-        name: "Booth BSCC Dome Balikpapan",
-        location: "Area Pintu Masuk Barat BSCC Dome",
-        hours: "08.30 - 21.00 WITA",
-        status: "Tersedia",
-        wa: "6281255443322"
+        "id": "bth-1791633418174",
+        "wa": "6285165126643",
+        "name": "Point Sales Samarinda - SPBU Juanda",
+        "hours": "07.00 - 21.00 WITA",
+        "status": "Tersedia",
+        "mapsUrl": "https://www.google.com/maps/search/?api=1&query=Point Sales%20Samarinda%20-%20SPBU%20Juanda%20Samarinda",
+        "location": "G48J+WRR, Air Hitam, Samarinda Ulu, Samarinda City, East Kalimantan, Indonesia"
       },
       {
-        id: "bth-02-bb",
-        name: "Booth Pasar Segar Balikpapan Baru",
-        location: "Kios Kuliner Blok RA-08 Pasar Segar",
-        hours: "07.00 - 17.00 WITA",
-        status: "Tersedia",
-        wa: "6281255443322"
+        "id": "bth-1791633418275",
+        "wa": "6283877731007",
+        "name": "Point Sales Samarinda - Bhayangkara",
+        "hours": "07.00 - 21.00 WITA",
+        "status": "Tersedia",
+        "mapsUrl": "https://www.google.com/maps/search/?api=1&query=Point Sales%20Samarinda%20-%20Bhayangkara%20Samarinda",
+        "location": "Jl. Bhayangkara No.21, RT.004, Dadi Mulya, Kec. Samarinda Kota, Kota Samarinda, Kalimantan Timur 75242"
+      },
+      {
+        "id": "bth-1791633418376",
+        "wa": "6285133814042",
+        "name": "Point Sales Samarinda - Loa Janan",
+        "hours": "07.00 - 21.00 WITA",
+        "status": "Tersedia",
+        "mapsUrl": "https://www.google.com/maps/search/?api=1&query=Point Sales%20Samarinda%20-%20Loa%20Janan%20Samarinda",
+        "location": "Jl. Bung Tomo No.7, Sungai Keledang, Kec. Samarinda Seberang, Kota Samarinda, Kalimantan Timur 75242, Indonesia"
+      },
+      {
+        "id": "bth-1791633418477",
+        "wa": "628134365613",
+        "name": "Point Sales Samarinda - Slamet Riyadi",
+        "hours": "07.00 - 21.00 WITA",
+        "status": "Tersedia",
+        "mapsUrl": "https://www.google.com/maps/search/?api=1&query=Point Sales%20Samarinda%20-%20Slamet%20Riyadi%20Samarinda",
+        "location": "Jl. Slamet Riyadi No.34, Tlk. Lerong Ulu, Kec. Sungai Kunjang, Kota Samarinda, Kalimantan Timur 75127"
       }
     ]
   },
   {
-    id: "out-bpn-03",
-    name: "Amanda Brownies Outlet Ahmad Yani (Klandasan Ilir)",
-    city: "Balikpapan Kota",
-    region: "Kota Balikpapan",
-    image: "assets/outlet_mt_haryono.jpg",
-    address: "Jl. Jenderal Ahmad Yani No. 42, Klandasan Ilir, Balikpapan Kota",
-    phone: "(0542) 765-4321",
-    wa: "6281344556677",
-    hours: "07.30 - 21.00 WITA",
-    mapsUrl: "https://maps.google.com/?q=Amanda+Brownies+Ahmad+Yani+Balikpapan",
-    distance: "3.1 km",
-    booths: [
+    "id": "out-bpn-1791633417485",
+    "name": "Amanda Samarinda Sebrang",
+    "city": "Samarinda",
+    "region": "Kota Balikpapan",
+    "image": "assets/outlet_mt_haryono.jpg",
+    "address": "Jl. Bung Tomo No.7, Sungai Keledang, Kec. Samarinda Seberang, Kota Samarinda, Kalimantan Timur 75242",
+    "phone": "+6282155108714",
+    "wa": "6282155108714",
+    "hours": "07.00 - 22.00 WITA",
+    "mapsUrl": "https://www.google.com/maps/search/?api=1&query=Amanda%20Samarinda%20Sebrang%20Samarinda",
+    "distance": "1.0 km",
+    "booths": [
       {
-        id: "bth-03-a",
-        name: "Booth Plaza Balikpapan (The Plaza)",
-        location: "Ground Floor GF-32 (Dekat Hypermart)",
-        hours: "10.00 - 22.00 WITA",
-        status: "Tersedia",
-        wa: "6281344556677"
-      },
-      {
-        id: "bth-03-b",
-        name: "Booth Pelabuhan Semayang",
-        location: "Ruang Tunggu Terminal Penyeberangan Semayang",
-        hours: "07.00 - 20.00 WITA",
-        status: "Tersedia",
-        wa: "6281344556677"
+        "id": "bth-1791633418674",
+        "wa": "6285194169832",
+        "name": "Point Sales Samarinda Sebrang - Palaran",
+        "hours": "07.00 - 21.00 WITA",
+        "status": "Tersedia",
+        "mapsUrl": "https://www.google.com/maps/search/?api=1&query=Point Sales%20Samarinda%20Sebrang%20-%20Palaran%20Samarinda",
+        "location": "C5GH+GC4, Jl. Ampera, Rw. Makmur, Kec. Palaran, Kota Samarinda, Kalimantan Timur, Indonesia"
       }
     ]
   },
   {
-    id: "out-bpn-04",
-    name: "Amanda Brownies Cabang Sepinggan (Akses Bandara SAMS)",
-    city: "Balikpapan Selatan",
-    region: "Kota Balikpapan",
-    image: "assets/outlet_sepinggan.jpg",
-    address: "Jl. Marsma R. Iswahyudi No. 102, Sepinggan, Balikpapan Selatan (5 Menit dari Bandara)",
-    phone: "(0542) 789-0123",
-    wa: "6281155667788",
-    hours: "06.30 - 21.00 WITA",
-    mapsUrl: "https://maps.google.com/?q=Amanda+Brownies+Sepinggan+Balikpapan",
-    distance: "4.5 km",
-    booths: [
+    "id": "out-bpn-1791633417487",
+    "name": "Amanda Brownies Bontang",
+    "city": "Bontang",
+    "region": "Kota Balikpapan",
+    "image": "assets/outlet_mt_haryono.jpg",
+    "address": "Jl. MT. Haryono No.9, Api-Api, Kec. Bontang Utara, Kota Bontang, Kalimantan Timur 75325",
+    "phone": "+6285245563469",
+    "wa": "6285245563469",
+    "hours": "07.00 - 22.00 WITA",
+    "mapsUrl": "https://www.google.com/maps/search/?api=1&query=Amanda%20Brownies%20Bontang%20Bontang",
+    "distance": "1.0 km",
+    "booths": [
       {
-        id: "bth-04-a",
-        name: "Booth Bandara SAMS Sepinggan (Keberangkatan)",
-        location: "Lantai 3 Gate 4 Terminal Keberangkatan Domestik",
-        hours: "06.00 - 21.00 WITA",
-        status: "Tersedia",
-        wa: "6281155667788"
+        "id": "bth-1791633418874",
+        "wa": "6282254415770",
+        "name": "Point Sales Bontang - Sangatta",
+        "hours": "07.00 - 21.00 WITA",
+        "status": "Tersedia",
+        "mapsUrl": "https://www.google.com/maps/search/?api=1&query=Point Sales%20Bontang%20-%20Sangatta%20Bontang",
+        "location": "Teluk Lingga, Sangatta Utara, East Kutai Regency, East Kalimantan 75683"
       },
       {
-        id: "bth-04-b",
-        name: "Booth Bandara SAMS (Kedatangan)",
-        location: "Lantai 1 Arrival Hall (Dekat Pengambilan Bagasi)",
-        hours: "07.00 - 21.30 WITA",
-        status: "Tersedia",
-        wa: "6281155667788"
+        "id": "bth-1791633418975",
+        "wa": "6289508135740",
+        "name": "Point Sales Bontang - Tanjung Laut",
+        "hours": "07.00 - 21.00 WITA",
+        "status": "Tersedia",
+        "mapsUrl": "https://www.google.com/maps/search/?api=1&query=Point Sales%20Bontang%20-%20Tanjung%20Laut%20Bontang",
+        "location": "Jalan WR. Supratman RT.27 Kel. Tanjung Laut Kec. Bontang Selatan Bontang"
       }
     ]
   },
   {
-    id: "out-bpn-05",
-    name: "Amanda Brownies Outlet KM. 4.5 Batu Ampar",
-    city: "Balikpapan Utara",
-    region: "Kota Balikpapan",
-    image: "assets/outlet_ruhui_dome.jpg",
-    address: "Jl. Soekarno Hatta KM. 4.5 No. 70, Batu Ampar, Balikpapan Utara",
-    phone: "(0542) 865-9988",
-    wa: "6281299887766",
-    hours: "08.00 - 21.00 WITA",
-    mapsUrl: "https://maps.google.com/?q=Amanda+Brownies+KM+4+Balikpapan",
-    distance: "5.2 km",
-    booths: [
+    "id": "out-bpn-1791633417490",
+    "name": "Amanda Brownies Banjarbaru",
+    "city": "Banjarbaru",
+    "region": "Kota Balikpapan",
+    "image": "assets/outlet_mt_haryono.jpg",
+    "address": "Jl. A. Yani No.Km 34, Loktabat Utara, Kec. Banjarbaru Utara, Kota Banjar Baru, Kalimantan Selatan 70714",
+    "phone": "+6281254184019",
+    "wa": "6281254184019",
+    "hours": "07.00 - 22.00 WITA",
+    "mapsUrl": "https://www.google.com/maps/search/?api=1&query=Amanda%20Brownies%20Banjarbaru%20Banjarbaru",
+    "distance": "1.0 km",
+    "booths": [
       {
-        id: "bth-05-a",
-        name: "Booth Rapak Plaza (Ramayana)",
-        location: "Lantai 1 Depan Supermarket Rapak Plaza",
-        hours: "09.30 - 21.00 WITA",
-        status: "Tersedia",
-        wa: "6281299887766"
+        "id": "bth-1791633419174",
+        "wa": "6285252477051",
+        "name": "Point Sales Banjarbaru - Landasan Ulin",
+        "hours": "07.00 - 21.00 WITA",
+        "status": "Tersedia",
+        "mapsUrl": "https://www.google.com/maps/search/?api=1&query=Point Sales%20Banjarbaru%20-%20Landasan%20Ulin%20Banjarbaru",
+        "location": "Jl. Ahmad Yani KM. 25, Kel. Syamsudin Noor, Kec. Landasan Ulin Banjarbaru"
       },
       {
-        id: "bth-05-b",
-        name: "Booth Terminal Antarkota Batu Ampar",
-        location: "Kios Depan Jalur Keberangkatan Bus",
-        hours: "07.30 - 18.00 WITA",
-        status: "Tersedia",
-        wa: "6281299887766"
+        "id": "bth-1791633419275",
+        "wa": "62895335520156",
+        "name": "Point Sales Banjarbaru - Martapura",
+        "hours": "07.00 - 21.00 WITA",
+        "status": "Tersedia",
+        "mapsUrl": "https://www.google.com/maps/search/?api=1&query=Point Sales%20Banjarbaru%20-%20Martapura%20Banjarbaru",
+        "location": "Jl. Ahmad Yani No.KM 39, Cindai Alus, Kec. Martapura, Kabupaten Banjar, Kalimantan Selatan 70611"
       }
     ]
   },
   {
-    id: "out-bpn-06",
-    name: "Amanda Brownies Cabang Balikpapan Baru (Ruko Sentra Eropa)",
-    city: "Balikpapan Kota",
-    region: "Kota Balikpapan",
-    image: "assets/outlet_sepinggan.jpg",
-    address: "Kompleks Balikpapan Baru, Ruko Sentra Eropa Blok AB-2 No. 10, Damai Baru, Balikpapan",
-    phone: "(0542) 877-3344",
-    wa: "6281388776655",
-    hours: "08.00 - 21.30 WITA",
-    mapsUrl: "https://maps.google.com/?q=Amanda+Brownies+Balikpapan+Baru",
-    distance: "2.0 km",
-    booths: [
+    "id": "out-bpn-1791633417493",
+    "name": "Amanda Brownies Banjarmasin",
+    "city": "Banjarmasin",
+    "region": "Kota Balikpapan",
+    "image": "assets/outlet_mt_haryono.jpg",
+    "address": "Jl. Kuripan No.2, Kuripan, Kec. Banjarmasin Tim., Kota Banjarmasin, Kalimantan Selatan 70122",
+    "phone": "+6281255333876",
+    "wa": "6281255333876",
+    "hours": "07.00 - 22.00 WITA",
+    "mapsUrl": "https://www.google.com/maps/search/?api=1&query=Amanda%20Brownies%20Banjarmasin%20Banjarmasin",
+    "distance": "1.0 km",
+    "booths": [
       {
-        id: "bth-06-a",
-        name: "Booth E-Walk Mall BSB",
-        location: "Lantai Lower Ground LG-12 (Depan Superindo)",
-        hours: "10.00 - 22.00 WITA",
-        status: "Tersedia",
-        wa: "6281388776655"
+        "id": "bth-1791633419474",
+        "wa": "6285705003915",
+        "name": "Point Sales Banjarmasin - Kayu Tangi",
+        "hours": "07.00 - 21.00 WITA",
+        "status": "Tersedia",
+        "mapsUrl": "https://www.google.com/maps/search/?api=1&query=Point Sales%20Banjarmasin%20-%20Kayu%20Tangi%20Banjarmasin",
+        "location": "Alalak Utara, Banjarmasin Utara, Banjarmasin City, South Kalimantan 70123"
       },
       {
-        id: "bth-06-b",
-        name: "Booth Pentacity Shopping Venue",
-        location: "Lantai 1 Atrium East Promenade",
-        hours: "10.00 - 22.00 WITA",
-        status: "Tersedia",
-        wa: "6281388776655"
+        "id": "bth-1791633419575",
+        "wa": "62895374029965",
+        "name": "Point Sales Banjarmasin - Pelaihari",
+        "hours": "07.00 - 21.00 WITA",
+        "status": "Tersedia",
+        "mapsUrl": "https://www.google.com/maps/search/?api=1&query=Point Sales%20Banjarmasin%20-%20Pelaihari%20Banjarmasin",
+        "location": "Jl. H. Boejasin No.9, Angsau, Kec. Pelaihari, Kabupaten Tanah Laut, Kalimantan Selatan 70814, Indonesia"
+      }
+    ]
+  },
+  {
+    "id": "out-bpn-1791633417496",
+    "name": "Amanda Brownies Palangkaraya",
+    "city": "Balikpapan",
+    "region": "Kota Balikpapan",
+    "image": "assets/outlet_mt_haryono.jpg",
+    "address": "Jl. G. Obos No.15 Kav. 5, Menteng, Kec. Jekan Raya, Kota Palangka Raya, Kalimantan Tengah 74874",
+    "phone": "+6281256221450",
+    "wa": "6281256221450",
+    "hours": "07.00 - 22.00 WIB",
+    "mapsUrl": "https://www.google.com/maps/search/?api=1&query=Amanda%20Brownies%20Palangkaraya%20Palangkaraya",
+    "distance": "1.0 km",
+    "booths": [
+      {
+        "id": "bth-1791633419774",
+        "wa": "6289512290604",
+        "name": "Point Sales Palangkaraya - Tjilik Riwut",
+        "hours": "07.00 - 21.00 WIB",
+        "status": "Tersedia",
+        "mapsUrl": "https://www.google.com/maps/search/?api=1&query=Point Sales%20Palangkaraya%20-%20Tjilik%20Riwut%20Palangkaraya",
+        "location": "Jl. Cilik Riwut No.KM 2, Palangka, Kec. Jekan Raya, Kota Palangka Raya, Kalimantan Tengah 73111"
+      }
+    ]
+  },
+  {
+    "id": "out-bpn-1791633417498",
+    "name": "Amanda Brownies Tenggarong",
+    "city": "Tenggarong",
+    "region": "Kota Balikpapan",
+    "image": "assets/outlet_mt_haryono.jpg",
+    "address": "Jl. K.H. Ahmad Muksin No.RT.06, Timbau, Kec. Tenggarong, Kabupaten Kutai Kartanegara, Kalimantan Timur 75513",
+    "phone": "+6282155086503",
+    "wa": "6282155086503",
+    "hours": "07.00 - 22.00 WITA",
+    "mapsUrl": "https://www.google.com/maps/search/?api=1&query=Amanda%20Brownies%20Tenggarong%20Tenggarong",
+    "distance": "1.0 km",
+    "booths": []
+  },
+  {
+    "id": "out-bpn-1791633417499",
+    "name": "Amanda Brownies Batulicin",
+    "city": "Batulicin",
+    "region": "Kota Balikpapan",
+    "image": "assets/outlet_mt_haryono.jpg",
+    "address": "HXPP+J5 Baroqah, Tanah Bumbu Regency, South Kalimantan, Indonesia",
+    "phone": "+6285385391867",
+    "wa": "6285385391867",
+    "hours": "07.00 - 22.00 WITA",
+    "mapsUrl": "https://www.google.com/maps/search/?api=1&query=Amanda%20Brownies%20Batulicin%20Batulicin",
+    "distance": "1.0 km",
+    "booths": []
+  },
+  {
+    "id": "out-bpn-1791633417500",
+    "name": "Amanda Brownies Tanjung Tbl",
+    "city": "Tanjung Tabalong",
+    "region": "Kota Balikpapan",
+    "image": "assets/outlet_mt_haryono.jpg",
+    "address": "Dekat Tugu Obor, Jl. A. Yani, Mabuun, Kec. Tj., Kabupaten Tabalong, Kalimantan Selatan 71571",
+    "phone": "+6289512460352",
+    "wa": "6289512460352",
+    "hours": "07.00 - 22.00 WITA",
+    "mapsUrl": "https://www.google.com/maps/search/?api=1&query=Amanda%20Brownies%20Tanjung%20Tbl%20Tanjung%20Tabalong",
+    "distance": "1.0 km",
+    "booths": [
+      {
+        "id": "bth-1791633420174",
+        "wa": "6282254205891",
+        "name": "Point Sales Tanjung - Barabai",
+        "hours": "07.00 - 21.00 WITA",
+        "status": "Tersedia",
+        "mapsUrl": "https://maps.app.goo.gl/m7C9jmMkZDVrSTbB7",
+        "location": "C98G+4VF, Jl. H. Moh. Syarkawi, Barabai Utara, Kec. Barabai, Kabupaten Hulu Sungai Tengah, Kalimantan Selatan 71352, Indonesia"
+      }
+    ]
+  },
+  {
+    "id": "out-bpn-1791633417502",
+    "name": "Amanda Brownies Tanah Grogot",
+    "city": "Tanah Grogot",
+    "region": "Kota Balikpapan",
+    "image": "assets/outlet_mt_haryono.jpg",
+    "address": "Jalan Gajah Mada RT. 07 RW.03 Kec. Tanah Grogot, Kab. Paser Kalimantan Timur",
+    "phone": "+6282358037883",
+    "wa": "6282358037883",
+    "hours": "07.00 - 22.00 WITA",
+    "mapsUrl": "https://www.google.com/maps/search/?api=1&query=Amanda%20Brownies%20Tanah%20Grogot%20Tanah%20Grogot",
+    "distance": "1.0 km",
+    "booths": [
+      {
+        "id": "bth-1791633420374",
+        "wa": "6282358037893",
+        "name": "Point Sales Tanah Grogot - Babulu",
+        "hours": "07.00 - 21.00 WITA",
+        "status": "Tersedia",
+        "mapsUrl": "https://www.google.com/maps/search/?api=1&query=Point Sales%20Tanah%20Grogot%20-%20Babulu%20Tanah%20Grogot",
+        "location": "Jl. Penajam Kuaro RT. 03 Labangka. Kec. Babulu Kab. PPU"
       }
     ]
   }
@@ -218,85 +338,106 @@ const DEFAULT_OUTLETS = [
 
 const DEFAULT_OUTLET_CATEGORIES = [
   {
-    id: "cat-bpn-selatan",
-    slug: "balikpapan-selatan",
-    name: "Balikpapan Selatan",
-    region: "Kota Balikpapan",
-    icon: "fa-solid fa-location-dot",
-    badgeColor: "olive",
-    description: "Wilayah MT Haryono, Sepinggan, Ruhui Rahayu, Damai & Akses Bandara SAMS",
-    status: "active",
-    sortOrder: 1
+    "id": "cat-balikpapan",
+    "slug": "balikpapan",
+    "name": "Balikpapan",
+    "region": "Kota Balikpapan",
+    "icon": "fa-solid fa-location-dot",
+    "badgeColor": "olive",
+    "description": "",
+    "status": "active",
+    "sortOrder": 1
   },
   {
-    id: "cat-bpn-kota",
-    slug: "balikpapan-kota",
-    name: "Balikpapan Kota",
-    region: "Kota Balikpapan",
-    icon: "fa-solid fa-city",
-    badgeColor: "gold",
-    description: "Pusat Kota, Jl. Jend. Ahmad Yani, Klandasan & Sentra Eropa Balikpapan Baru",
-    status: "active",
-    sortOrder: 2
+    "id": "cat-samarinda",
+    "slug": "samarinda",
+    "name": "Samarinda",
+    "region": "Kota Samarinda",
+    "icon": "fa-solid fa-location-dot",
+    "badgeColor": "olive",
+    "description": "",
+    "status": "active",
+    "sortOrder": 2
   },
   {
-    id: "cat-bpn-utara",
-    slug: "balikpapan-utara",
-    name: "Balikpapan Utara",
-    region: "Kota Balikpapan",
-    icon: "fa-solid fa-map-pin",
-    badgeColor: "green",
-    description: "Area KM 4.5, Batu Ampar, Soekarno Hatta & Karang Joang",
-    status: "active",
-    sortOrder: 3
+    "id": "cat-tanah-grogot",
+    "slug": "tanah-grogot",
+    "name": "Tanah Grogot",
+    "region": "Kota Balikpapan",
+    "icon": "fa-solid fa-location-dot",
+    "badgeColor": "olive",
+    "description": "",
+    "status": "active",
+    "sortOrder": 3
   },
   {
-    id: "cat-bpn-barat",
-    slug: "balikpapan-barat",
-    name: "Balikpapan Barat",
-    region: "Kota Balikpapan",
-    icon: "fa-solid fa-anchor",
-    badgeColor: "sand",
-    description: "Wilayah Kampung Baru, Pelabuhan Semayang & Kawasan Industri Kariangau",
-    status: "active",
-    sortOrder: 4
+    "id": "cat-test",
+    "slug": "test",
+    "name": "Banjarmasin",
+    "region": "Kota Banjarmasin",
+    "icon": "fa-solid fa-location-dot",
+    "badgeColor": "olive",
+    "description": "",
+    "status": "active",
+    "sortOrder": 4
   },
   {
-    id: "cat-bpn-tengah",
-    slug: "balikpapan-tengah",
-    name: "Balikpapan Tengah",
-    region: "Kota Balikpapan",
-    icon: "fa-solid fa-building",
-    badgeColor: "olive",
-    description: "Gunung Sari, Mekar Sari, Sumber Rejo & Karang Rejo",
-    status: "active",
-    sortOrder: 5
+    "id": "cat-banjarbaru",
+    "slug": "banjarbaru",
+    "name": "Banjarbaru",
+    "region": "Kota",
+    "icon": "fa-solid fa-location-dot",
+    "badgeColor": "olive",
+    "description": "",
+    "status": "active",
+    "sortOrder": 5
   },
   {
-    id: "cat-bpn-timur",
-    slug: "balikpapan-timur",
-    name: "Balikpapan Timur",
-    region: "Kota Balikpapan",
-    icon: "fa-solid fa-umbrella-beach",
-    badgeColor: "gold",
-    description: "Manggar, Lamaru, Teritip & Kawasan Pantai Balikpapan",
-    status: "active",
-    sortOrder: 6
+    "id": "cat-bontang",
+    "slug": "bontang",
+    "name": "Bontang",
+    "region": "Kota Bontang",
+    "icon": "fa-solid fa-location-dot",
+    "badgeColor": "olive",
+    "description": "",
+    "status": "active",
+    "sortOrder": 6
   },
   {
-    id: "cat-ikn",
-    slug: "ikn-penajam",
-    name: "IKN & Penajam",
-    region: "Kawasan IKN Nusantara",
-    icon: "fa-solid fa-tree",
-    badgeColor: "green",
-    description: "Kawasan Ibu Kota Nusantara (IKN), Sepaku & Penajam Paser Utara",
-    status: "active",
-    sortOrder: 7
+    "id": "cat-tenggarong",
+    "slug": "tenggarong",
+    "name": "Tenggarong",
+    "region": "Kota Tenggarong",
+    "icon": "fa-solid fa-location-dot",
+    "badgeColor": "olive",
+    "description": "",
+    "status": "active",
+    "sortOrder": 8
+  },
+  {
+    "id": "cat-batulicin",
+    "slug": "batulicin",
+    "name": "Batulicin",
+    "region": "Batulicin",
+    "icon": "fa-solid fa-location-dot",
+    "badgeColor": "olive",
+    "description": "",
+    "status": "active",
+    "sortOrder": 9
+  },
+  {
+    "id": "cat-tanjung-tabalong",
+    "slug": "tanjung-tabalong",
+    "name": "Tanjung Tabalong",
+    "region": "Tanjung Tabalong",
+    "icon": "fa-solid fa-location-dot",
+    "badgeColor": "olive",
+    "description": "",
+    "status": "active",
+    "sortOrder": 10
   }
 ];
 
-// Default Promo & Price List collections (Kosong secara default agar halaman hanya memuat data asli dari database Supabase)
 const DEFAULT_PROMOS = [
   {
     "id": "promo-1791344432578",
@@ -1084,6 +1225,27 @@ function saveStoredData(key, data, syncCloud = true) {
     localStorage.setItem(key, JSON.stringify(data));
   } catch (e) {
     console.warn(`LocalStorage quota/write warning for ${key}:`, e);
+    // Quota-exceeded protection for large base64 image data
+    if (key === 'amanda_outlets' && Array.isArray(data)) {
+      try {
+        const lightweight = data.map(o => ({
+          ...o,
+          image: (o.image && o.image.startsWith('data:')) ? 'assets/outlet_mt_haryono.jpg' : (o.image || 'assets/outlet_mt_haryono.jpg')
+        }));
+        localStorage.setItem(key, JSON.stringify(lightweight));
+        console.log('💾 amanda_outlets berhasil dicadangkan dalam format lightweight cache');
+      } catch (e2) {
+        console.warn('Gagal menyimpan lightweight cache outlets:', e2);
+      }
+    } else if (key === 'amanda_products' && Array.isArray(data)) {
+      try {
+        const lightweight = data.map(p => ({
+          ...p,
+          image: (p.image && p.image.startsWith('data:')) ? '' : p.image
+        }));
+        localStorage.setItem(key, JSON.stringify(lightweight));
+      } catch (e2) {}
+    }
   }
 
   notifyAmandaDataChanged();
@@ -1125,7 +1287,7 @@ const DEFAULT_CS_INQUIRIES = [];
 // ===================================================================
 // COOKIE & CACHE EXPIRATION / AUTO-UPDATE MANAGEMENT
 // ===================================================================
-const AMANDA_SYSTEM_VERSION = '4.5.0';
+const AMANDA_SYSTEM_VERSION = '4.6.0';
 const AMANDA_CACHE_TTL_SECONDS = 1800; // 30 Menit masa berlaku cookie cache
 
 /**
@@ -1183,7 +1345,9 @@ function enforceCacheAndCookieExpiration() {
     const isVersionMismatch = storedVersion !== currentVersion || (versionCookie && versionCookie !== currentVersion);
 
     if (isVersionMismatch) {
-      console.log(`🔄 [Version Upgrade] Versi baru terdeteksi: ${currentVersion}. Menyinkronkan ulang database...`);
+      console.log(`🔄 [Version Upgrade] Versi baru terdeteksi: ${currentVersion}. Membersihkan cache lama dan menyinkronkan database Supabase...`);
+      localStorage.removeItem('amanda_outlets');
+      localStorage.removeItem('amanda_outlet_categories');
       localStorage.setItem('amanda_system_version', currentVersion);
       localStorage.setItem('amanda_last_cache_refresh', Date.now().toString());
       setAmandaCookie('amanda_version', currentVersion, 86400 * 30);
@@ -1203,7 +1367,7 @@ function enforceCacheAndCookieExpiration() {
   }
 }
 
-// Global active datasets loaded from localStorage or defaults
+// Global active datasets loaded from localStorage, memory or Supabase
 let AMANDA_OUTLETS = [];
 let AMANDA_OUTLET_CATEGORIES = [];
 let AMANDA_PROMOS = [];
@@ -1211,16 +1375,45 @@ let AMANDA_PRICELISTS = [];
 let AMANDA_PRODUCTS = [];
 let AMANDA_TICKER = [];
 let AMANDA_CS_INQUIRIES = [];
+let isSupabaseOutletsLoaded = false;
+let isSupabaseCategoriesLoaded = false;
 
 function reloadAmandaData() {
   enforceCacheAndCookieExpiration();
-  AMANDA_OUTLET_CATEGORIES = getStoredData('amanda_outlet_categories', DEFAULT_OUTLET_CATEGORIES);
-  AMANDA_OUTLETS = getStoredData('amanda_outlets', DEFAULT_OUTLETS).map(out => {
-    return {
+
+  // Outlet Categories: Prioritaskan data Supabase yang sudah ada di memori
+  const storedCats = getStoredData('amanda_outlet_categories', null);
+  if (Array.isArray(storedCats) && storedCats.length > 0) {
+    if (!isSupabaseCategoriesLoaded || !AMANDA_OUTLET_CATEGORIES || AMANDA_OUTLET_CATEGORIES.length < storedCats.length) {
+      AMANDA_OUTLET_CATEGORIES = storedCats;
+    }
+  } else if (!AMANDA_OUTLET_CATEGORIES || AMANDA_OUTLET_CATEGORIES.length === 0) {
+    AMANDA_OUTLET_CATEGORIES = DEFAULT_OUTLET_CATEGORIES;
+  }
+
+  // Outlets: Prioritaskan data Supabase yang sudah ada di memori
+  const storedOutlets = getStoredData('amanda_outlets', null);
+  if (Array.isArray(storedOutlets) && storedOutlets.length > 0) {
+    if (isSupabaseOutletsLoaded && AMANDA_OUTLETS && AMANDA_OUTLETS.length >= storedOutlets.length) {
+      // Memory is already live and complete with full base64 images from Supabase
+    } else {
+      AMANDA_OUTLETS = storedOutlets.map(out => {
+        const existing = (AMANDA_OUTLETS || []).find(e => e.id === out.id);
+        return {
+          ...out,
+          image: (existing && existing.image && existing.image.startsWith('data:') && (!out.image || !out.image.startsWith('data:')))
+            ? existing.image
+            : (out.image || (existing ? existing.image : 'assets/outlet_mt_haryono.jpg')),
+          booths: Array.isArray(out.booths) ? out.booths : []
+        };
+      });
+    }
+  } else if (!AMANDA_OUTLETS || AMANDA_OUTLETS.length === 0) {
+    AMANDA_OUTLETS = DEFAULT_OUTLETS.map(out => ({
       ...out,
       booths: Array.isArray(out.booths) ? out.booths : []
-    };
-  });
+    }));
+  }
 
   // Promos: Langsung muat dari database (fallback ke DEFAULT_PROMOS jika cache kosong)
   const storedPromos = getStoredData('amanda_promos', DEFAULT_PROMOS);

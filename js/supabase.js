@@ -355,53 +355,84 @@ async function pullAllDataFromSupabase() {
         }
       });
 
-    // 4. Fetch Outlets & Booths
+    // 4. Fetch Outlets & Booths Langsung dari Supabase PostgreSQL
     const fetchOutlets = supabaseClient
       .from('outlets')
       .select('*')
       .order('id', { ascending: true })
       .then(({ data: dbOutlets, error: errOut }) => {
         if (!errOut && dbOutlets && dbOutlets.length > 0) {
+          console.log(`📍 Supabase Outlets dimuat langsung dari Database: ${dbOutlets.length} cabang.`);
           AMANDA_OUTLETS = dbOutlets.map(o => ({
             id: o.id,
             name: o.name,
-            city: o.city,
-            region: o.region || 'Kota Balikpapan',
-            image: o.image,
-            address: o.address,
-            phone: o.phone,
-            wa: o.wa,
-            hours: o.hours,
+            city: o.city || 'Balikpapan',
+            region: o.region || (o.city ? ('Kota ' + o.city) : 'Kota Balikpapan'),
+            image: o.image || 'assets/outlet_mt_haryono.jpg',
+            address: o.address || '',
+            phone: o.phone || '',
+            wa: o.wa || '',
+            hours: o.hours || '07.00 - 22.00 WITA',
             mapsUrl: o.maps_url || o.mapsUrl || '',
             distance: o.distance || '1.0 km',
             booths: Array.isArray(o.booths) ? o.booths : (typeof o.booths === 'string' ? JSON.parse(o.booths) : [])
           }));
-          try { localStorage.setItem('amanda_outlets', JSON.stringify(AMANDA_OUTLETS)); } catch(e) {}
+          if (typeof isSupabaseOutletsLoaded !== 'undefined') isSupabaseOutletsLoaded = true;
+
+          // Simpan ke localStorage dengan perlindungan kuota 5MB browser
+          try {
+            localStorage.setItem('amanda_outlets', JSON.stringify(AMANDA_OUTLETS));
+          } catch(e) {
+            console.warn('LocalStorage kuota penuh untuk image base64, menyimpan versi lightweight cache:', e);
+            try {
+              const lightweight = AMANDA_OUTLETS.map(o => ({
+                ...o,
+                image: (o.image && o.image.startsWith('data:')) ? 'assets/outlet_mt_haryono.jpg' : (o.image || 'assets/outlet_mt_haryono.jpg')
+              }));
+              localStorage.setItem('amanda_outlets', JSON.stringify(lightweight));
+            } catch(e2) {}
+          }
+
+          // Sinkronkan UI Landing Page dan CMS secara instan
           if (typeof renderNavbarOutletDropdown === 'function') renderNavbarOutletDropdown();
-          if (typeof renderOutletLocatorList === 'function') renderOutletLocatorList();
+          if (typeof renderOutletLocatorList === 'function') renderOutletLocatorList(typeof selectedCityForOutlet !== 'undefined' ? selectedCityForOutlet : 'all');
+          if (typeof renderOutletCategoryFilterPills === 'function') renderOutletCategoryFilterPills();
+          if (typeof renderOutletsManager === 'function') renderOutletsManager();
+          if (typeof renderDashboard === 'function') renderDashboard();
+          window.dispatchEvent(new CustomEvent('amanda_data_updated'));
+        } else if (errOut) {
+          console.error('❌ Gagal memuat data outlets dari Supabase:', errOut.message);
         }
       });
 
-    // 5. Fetch Outlet Categories / Wilayah
+    // 5. Fetch Outlet Categories / Wilayah Langsung dari Supabase PostgreSQL
     const fetchCategories = supabaseClient
       .from('outlet_categories')
       .select('*')
       .order('sort_order', { ascending: true })
       .then(({ data: dbOutletCats, error: errOutletCat }) => {
         if (!errOutletCat && dbOutletCats && dbOutletCats.length > 0) {
-          AMANDA_OUTLET_CATEGORIES = dbOutletCats.map(c => ({
+          console.log(`🏷️ Supabase Outlet Categories dimuat langsung dari Database: ${dbOutletCats.length} wilayah.`);
+          AMANDA_OUTLET_CATEGORIES = dbOutletCats.map((c, idx) => ({
             id: c.id,
             slug: c.slug || c.id,
             name: c.name,
-            region: c.region || 'Kota Balikpapan',
+            region: c.region || ('Kota ' + c.name),
             icon: c.icon || 'fa-solid fa-location-dot',
             badgeColor: c.badge_color || c.badgeColor || 'olive',
             description: c.description || '',
             status: c.status || 'active',
-            sortOrder: Number(c.sort_order) || 1
+            sortOrder: Number(c.sort_order || c.sortOrder) || (idx + 1)
           }));
+          if (typeof isSupabaseCategoriesLoaded !== 'undefined') isSupabaseCategoriesLoaded = true;
+
           try { localStorage.setItem('amanda_outlet_categories', JSON.stringify(AMANDA_OUTLET_CATEGORIES)); } catch(e) {}
           if (typeof renderOutletCategoryFilterPills === 'function') renderOutletCategoryFilterPills();
+          if (typeof renderOutletCategoriesManager === 'function') renderOutletCategoriesManager();
+          if (typeof renderDashboard === 'function') renderDashboard();
+          window.dispatchEvent(new CustomEvent('amanda_data_updated'));
+        } else if (errOutletCat) {
+          console.error('❌ Gagal memuat data outlet_categories dari Supabase:', errOutletCat.message);
         }
       });
 
@@ -606,9 +637,9 @@ async function pushToSupabase(tableName, payload, operation = 'upsert') {
         id: o.id || ('out-bpn-' + Date.now()),
         name: o.name || 'Cabang Amanda',
         city: o.city || 'Balikpapan',
-        region: o.region || 'Kota Balikpapan',
+        region: o.region || (o.city ? ('Kota ' + o.city) : 'Kota Balikpapan'),
         image: o.image || 'assets/outlet_mt_haryono.jpg',
-        address: o.address || 'Kota Balikpapan',
+        address: o.address || '',
         phone: o.phone || '',
         wa: (o.wa ? String(o.wa).replace(/[^0-9]/g, '') : '6281241075981'),
         hours: o.hours || '07.00 - 22.00 WITA',

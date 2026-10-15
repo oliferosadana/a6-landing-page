@@ -85,11 +85,64 @@ body {
 }
 
 .sidebar-brand {
-  padding: 24px 20px;
+  padding: 20px 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  border-bottom: 1px solid rgba(216, 201, 168, 0.18);
+}
+
+.brand-left {
   display: flex;
   align-items: center;
   gap: 12px;
-  border-bottom: 1px solid rgba(216, 201, 168, 0.18);
+  min-width: 0;
+}
+
+.btn-close-sidebar-mobile {
+  display: none;
+  background: rgba(216, 201, 168, 0.15);
+  border: 1px solid rgba(216, 201, 168, 0.25);
+  color: #ffffff;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-sm);
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 15px;
+  transition: var(--transition-fast);
+  flex-shrink: 0;
+}
+
+.btn-close-sidebar-mobile:hover {
+  background: var(--accent-red);
+  border-color: var(--accent-red);
+}
+
+/* Mobile Sidebar Backdrop Overlay */
+.sidebar-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(18, 14, 10, 0.65);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  z-index: 490;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.sidebar-backdrop.active {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+
+body.sidebar-open-freeze {
+  overflow: hidden;
 }
 
 .brand-badge {
@@ -785,11 +838,14 @@ body {
 
 /* ==================== PRODUCTS TABLE & STOCKS ==================== */
 .table-responsive {
+  width: 100%;
   overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .cms-table {
   width: 100%;
+  min-width: 680px;
   border-collapse: collapse;
   text-align: left;
   font-size: 13.5px;
@@ -1065,6 +1121,95 @@ body {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 24px;
+}
+
+/* ==================== CS FILTER TOOLBAR ==================== */
+.cs-filter-toolbar-card {
+  padding: 16px 20px;
+  margin-bottom: 20px;
+}
+
+.cs-filter-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  align-items: flex-end;
+}
+
+.cs-filter-group {
+  flex: 1 1 180px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 160px;
+}
+
+.cs-filter-group label,
+.cs-search-group label {
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.cs-filter-group select,
+.cs-filter-group input {
+  width: 100%;
+  padding: 9px 12px;
+  border: 1px solid var(--ch-sand);
+  border-radius: var(--radius-sm);
+  background: var(--bg-elevated);
+  font-size: 13px;
+  color: var(--text-main);
+  outline: none;
+  transition: var(--transition-fast);
+}
+
+.cs-filter-group select:focus,
+.cs-filter-group input:focus {
+  border-color: var(--ch-olive);
+  background: #ffffff;
+}
+
+.cs-search-group {
+  flex: 2 1 240px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 220px;
+}
+
+.cs-search-input-wrap {
+  position: relative;
+  width: 100%;
+}
+
+.cs-search-input-wrap input {
+  width: 100%;
+  padding: 9px 36px 9px 12px;
+  border: 1px solid var(--ch-sand);
+  border-radius: var(--radius-sm);
+  background: var(--bg-elevated);
+  font-size: 13px;
+  color: var(--text-main);
+  outline: none;
+  transition: var(--transition-fast);
+}
+
+.cs-search-input-wrap input:focus {
+  border-color: var(--ch-olive);
+  background: #ffffff;
+}
+
+.cs-search-input-wrap i {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-dim);
+  font-size: 13px;
+  pointer-events: none;
 }
 
 /* ==================== MODALS ==================== */
@@ -1555,54 +1700,381 @@ form {
   100% { transform: scale(1); opacity: 1; }
 }
 
-/* ==================== RESPONSIVE ==================== */
-@media (max-width: 1024px) {
+/* ==================== RESPONSIVE DESIGN SYSTEM ==================== */
+
+/* ---------- Large Tablets / Small Laptops (<= 1200px) ---------- */
+@media (max-width: 1200px) {
   .stats-grid {
     grid-template-columns: repeat(2, 1fr);
   }
 
   .promos-management-grid,
   .outlets-management-grid,
-  .settings-grid {
+  .settings-grid,
+  .outlet-categories-grid {
     grid-template-columns: repeat(2, 1fr);
   }
 
   .dash-grid-split {
     grid-template-columns: 1fr;
   }
+
+  .sub-status-metrics-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 
-@media (max-width: 768px) {
+/* ---------- Tablets & iPad Portrait (<= 1024px) ---------- */
+@media (max-width: 1024px) {
   .btn-toggle-sidebar {
     display: flex;
     align-items: center;
     justify-content: center;
   }
 
+  .btn-close-sidebar-mobile {
+    display: inline-flex;
+  }
+
   .cms-sidebar {
     position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    height: 100vh;
+    height: 100dvh;
+    width: 280px;
+    max-width: 85vw;
+    z-index: 500;
     transform: translateX(-100%);
+    box-shadow: 4px 0 24px rgba(0, 0, 0, 0.4);
+    transition: transform var(--transition-normal);
   }
 
   .cms-sidebar.open {
     transform: translateX(0);
   }
 
-  .stats-grid,
-  .promos-management-grid,
-  .outlets-management-grid,
-  .settings-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .form-grid-2,
-  .form-grid-3,
-  .booth-editor-card {
-    grid-template-columns: 1fr;
+  .cms-topbar {
+    padding: 12px 20px;
   }
 
   .cms-content-wrapper {
+    padding: 20px;
+  }
+
+  .topbar-subtitle {
+    max-width: 320px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+
+/* ---------- Standard Mobile Screens (<= 768px) ---------- */
+@media (max-width: 768px) {
+  /* Layout & Padding */
+  .cms-topbar {
+    padding: 10px 14px;
+    gap: 10px;
+  }
+
+  .topbar-left {
+    gap: 10px;
+    min-width: 0;
+    flex: 1;
+  }
+
+  .topbar-title-wrap {
+    min-width: 0;
+  }
+
+  .topbar-title-wrap h1 {
+    font-size: 16px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .topbar-subtitle {
+    display: none;
+  }
+
+  .topbar-actions {
+    gap: 8px;
+    flex-shrink: 0;
+  }
+
+  .sync-status-pill {
+    font-size: 11px;
+    padding: 5px 10px;
+  }
+
+  .btn-preview-top {
+    font-size: 11.5px;
+    padding: 6px 12px;
+  }
+
+  .cms-content-wrapper {
+    padding: 14px 12px;
+  }
+
+  /* Grid Stack to 1 Column */
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+
+  .stat-card {
+    padding: 14px;
+    gap: 10px;
+  }
+
+  .stat-icon {
+    width: 40px;
+    height: 40px;
+    font-size: 18px;
+  }
+
+  .stat-value {
+    font-size: 22px;
+  }
+
+  .stat-label {
+    font-size: 11.5px;
+  }
+
+  .promos-management-grid,
+  .outlets-management-grid,
+  .settings-grid,
+  .outlet-categories-grid,
+  .dash-promos-preview {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .panel-card {
     padding: 16px;
+    border-radius: var(--radius-md);
+  }
+
+  /* Toolbars and Actions Full Width */
+  .section-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 14px;
+    margin-bottom: 18px;
+  }
+
+  .toolbar-left h2 {
+    font-size: 20px;
+  }
+
+  .toolbar-left p {
+    font-size: 12.5px;
+  }
+
+  .toolbar-actions-row {
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+    gap: 10px;
+  }
+
+  .search-box-cms {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .toolbar-actions-row .btn-primary,
+  .toolbar-actions-row .btn-secondary {
+    width: 100%;
+    justify-content: center;
+  }
+
+  /* CS Inquiries Filter Toolbar */
+  .cs-filter-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+
+  .cs-filter-group,
+  .cs-search-group {
+    width: 100%;
+    min-width: 0;
+    flex: 1 1 100%;
+  }
+
+  /* Form Grids Stacking */
+  .form-grid-2,
+  .form-grid-3,
+  .booth-editor-card,
+  .sub-status-metrics-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  /* Touch-Friendly Table Responsive */
+  .table-responsive {
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--ch-sand-light);
+    background: #ffffff;
+    margin: 0 -2px;
+  }
+
+  .cms-table {
+    min-width: 680px;
+    font-size: 12.5px;
+  }
+
+  .cms-table th,
+  .cms-table td {
+    padding: 10px 12px;
+  }
+
+  .cms-data-table {
+    min-width: 650px;
+    font-size: 12.5px;
+  }
+
+  .cms-data-table th,
+  .cms-data-table td {
+    padding: 10px 12px;
+  }
+
+  .stocks-mini-table {
+    min-width: 460px;
+    font-size: 12px;
+  }
+
+  .stocks-mini-table td,
+  .stocks-mini-table th {
+    padding: 8px;
+  }
+
+  /* Responsive Modals */
+  .cms-modal-overlay {
+    padding: 10px;
+    align-items: flex-end;
+  }
+
+  .cms-modal-card,
+  .cms-modal-card.large {
+    width: 100%;
+    max-width: 100%;
+    max-height: calc(100vh - 20px);
+    max-height: calc(100dvh - 20px);
+    border-radius: 16px 16px 0 0;
+    margin: 0;
+  }
+
+  .modal-head {
+    padding: 14px 16px;
+  }
+
+  .modal-head h3 {
+    font-size: 16px;
+  }
+
+  form {
+    padding: 16px;
+    gap: 14px;
+  }
+
+  .modal-actions {
+    flex-direction: column-reverse;
+    width: 100%;
+    gap: 8px;
+    padding-top: 12px;
+  }
+
+  .modal-actions button,
+  .modal-actions a {
+    width: 100%;
+    justify-content: center;
+  }
+
+  /* Prevent iOS Safari 16px Zoom Glitch */
+  form input,
+  form select,
+  form textarea,
+  .form-group input,
+  .form-group select,
+  .form-group textarea,
+  .search-box-cms input,
+  .cs-search-input-wrap input,
+  .cs-filter-group select,
+  .stocks-mini-table input,
+  .stocks-mini-table select {
+    font-size: 16px !important;
+  }
+
+  /* Toast Notification */
+  .cms-toast {
+    left: 12px;
+    right: 12px;
+    bottom: 12px;
+    max-width: none;
+    padding: 12px 16px;
+  }
+}
+
+/* ---------- Small Mobile Phones (<= 480px) ---------- */
+@media (max-width: 480px) {
+  .cms-topbar {
+    padding: 8px 10px;
+  }
+
+  .btn-toggle-sidebar {
+    width: 34px;
+    height: 34px;
+    font-size: 15px;
+  }
+
+  .topbar-title-wrap h1 {
+    font-size: 14.5px;
+    max-width: 140px;
+  }
+
+  .sync-status-pill .sync-text {
+    display: none;
+  }
+
+  .sync-status-pill {
+    padding: 6px 9px;
+  }
+
+  .btn-preview-top .preview-text {
+    display: none;
+  }
+
+  .btn-preview-top {
+    padding: 6px 10px;
+  }
+
+  .stats-grid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .dash-outlet-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .dash-outlet-actions {
+    width: 100%;
+    display: flex;
+    justify-content: flex-end;
+  }
+
+  .cat-card-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
   }
 }
 

@@ -68,10 +68,13 @@ function switchTab(tabName, btnElement) {
   const headingElem = document.getElementById('page-heading');
   if (headingElem) headingElem.textContent = headingMap[tabName] || 'CMS Amanda Balikpapan';
 
-  // Auto-close sidebar on mobile
-  if (window.innerWidth <= 768) {
+  // Auto-close sidebar on mobile / tablet (<= 1024px)
+  if (window.innerWidth <= 1024) {
     const sidebar = document.getElementById('cms-sidebar');
+    const backdrop = document.getElementById('sidebar-backdrop');
     if (sidebar) sidebar.classList.remove('open');
+    if (backdrop) backdrop.classList.remove('active');
+    document.body.classList.remove('sidebar-open-freeze');
   }
 
   // Refresh data view
@@ -85,9 +88,15 @@ function switchTab(tabName, btnElement) {
   if (tabName === 'security') renderSecurityVault();
 }
 
-function toggleSidebar() {
+function toggleSidebar(forceOpen) {
   const sidebar = document.getElementById('cms-sidebar');
-  if (sidebar) sidebar.classList.toggle('open');
+  const backdrop = document.getElementById('sidebar-backdrop');
+  if (!sidebar) return;
+
+  const willBeOpen = typeof forceOpen === 'boolean' ? forceOpen : !sidebar.classList.contains('open');
+  sidebar.classList.toggle('open', willBeOpen);
+  if (backdrop) backdrop.classList.toggle('active', willBeOpen);
+  document.body.classList.toggle('sidebar-open-freeze', willBeOpen);
 }
 
 // ==================== DASHBOARD OVERVIEW ====================

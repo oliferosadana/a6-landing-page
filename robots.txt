@@ -1,7 +1,9 @@
 # robots.txt for Amanda Brownies Landing & CMS
 User-agent: *
 Allow: /
+Allow: /google*.html
 Disallow: /admin.html
 Disallow: /login.html
 
+Sitemap: https://amandabrownies-kalimantan.store/sitemap.xml
 Sitemap: https://amandabrownies.id/sitemap.xml

@@ -263,9 +263,13 @@ function renderOutletLocatorList(filterCity = 'all') {
         </div>
         <ul class="booths-simple-list">
           ${boothsList.map(bth => {
-      const mapsQuery = encodeURIComponent(`${bth.name} ${out.city} Balikpapan`);
-      const mapsUrl = bth.mapsUrl || `https://maps.google.com/?q=${mapsQuery}`;
       const waMsg = encodeURIComponent(`Halo ${bth.name}, saya ingin memesan brownies Amanda. Mohon info ketersediaan stok.`);
+      const hasWa = Boolean(bth.wa || out.wa);
+      const hasGrab = Boolean(bth.grabUrl && bth.grabUrl.trim());
+      const hasGofood = Boolean(bth.gofoodUrl && bth.gofoodUrl.trim());
+      const hasShopee = Boolean(bth.shopeefoodUrl && bth.shopeefoodUrl.trim());
+      const hasMaps = Boolean(bth.mapsUrl && bth.mapsUrl.trim());
+
       return `
               <li class="booth-simple-item">
                 <div class="booth-simple-text">
@@ -273,12 +277,11 @@ function renderOutletLocatorList(filterCity = 'all') {
                   <span class="booth-simple-time"><i class="fa-regular fa-clock" style="font-size: 10px; margin-right: 3px;"></i>${bth.hours}</span>
                 </div>
                 <div class="booth-item-actions">
-                  <a href="https://wa.me/${bth.wa || out.wa}?text=${waMsg}" target="_blank" class="btn-booth-simple-wa" title="WhatsApp ${bth.name}">
-                    <i class="fa-brands fa-whatsapp"></i> Chat
-                  </a>
-                  <a href="${mapsUrl}" target="_blank" class="btn-booth-simple-maps" title="Petunjuk Arah Google Maps ${bth.name}">
-                    <i class="fa-solid fa-map-location-dot"></i>
-                  </a>
+                  ${hasWa ? `<a href="https://wa.me/${bth.wa || out.wa}?text=${waMsg}" target="_blank" class="btn-booth-simple-wa" title="WhatsApp ${bth.name}"><i class="fa-brands fa-whatsapp"></i> Chat</a>` : ''}
+                  ${hasGrab ? `<a href="${bth.grabUrl.trim()}" target="_blank" class="btn-booth-simple-grab" title="GrabFood ${bth.name}"><i class="fa-solid fa-motorcycle"></i></a>` : ''}
+                  ${hasGofood ? `<a href="${bth.gofoodUrl.trim()}" target="_blank" class="btn-booth-simple-gofood" title="GoFood ${bth.name}"><i class="fa-solid fa-bowl-food"></i></a>` : ''}
+                  ${hasShopee ? `<a href="${bth.shopeefoodUrl.trim()}" target="_blank" class="btn-booth-simple-shopee" title="ShopeeFood ${bth.name}"><i class="fa-solid fa-bag-shopping"></i></a>` : ''}
+                  ${hasMaps ? `<a href="${bth.mapsUrl.trim()}" target="_blank" class="btn-booth-simple-maps" title="Petunjuk Arah Google Maps ${bth.name}"><i class="fa-solid fa-map-location-dot"></i></a>` : ''}
                 </div>
               </li>
             `;
@@ -318,7 +321,10 @@ function renderOutletLocatorList(filterCity = 'all') {
             <a href="https://wa.me/${out.wa}?text=${encodeURIComponent('Halo ' + out.name + ', saya ingin pesan brownies Amanda. Mohon info varian yang ready saat ini.')}" target="_blank" class="btn-network-wa">
               <i class="fa-brands fa-whatsapp"></i> Hubungi Outlet
             </a>
-            <a href="${out.mapsUrl}" target="_blank" class="btn-network-maps" title="Buka Rute Google Maps">
+            ${Boolean(out.grabUrl && out.grabUrl.trim()) ? `<a href="${out.grabUrl.trim()}" target="_blank" class="btn-network-grab" title="Pesan via GrabFood"><i class="fa-solid fa-motorcycle"></i> Grab</a>` : ''}
+            ${Boolean(out.gofoodUrl && out.gofoodUrl.trim()) ? `<a href="${out.gofoodUrl.trim()}" target="_blank" class="btn-network-gofood" title="Pesan via GoFood"><i class="fa-solid fa-bowl-food"></i> GoFood</a>` : ''}
+            ${Boolean(out.shopeefoodUrl && out.shopeefoodUrl.trim()) ? `<a href="${out.shopeefoodUrl.trim()}" target="_blank" class="btn-network-shopee" title="Pesan via ShopeeFood"><i class="fa-solid fa-bag-shopping"></i> Shopee</a>` : ''}
+            <a href="${out.mapsUrl || `https://maps.google.com/?q=${encodeURIComponent(out.name + ' ' + out.city)}`}" target="_blank" class="btn-network-maps" title="Buka Rute Google Maps">
               <i class="fa-solid fa-diamond-turn-right"></i> Rute Maps
             </a>
           </div>

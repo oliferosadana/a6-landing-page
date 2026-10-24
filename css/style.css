@@ -1908,10 +1908,115 @@ h4,
   transform: translateY(0);
 }
 
+.btn-booth-simple-grab,
+.btn-booth-simple-gofood,
+.btn-booth-simple-shopee {
+  width: 24px;
+  height: 24px;
+  border-radius: var(--radius-sm);
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  flex-shrink: 0;
+  transition: all var(--transition-fast);
+}
+
+.btn-booth-simple-grab {
+  background: rgba(0, 177, 79, 0.08);
+  color: #008a3e;
+  border: 1px solid rgba(0, 177, 79, 0.3);
+}
+.btn-booth-simple-grab:hover {
+  background: #00B14F;
+  color: #ffffff;
+  border-color: #00B14F;
+  transform: translateY(-1px);
+}
+
+.btn-booth-simple-gofood {
+  background: rgba(238, 39, 55, 0.08);
+  color: #EE2737;
+  border: 1px solid rgba(238, 39, 55, 0.3);
+}
+.btn-booth-simple-gofood:hover {
+  background: #EE2737;
+  color: #ffffff;
+  border-color: #EE2737;
+  transform: translateY(-1px);
+}
+
+.btn-booth-simple-shopee {
+  background: rgba(238, 77, 45, 0.08);
+  color: #EE4D2D;
+  border: 1px solid rgba(238, 77, 45, 0.3);
+}
+.btn-booth-simple-shopee:hover {
+  background: #EE4D2D;
+  color: #ffffff;
+  border-color: #EE4D2D;
+  transform: translateY(-1px);
+}
+
 .outlet-network-actions {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.btn-network-grab,
+.btn-network-gofood,
+.btn-network-shopee {
+  flex: 1;
+  min-width: 0;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 8px 10px;
+  border-radius: var(--radius-md);
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  transition: all var(--transition-fast);
+}
+
+.btn-network-grab {
+  background: rgba(0, 177, 79, 0.08);
+  color: #008a3e;
+  border: 1px solid rgba(0, 177, 79, 0.3);
+}
+.btn-network-grab:hover {
+  background: #00B14F;
+  color: #ffffff;
+  box-shadow: 0 4px 12px rgba(0, 177, 79, 0.25);
+  transform: translateY(-1px);
+}
+
+.btn-network-gofood {
+  background: rgba(238, 39, 55, 0.08);
+  color: #EE2737;
+  border: 1px solid rgba(238, 39, 55, 0.3);
+}
+.btn-network-gofood:hover {
+  background: #EE2737;
+  color: #ffffff;
+  box-shadow: 0 4px 12px rgba(238, 39, 55, 0.25);
+  transform: translateY(-1px);
+}
+
+.btn-network-shopee {
+  background: rgba(238, 77, 45, 0.08);
+  color: #EE4D2D;
+  border: 1px solid rgba(238, 77, 45, 0.3);
+}
+.btn-network-shopee:hover {
+  background: #EE4D2D;
+  color: #ffffff;
+  box-shadow: 0 4px 12px rgba(238, 77, 45, 0.25);
+  transform: translateY(-1px);
 }
 
 .btn-network-wa {

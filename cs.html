@@ -851,6 +851,115 @@
       renderReceiptPreviews();
     }
 
+    // WAHA Automated WhatsApp Notification Engine
+    const WAHA_CONFIG = {
+      serverUrl: 'https://waha.oodana.my.id',
+      apiKey: 'zNqV4kRkBjEymlCgNxTiKLWZw75EgNg',
+      sessionName: 'default',
+      adminPhone: '6281253439968'
+    };
+
+    function getActiveWahaConfig() {
+      try {
+        const raw = localStorage.getItem('amanda_waha_config');
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (
+            !parsed.serverUrl ||
+            parsed.serverUrl.includes('localhost') ||
+            parsed.serverUrl.includes('127.0.0.1') ||
+            parsed.serverUrl.includes('143.198.219.167') ||
+            !parsed.serverUrl.startsWith('https://')
+          ) {
+            parsed.serverUrl = WAHA_CONFIG.serverUrl;
+            parsed.apiKey = WAHA_CONFIG.apiKey;
+          }
+          if (!parsed.adminPhone || parsed.adminPhone === '6281241075981') {
+            parsed.adminPhone = WAHA_CONFIG.adminPhone;
+          }
+          return { ...WAHA_CONFIG, ...parsed };
+        }
+      } catch (e) {}
+      return WAHA_CONFIG;
+    }
+
+    async function sendWahaAdminAlert(payload) {
+      try {
+        const config = getActiveWahaConfig();
+        const adminPhone = config.adminPhone || WAHA_CONFIG.adminPhone;
+        const targetChatId = adminPhone.includes('@c.us') ? adminPhone : `${adminPhone.replace(/\D/g, '')}@c.us`;
+
+        const categoryLabels = {
+          complaint: 'Komplain / Pengaduan Produk',
+          stock: 'Tanya Ketersediaan Stok',
+          catering: 'Pesanan Katering / Acara',
+          promo: 'Klaim Promo & Flyer',
+          partnership: 'Kerjasama / Reseller B2B',
+          other: 'Pertanyaan Lainnya'
+        };
+
+        const catText = categoryLabels[payload.category] || payload.category || 'Layanan CS';
+        const dateStr = new Date().toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' });
+
+        const text = `🔔 *NOTIFIKASI PENGADUAN BARU (CS)* 🍫\n\nHalo Admin Amanda Brownies, ada tiket pengaduan baru dari pelanggan yang perlu ditindaklanjuti:\n\n📋 *No. Tiket*: #${payload.id}\n👤 *Nama Pelanggan*: ${payload.name || 'Pelanggan'}\n📞 *No. WhatsApp*: ${payload.phone || '-'}\n🏪 *Outlet/Cabang*: ${payload.outlet_name || 'Balikpapan'}\n🏷️ *Kategori*: ${catText}\n🧾 *No. Struk*: ${payload.receipt_number || 'Tidak dilampirkan'}\n⭐ *Rating*: ${payload.rating || 5} / 5\n💬 *Pesan/Kendala*:\n"${payload.message || '-'}"\n\n⏰ *Waktu*: ${dateStr}\n\nSilakan buka panel Admin Amanda untuk tindak lanjut segera. Terima kasih!`;
+
+        const controller = new AbortController();
+        const timer = setTimeout(() => controller.abort(), 7000);
+
+        const res = await fetch(`${config.serverUrl.replace(/\/+$/, '')}/api/sendText`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'X-Api-Key': config.apiKey
+          },
+          body: JSON.stringify({
+            session: config.sessionName || 'default',
+            chatId: targetChatId,
+            text: text
+          }),
+          signal: controller.signal
+        });
+        clearTimeout(timer);
+        return res.ok;
+      } catch (err) {
+        console.warn('Gagal kirim notifikasi WhatsApp ke Admin:', err);
+        return false;
+      }
+    }
+
+    async function sendWahaCustomerConfirmation(payload) {
+      if (!payload.phone || payload.phone.length < 8) return false;
+      try {
+        const config = getActiveWahaConfig();
+        const custChatId = payload.phone.includes('@c.us') ? payload.phone : `${payload.phone.replace(/\D/g, '')}@c.us`;
+        const custText = `Halo Kak *${payload.name || 'Pelanggan'}*,\n\nTerima kasih telah menghubungi Layanan Pelanggan *Amanda Brownies Balikpapan*.\n\nPengaduan/pesan Kakak dengan nomor tiket *#${payload.id}* untuk cabang *${payload.outlet_name || 'Balikpapan'}* telah berhasil kami catat di sistem kami dan sedang diteruskan ke tim outlet.\n\nTim kami akan segera menindaklanjuti kendala Kakak. Mohon kesediaannya menunggu konfirmasi selanjutnya ya Kak.\n\nSalam hangat,\n*Amanda Brownies Official Balikpapan* 🍫✨`;
+
+        const controller = new AbortController();
+        const timer = setTimeout(() => controller.abort(), 7000);
+
+        const res = await fetch(`${config.serverUrl.replace(/\/+$/, '')}/api/sendText`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'X-Api-Key': config.apiKey
+          },
+          body: JSON.stringify({
+            session: config.sessionName || 'default',
+            chatId: custChatId,
+            text: custText
+          }),
+          signal: controller.signal
+        });
+        clearTimeout(timer);
+        return res.ok;
+      } catch (err) {
+        console.warn('Gagal kirim auto-reply WhatsApp ke Pelanggan:', err);
+        return false;
+      }
+    }
+
     async function handleCsFormSubmit(event) {
       event.preventDefault();
       const btn = document.getElementById('btn-submit-cs');
@@ -920,7 +1029,17 @@
         window.dispatchEvent(new CustomEvent('amanda_data_updated'));
       } catch (e) {}
 
-      // 3. Show Success Modal
+      // 3. Dispatch automated WhatsApp notification to Admin & Customer via WAHA API
+      try {
+        await Promise.allSettled([
+          sendWahaAdminAlert(payload),
+          sendWahaCustomerConfirmation(payload)
+        ]);
+      } catch (wErr) {
+        console.warn('Gagal memicu pengiriman notifikasi WhatsApp WAHA:', wErr);
+      }
+
+      // 4. Show Success Modal
       document.getElementById('modal-ticket-id').textContent = '#' + ticketId;
       const modalOutletElem = document.getElementById('modal-outlet-name');
       if (modalOutletElem) modalOutletElem.textContent = fullLocation;

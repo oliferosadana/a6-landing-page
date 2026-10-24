@@ -2642,6 +2642,42 @@ function updateCsReceiptModalView() {
   }
 }
 
+async function sendWahaStatusUpdate(inquiryId, newStatus) {
+  try {
+    const rawList = typeof getCsInquiries === 'function' ? getCsInquiries() : [];
+    const item = rawList.find(i => i.id === inquiryId);
+    if (!item || !item.phone || item.phone.length < 8) return;
+
+    let cleanPhone = item.phone.replace(/\D/g, '');
+    if (cleanPhone.startsWith('0')) cleanPhone = '62' + cleanPhone.substring(1);
+    const chatId = cleanPhone.includes('@c.us') ? cleanPhone : `${cleanPhone}@c.us`;
+
+    let msg = '';
+    if (newStatus === 'IN_PROGRESS') {
+      msg = `Halo Kak *${item.name || 'Pelanggan'}*,\n\nKami menginformasikan bahwa tiket pengaduan/pesan Kakak *#${item.id}* saat ini: *Sedang Diproses oleh Tim Outlet* ⚙️.\n\nTim kami sedang mengupayakan penanganan terbaik. Mohon kesediaannya menunggu ya Kak.\n\nSalam hangat,\n*Amanda Brownies Official Balikpapan* 🍫✨`;
+    } else if (newStatus === 'RESOLVED') {
+      msg = `Halo Kak *${item.name || 'Pelanggan'}*,\n\nKabar baik! Tiket pengaduan/layanan Kakak *#${item.id}* di cabang *${item.outlet_name || 'Balikpapan'}* telah *selesai ditangani*. ✅\n\nTerima kasih atas kesabaran dan masukan berharga Kakak untuk peningkatan layanan Amanda Brownies.\n\nSalam hangat,\n*Amanda Brownies Official Balikpapan* 🍰💖`;
+    }
+    if (!msg) return;
+
+    fetch('https://waha.oodana.my.id/api/sendText', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'X-Api-Key': 'zNqV4kRkBjEymlCgNxTiKLWZw75EgNg'
+      },
+      body: JSON.stringify({
+        session: 'default',
+        chatId: chatId,
+        text: msg
+      })
+    }).catch(err => console.warn('WAHA status update notification error:', err));
+  } catch (e) {
+    console.warn('sendWahaStatusUpdate error:', e);
+  }
+}
+
 async function changeCsStatus(inquiryId, newStatus) {
   if (typeof updateCsInquiryStatus === 'function') {
     updateCsInquiryStatus(inquiryId, newStatus);
@@ -2654,6 +2690,9 @@ async function changeCsStatus(inquiryId, newStatus) {
         console.warn('Supabase status update error:', e);
       }
     }
+
+    // Send auto notification to customer WhatsApp via WAHA
+    sendWahaStatusUpdate(inquiryId, newStatus);
     
     showCmsToast(`Status tiket #${inquiryId} diperbarui menjadi ${newStatus}.`, 'Status Diperbarui');
     renderCsManager();

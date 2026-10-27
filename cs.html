@@ -596,6 +596,11 @@
         });
       }
 
+      // Prefetch live WAHA & Admin phone configuration from Supabase
+      if (typeof getActiveWahaConfig === 'function') {
+        getActiveWahaConfig().catch(() => {});
+      }
+
       // Listen for background Supabase updates to keep outlet/booth list synced
       window.addEventListener('amanda_data_updated', () => {
         populateOutletDropdown();
@@ -852,41 +857,87 @@
     }
 
     // WAHA Automated WhatsApp Notification Engine
+    const SUPABASE_CONFIG_API = {
+      url: 'https://fywzoiqmlxwbnkvordxu.supabase.co',
+      anonKey: 'sb_publishable_w8ai_EoixB5KG9jQiXo2Qg_MhbD-56d'
+    };
+
     const WAHA_CONFIG = {
       serverUrl: 'https://waha.oodana.my.id',
       apiKey: 'zNqV4kRkBjEymlCgNxTiKLWZw75EgNg',
       sessionName: 'default',
-      adminPhone: '6281253439968'
+      adminPhone: '628115954488',
+      autoNotifyAdminNew: true
     };
 
-    function getActiveWahaConfig() {
+    let cachedWahaConfig = null;
+
+    async function getActiveWahaConfig() {
+      if (cachedWahaConfig && cachedWahaConfig.adminPhone) return cachedWahaConfig;
+
+      let config = { ...WAHA_CONFIG };
+
+      // 1. Coba baca cache lokal jika tersedia
       try {
         const raw = localStorage.getItem('amanda_waha_config');
         if (raw) {
           const parsed = JSON.parse(raw);
-          if (
-            !parsed.serverUrl ||
-            parsed.serverUrl.includes('localhost') ||
-            parsed.serverUrl.includes('127.0.0.1') ||
-            parsed.serverUrl.includes('143.198.219.167') ||
-            !parsed.serverUrl.startsWith('https://')
-          ) {
-            parsed.serverUrl = WAHA_CONFIG.serverUrl;
-            parsed.apiKey = WAHA_CONFIG.apiKey;
-          }
-          if (!parsed.adminPhone || parsed.adminPhone === '6281241075981') {
-            parsed.adminPhone = WAHA_CONFIG.adminPhone;
-          }
-          return { ...WAHA_CONFIG, ...parsed };
+          config = { ...config, ...parsed };
         }
       } catch (e) {}
-      return WAHA_CONFIG;
+
+      // 2. Tarik konfigurasi terbaru langsung dari database Supabase (tabel waha_config)
+      try {
+        const controller = new AbortController();
+        const timer = setTimeout(() => controller.abort(), 4000);
+        const res = await fetch(`${SUPABASE_CONFIG_API.url}/rest/v1/waha_config?id=eq.default&select=*`, {
+          headers: {
+            'apikey': SUPABASE_CONFIG_API.anonKey,
+            'Authorization': `Bearer ${SUPABASE_CONFIG_API.anonKey}`
+          },
+          signal: controller.signal
+        });
+        clearTimeout(timer);
+
+        if (res.ok) {
+          const rows = await res.json();
+          if (Array.isArray(rows) && rows.length > 0) {
+            const db = rows[0];
+            if (db.server_url) config.serverUrl = db.server_url;
+            if (db.api_key) config.apiKey = db.api_key;
+            if (db.session_name) config.sessionName = db.session_name;
+            if (db.admin_phone) config.adminPhone = db.admin_phone;
+            if (typeof db.auto_notify_admin_new === 'boolean') {
+              config.autoNotifyAdminNew = db.auto_notify_admin_new;
+            }
+            try {
+              localStorage.setItem('amanda_waha_config', JSON.stringify(config));
+            } catch (e) {}
+          }
+        }
+      } catch (err) {
+        console.warn('Gagal memuat waha_config dari database Supabase, menggunakan fallback:', err);
+      }
+
+      cachedWahaConfig = config;
+      return config;
     }
 
     async function sendWahaAdminAlert(payload) {
       try {
-        const config = getActiveWahaConfig();
-        const adminPhone = config.adminPhone || WAHA_CONFIG.adminPhone;
+        const config = await getActiveWahaConfig();
+
+        if (config.autoNotifyAdminNew === false) {
+          console.log('[WAHA] Notifikasi WA Admin dinonaktifkan di database.');
+          return false;
+        }
+
+        const adminPhone = config.adminPhone;
+        if (!adminPhone) {
+          console.warn('[WAHA] Nomor WhatsApp Admin belum diatur di database atau CMS.');
+          return false;
+        }
+
         const targetChatId = adminPhone.includes('@c.us') ? adminPhone : `${adminPhone.replace(/\D/g, '')}@c.us`;
 
         const categoryLabels = {
@@ -931,7 +982,7 @@
     async function sendWahaCustomerConfirmation(payload) {
       if (!payload.phone || payload.phone.length < 8) return false;
       try {
-        const config = getActiveWahaConfig();
+        const config = await getActiveWahaConfig();
         const custChatId = payload.phone.includes('@c.us') ? payload.phone : `${payload.phone.replace(/\D/g, '')}@c.us`;
         const custText = `Halo Kak *${payload.name || 'Pelanggan'}*,\n\nTerima kasih telah menghubungi Layanan Pelanggan *Amanda Brownies Balikpapan*.\n\nPengaduan/pesan Kakak dengan nomor tiket *#${payload.id}* untuk cabang *${payload.outlet_name || 'Balikpapan'}* telah berhasil kami catat di sistem kami dan sedang diteruskan ke tim outlet.\n\nTim kami akan segera menindaklanjuti kendala Kakak. Mohon kesediaannya menunggu konfirmasi selanjutnya ya Kak.\n\nSalam hangat,\n*Amanda Brownies Official Balikpapan* 🍫✨`;
 

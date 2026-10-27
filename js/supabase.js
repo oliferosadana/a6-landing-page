@@ -7,8 +7,8 @@ const SUPABASE_CONFIG_STORAGE_KEY = 'amanda_supabase_config';
 const SECURITY_VAULT_STORAGE_KEY = 'amanda_security_vault';
 
 // Active Supabase Cloud Project Configuration (Managed via Admin Vault)
-const DEFAULT_SUPABASE_URL = 'https://ffzzlertrzfrpuhbspws.supabase.co';
-const DEFAULT_SUPABASE_KEY = 'sb_publishable_64yf0NZHiOLEylWhspci4A_EaOWuVyB';
+const DEFAULT_SUPABASE_URL = 'https://fywzoiqmlxwbnkvordxu.supabase.co';
+const DEFAULT_SUPABASE_KEY = 'sb_publishable_w8ai_EoixB5KG9jQiXo2Qg_MhbD-56d';
 
 let supabaseConfig = {
   url: DEFAULT_SUPABASE_URL,
@@ -28,7 +28,7 @@ function getSecurityVaultData() {
     if (raw) {
       const parsed = JSON.parse(raw);
       // Auto-migrate if stored URL is from old/stale instance or key is invalid
-      if (parsed.supabaseUrl && (parsed.supabaseUrl.includes('zomkdefqivvbtxqzavpz') || !parsed.supabaseAnonKey || !parsed.supabaseAnonKey.startsWith('sb_publishable'))) {
+      if (parsed.supabaseUrl && (parsed.supabaseUrl.includes('zomkdefqivvbtxqzavpz') || parsed.supabaseUrl.includes('ffzzlertrzfrpuhbspws') || !parsed.supabaseAnonKey || !parsed.supabaseAnonKey.startsWith('sb_publishable'))) {
         parsed.supabaseUrl = DEFAULT_SUPABASE_URL;
         parsed.supabaseAnonKey = DEFAULT_SUPABASE_KEY;
         try { localStorage.setItem(SECURITY_VAULT_STORAGE_KEY, JSON.stringify(parsed)); } catch(e) {}

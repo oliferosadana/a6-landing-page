@@ -299,13 +299,17 @@ function renderOutletLocatorList(filterCity = 'all') {
           <div class="outlet-live-badge">
             <span class="live-dot"></span> Buka • ${out.hours}
           </div>
-          <!-- Social Media Pulse Overlay (Instagram & TikTok) -->
-          <div class="outlet-media-socials" onclick="event.stopPropagation()" title="Media Sosial Resmi Amanda Brownies">
+          <!-- Social Media Pulse Overlay (Follow us: Instagram, TikTok, Threads) -->
+          <div class="outlet-media-socials" onclick="event.stopPropagation()" title="Ikuti Media Sosial Resmi Amanda Brownies">
+            <span class="outlet-social-label">Follow us:</span>
             <a href="https://www.instagram.com/amandabrownies" target="_blank" rel="noopener noreferrer" class="outlet-social-icon-btn outlet-social-pulse" title="Kunjungi Instagram Resmi @amandabrownies" aria-label="Instagram Amanda Brownies">
               <i class="fa-brands fa-instagram"></i>
             </a>
             <a href="https://www.tiktok.com/@amandabrownies" target="_blank" rel="noopener noreferrer" class="outlet-social-icon-btn outlet-social-pulse" title="Kunjungi TikTok Resmi @amandabrownies" aria-label="TikTok Amanda Brownies">
               <i class="fa-brands fa-tiktok"></i>
+            </a>
+            <a href="https://www.threads.net/@amandabrownies" target="_blank" rel="noopener noreferrer" class="outlet-social-icon-btn outlet-social-pulse" title="Kunjungi Threads Resmi @amandabrownies" aria-label="Threads Amanda Brownies">
+              <i class="fa-brands fa-threads"></i>
             </a>
           </div>
         </div>

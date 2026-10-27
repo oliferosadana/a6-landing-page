@@ -299,6 +299,15 @@ function renderOutletLocatorList(filterCity = 'all') {
           <div class="outlet-live-badge">
             <span class="live-dot"></span> Buka • ${out.hours}
           </div>
+          <!-- Social Media Pulse Overlay (Instagram & TikTok) -->
+          <div class="outlet-media-socials" onclick="event.stopPropagation()" title="Media Sosial Resmi Amanda Brownies">
+            <a href="https://www.instagram.com/amandabrownies" target="_blank" rel="noopener noreferrer" class="outlet-social-icon-btn outlet-social-pulse" title="Kunjungi Instagram Resmi @amandabrownies" aria-label="Instagram Amanda Brownies">
+              <i class="fa-brands fa-instagram"></i>
+            </a>
+            <a href="https://www.tiktok.com/@amandabrownies" target="_blank" rel="noopener noreferrer" class="outlet-social-icon-btn outlet-social-pulse" title="Kunjungi TikTok Resmi @amandabrownies" aria-label="TikTok Amanda Brownies">
+              <i class="fa-brands fa-tiktok"></i>
+            </a>
+          </div>
         </div>
 
         <!-- Right Side: Simple List & Information -->

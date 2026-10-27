@@ -882,6 +882,9 @@
         const raw = localStorage.getItem('amanda_waha_config');
         if (raw) {
           const parsed = JSON.parse(raw);
+          if (parsed.adminPhone === '6281253439968' || parsed.adminPhone === '6281241075981') {
+            parsed.adminPhone = WAHA_CONFIG.adminPhone;
+          }
           config = { ...config, ...parsed };
         }
       } catch (e) {}
@@ -919,6 +922,10 @@
         console.warn('Gagal memuat waha_config dari database Supabase, menggunakan fallback:', err);
       }
 
+      if (config.adminPhone === '6281253439968' || config.adminPhone === '6281241075981') {
+        config.adminPhone = WAHA_CONFIG.adminPhone;
+      }
+
       cachedWahaConfig = config;
       return config;
     }
@@ -932,7 +939,10 @@
           return false;
         }
 
-        const adminPhone = config.adminPhone;
+        let adminPhone = config.adminPhone;
+        if (!adminPhone || adminPhone === '6281253439968' || adminPhone === '6281241075981') {
+          adminPhone = WAHA_CONFIG.adminPhone;
+        }
         if (!adminPhone) {
           console.warn('[WAHA] Nomor WhatsApp Admin belum diatur di database atau CMS.');
           return false;

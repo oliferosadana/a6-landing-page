@@ -695,31 +695,10 @@
   </div>
 
   <div class="floating-music-widget is-paused is-loading" id="floating-music-widget" aria-label="Kontrol Backsound Musik">
-    <!-- Volume Popover -->
-    <div class="music-volume-panel" id="music-volume-panel" style="display: none;" onclick="event.stopPropagation()">
-      <div class="music-volume-header">
-        <span class="volume-label" id="music-volume-label">
-          <i class="fa-solid fa-volume-low"></i> Volume Musik (40%)
-        </span>
-        <button type="button" class="music-mute-btn" id="music-mute-btn" onclick="toggleMusicMute()">Mute</button>
-      </div>
-      <input type="range" min="0" max="100" value="40" class="music-volume-slider" id="music-volume-slider" oninput="changeMusicVolume(this.value)" aria-label="Pengatur Volume Backsound">
-    </div>
-
-    <!-- Floating Tooltip Pill -->
-    <div class="music-floating-pill" id="music-floating-pill" onclick="toggleMusicPlayback()" role="button" tabindex="0" title="Klik untuk putar backsound">
-      <span class="music-pill-status-dot"></span>
-      <span class="music-pill-text" id="music-pill-text">🎵 Musik Suasana</span>
-    </div>
-
-    <!-- Floating Circle Button -->
     <div class="music-btn-wrapper">
       <span class="music-pulse-ring" id="music-pulse-ring"></span>
-      <button type="button" class="floating-music-btn" id="floating-music-btn" onclick="toggleMusicPlayback()" oncontextmenu="event.preventDefault(); toggleMusicVolumePanel();" aria-label="Putar Musik" title="Klik: Putar/Jeda Musik | Klik Kanan: Atur Volume">
+      <button type="button" class="floating-music-btn" id="floating-music-btn" onclick="toggleMusicPlayback()" aria-label="Putar Musik" title="Putar Musik">
         <i class="fa-solid fa-play music-icon-play" id="music-btn-icon"></i>
-      </button>
-      <button type="button" class="music-quick-vol-btn" onclick="event.stopPropagation(); toggleMusicVolumePanel();" title="Pengaturan Volume" aria-label="Buka Pengaturan Volume">
-        <i class="fa-solid fa-sliders" id="music-quick-vol-icon"></i>
       </button>
     </div>
   </div>

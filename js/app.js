@@ -1106,7 +1106,6 @@ let ytAudioPlayer = null;
 let ytAudioIsReady = false;
 let ytAudioIsPlaying = false;
 let ytAudioVolume = 40;
-let ytAudioIsMuted = false;
 const YT_BG_VIDEO_ID = 'y9F9wkQ_LLg';
 
 function initYouTubeAudio() {
@@ -1142,15 +1141,14 @@ function createYtAudioPlayer() {
       width: '1',
       videoId: YT_BG_VIDEO_ID,
       playerVars: {
-        autoplay: 0,
+        autoplay: 1, // Auto play saat halaman dibuka
         controls: 0,
         disablekb: 1,
         fs: 0,
         modestbranding: 1,
         rel: 0,
         playsinline: 1,
-        loop: 1,
-        playlist: YT_BG_VIDEO_ID,
+        loop: 0, // Putar hanya sekali (tanpa loop)
         origin: window.location.origin
       },
       events: {
@@ -1158,6 +1156,8 @@ function createYtAudioPlayer() {
           ytAudioIsReady = true;
           try {
             event.target.setVolume(ytAudioVolume);
+            // Langsung otomatis putar
+            event.target.playVideo();
           } catch (e) {}
           const widget = document.getElementById('floating-music-widget');
           if (widget) {
@@ -1168,7 +1168,6 @@ function createYtAudioPlayer() {
         onStateChange: function (event) {
           const widget = document.getElementById('floating-music-widget');
           const btn = document.getElementById('floating-music-btn');
-          const pillText = document.getElementById('music-pill-text');
           const pulseRing = document.getElementById('music-pulse-ring');
 
           if (event.data === window.YT.PlayerState.PLAYING) {
@@ -1186,8 +1185,9 @@ function createYtAudioPlayer() {
                   <span class="eq-bar eq-bar-4"></span>
                 </div>
               `;
+              btn.setAttribute('aria-label', 'Jeda Musik');
+              btn.setAttribute('title', 'Jeda Musik');
             }
-            if (pillText) pillText.textContent = 'Musik Santai Aktif';
             if (pulseRing) pulseRing.style.display = 'none';
           } else if (event.data === window.YT.PlayerState.PAUSED) {
             ytAudioIsPlaying = false;
@@ -1197,14 +1197,23 @@ function createYtAudioPlayer() {
             }
             if (btn) {
               btn.innerHTML = '<i class="fa-solid fa-play music-icon-play"></i>';
+              btn.setAttribute('aria-label', 'Putar Musik');
+              btn.setAttribute('title', 'Putar Musik');
             }
-            if (pillText) pillText.textContent = 'Putar Musik';
+            if (pulseRing) pulseRing.style.display = 'block';
           } else if (event.data === window.YT.PlayerState.ENDED) {
-            try {
-              event.target.playVideo();
-            } catch (e) {}
-          } else if (event.data === window.YT.PlayerState.BUFFERING) {
-            if (pillText) pillText.textContent = 'Memuat Lagu...';
+            // Selesai diputar 1x: berhenti dan siap diputar kembali jika tombol ditekan
+            ytAudioIsPlaying = false;
+            if (widget) {
+              widget.classList.remove('is-playing');
+              widget.classList.add('is-paused');
+            }
+            if (btn) {
+              btn.innerHTML = '<i class="fa-solid fa-play music-icon-play"></i>';
+              btn.setAttribute('aria-label', 'Putar Musik');
+              btn.setAttribute('title', 'Putar Musik');
+            }
+            if (pulseRing) pulseRing.style.display = 'block';
           }
         }
       }
@@ -1223,6 +1232,10 @@ function toggleMusicPlayback() {
     if (ytAudioIsPlaying) {
       ytAudioPlayer.pauseVideo();
     } else {
+      const state = typeof ytAudioPlayer.getPlayerState === 'function' ? ytAudioPlayer.getPlayerState() : -1;
+      if (state === 0 || state === window.YT?.PlayerState?.ENDED) {
+        ytAudioPlayer.seekTo(0, true);
+      }
       ytAudioPlayer.playVideo();
     }
   } catch (e) {
@@ -1230,82 +1243,36 @@ function toggleMusicPlayback() {
   }
 }
 
-function toggleMusicVolumePanel() {
-  const panel = document.getElementById('music-volume-panel');
-  if (!panel) return;
-  panel.style.display = panel.style.display === 'none' ? 'flex' : 'none';
-}
+// Autoplay fallback: Jika browser menahan autoplay suara sebelum ada interaksi,
+// musik langsung diputar pada sentuhan/scroll pertama di halaman
+function setupAutoplayGestureFallback() {
+  const handleFirstGesture = () => {
+    if (ytAudioPlayer && ytAudioIsReady && !ytAudioIsPlaying) {
+      try {
+        const state = typeof ytAudioPlayer.getPlayerState === 'function' ? ytAudioPlayer.getPlayerState() : -1;
+        if (state !== 1 && state !== 0) {
+          ytAudioPlayer.playVideo();
+        }
+      } catch (e) {}
+    }
+  };
 
-function toggleMusicMute() {
-  if (!ytAudioPlayer || !ytAudioIsReady) return;
-  const muteBtn = document.getElementById('music-mute-btn');
-  const quickIcon = document.getElementById('music-quick-vol-icon');
-  const slider = document.getElementById('music-volume-slider');
-  const label = document.getElementById('music-volume-label');
-
-  if (ytAudioIsMuted) {
-    ytAudioPlayer.unMute();
-    ytAudioPlayer.setVolume(ytAudioVolume);
-    ytAudioIsMuted = false;
-    if (muteBtn) muteBtn.textContent = 'Mute';
-    if (quickIcon) quickIcon.className = 'fa-solid fa-sliders';
-    if (slider) slider.value = ytAudioVolume;
-    if (label) label.innerHTML = `<i class="fa-solid fa-volume-low"></i> Volume Musik (${ytAudioVolume}%)`;
-  } else {
-    ytAudioPlayer.mute();
-    ytAudioIsMuted = true;
-    if (muteBtn) muteBtn.textContent = 'Unmute';
-    if (quickIcon) quickIcon.className = 'fa-solid fa-volume-xmark';
-    if (slider) slider.value = 0;
-    if (label) label.innerHTML = '<i class="fa-solid fa-volume-xmark"></i> Volume Musik (Mute)';
-  }
-}
-
-function changeMusicVolume(val) {
-  const newVol = parseInt(val, 10);
-  ytAudioVolume = newVol;
-  const label = document.getElementById('music-volume-label');
-  const quickIcon = document.getElementById('music-quick-vol-icon');
-  const muteBtn = document.getElementById('music-mute-btn');
-
-  if (ytAudioPlayer && ytAudioIsReady) {
-    try {
-      ytAudioPlayer.setVolume(newVol);
-      if (newVol > 0 && ytAudioIsMuted) {
-        ytAudioPlayer.unMute();
-        ytAudioIsMuted = false;
-        if (muteBtn) muteBtn.textContent = 'Mute';
-      }
-    } catch (e) {}
-  }
-
-  if (label) {
-    const iconClass = newVol === 0 ? 'fa-volume-xmark' : newVol < 50 ? 'fa-volume-low' : 'fa-volume-high';
-    label.innerHTML = `<i class="fa-solid ${iconClass}"></i> Volume Musik (${newVol}%)`;
-  }
-  if (quickIcon) {
-    quickIcon.className = newVol === 0 ? 'fa-solid fa-volume-xmark' : 'fa-solid fa-sliders';
-  }
+  window.addEventListener('pointerdown', handleFirstGesture, { once: true, passive: true });
+  window.addEventListener('touchstart', handleFirstGesture, { once: true, passive: true });
+  window.addEventListener('scroll', handleFirstGesture, { once: true, passive: true });
+  window.addEventListener('keydown', handleFirstGesture, { once: true, passive: true });
 }
 
 // Auto init on DOM ready
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', () => {
     initYouTubeAudio();
+    setupAutoplayGestureFallback();
   });
 } else {
   initYouTubeAudio();
+  setupAutoplayGestureFallback();
 }
-
-// Close volume panel on outside click
-document.addEventListener('click', (e) => {
-  const panel = document.getElementById('music-volume-panel');
-  const quickBtn = document.querySelector('.music-quick-vol-btn');
-  if (!panel || panel.style.display === 'none') return;
-  if (!panel.contains(e.target) && (!quickBtn || !quickBtn.contains(e.target))) {
-    panel.style.display = 'none';
-  }
-});
 
 
 

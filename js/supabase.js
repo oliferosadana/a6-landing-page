@@ -374,6 +374,9 @@ async function pullAllDataFromSupabase() {
             wa: o.wa || '',
             hours: o.hours || '07.00 - 22.00 WITA',
             mapsUrl: o.maps_url || o.mapsUrl || '',
+            instagramUrl: o.instagram_url || o.instagramUrl || '',
+            tiktokUrl: o.tiktok_url || o.tiktokUrl || '',
+            threadsUrl: o.threads_url || o.threadsUrl || '',
             distance: o.distance || '1.0 km',
             booths: Array.isArray(o.booths) ? o.booths : (typeof o.booths === 'string' ? JSON.parse(o.booths) : [])
           }));
@@ -644,6 +647,9 @@ async function pushToSupabase(tableName, payload, operation = 'upsert') {
         wa: (o.wa ? String(o.wa).replace(/[^0-9]/g, '') : '6281241075981'),
         hours: o.hours || '07.00 - 22.00 WITA',
         maps_url: o.mapsUrl || o.maps_url || '',
+        instagram_url: o.instagramUrl || o.instagram_url || '',
+        tiktok_url: o.tiktokUrl || o.tiktok_url || '',
+        threads_url: o.threadsUrl || o.threads_url || '',
         distance: o.distance || '1.0 km',
         booths: Array.isArray(o.booths) ? o.booths : []
       }));
@@ -769,6 +775,15 @@ async function pushToSupabase(tableName, payload, operation = 'upsert') {
       const res = await supabaseClient.from(tableName).upsert(dbPayload, { onConflict: 'id' });
       data = res.data;
       error = res.error;
+    }
+    if (error && error.code === 'PGRST204' && tableName === 'outlets') {
+      const safePayload = dbPayload.map(o => {
+        const { instagram_url, tiktok_url, threads_url, ...core } = o;
+        return core;
+      });
+      const retryRes = await supabaseClient.from(tableName).upsert(safePayload, { onConflict: 'id' });
+      data = retryRes.data;
+      error = retryRes.error;
     }
     if (error) {
       console.error(`❌ Supabase upsert [${tableName}] FAILED:`, error.message, '| Code:', error.code, '| Details:', error.details, '| Hint:', error.hint);

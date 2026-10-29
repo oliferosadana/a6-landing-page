@@ -744,6 +744,9 @@ function openOutletModal(outlet = null) {
     document.getElementById('outlet-form-address').value = outlet.address;
     document.getElementById('outlet-form-image').value = outlet.image;
     document.getElementById('outlet-form-maps').value = outlet.mapsUrl || '';
+    document.getElementById('outlet-form-instagram').value = outlet.instagramUrl || outlet.instagram_url || '';
+    document.getElementById('outlet-form-tiktok').value = outlet.tiktokUrl || outlet.tiktok_url || '';
+    document.getElementById('outlet-form-threads').value = outlet.threadsUrl || outlet.threads_url || '';
     previewOutletImage(outlet.image);
     renderBoothEditorRows(outlet.booths || [], outlet.wa);
   } else {
@@ -753,6 +756,9 @@ function openOutletModal(outlet = null) {
     document.getElementById('outlet-form-image').value = 'assets/outlet_mt_haryono.jpg';
     document.getElementById('outlet-form-hours').value = '07.30 - 21.30 WITA';
     document.getElementById('outlet-form-wa').value = '6281322119988';
+    document.getElementById('outlet-form-instagram').value = '';
+    document.getElementById('outlet-form-tiktok').value = '';
+    document.getElementById('outlet-form-threads').value = '';
     previewOutletImage('assets/outlet_mt_haryono.jpg');
     renderBoothEditorRows([], '6281322119988');
   }
@@ -903,6 +909,9 @@ function saveOutletForm(e) {
   const address = document.getElementById('outlet-form-address').value.trim() || 'Kota Balikpapan';
   const image = document.getElementById('outlet-form-image').value.trim() || 'assets/outlet_mt_haryono.jpg';
   const mapsUrl = document.getElementById('outlet-form-maps').value.trim() || `https://maps.google.com/?q=${encodeURIComponent(name + ' Balikpapan')}`;
+  const instagramUrl = document.getElementById('outlet-form-instagram')?.value.trim() || '';
+  const tiktokUrl = document.getElementById('outlet-form-tiktok')?.value.trim() || '';
+  const threadsUrl = document.getElementById('outlet-form-threads')?.value.trim() || '';
 
   // Collect booth counter rows
   const boothRows = document.querySelectorAll('#outlet-booths-editor-container .booth-editor-card');
@@ -935,6 +944,8 @@ function saveOutletForm(e) {
       AMANDA_OUTLETS[idx] = {
         ...AMANDA_OUTLETS[idx],
         name, city, hours, wa, phone, address, image, mapsUrl,
+        instagramUrl, tiktokUrl, threadsUrl,
+        instagram_url: instagramUrl, tiktok_url: tiktokUrl, threads_url: threadsUrl,
         booths: collectedBooths
       };
     }
@@ -943,6 +954,8 @@ function saveOutletForm(e) {
       id: 'out-bpn-' + Date.now(),
       name, city, region: "Kota Balikpapan",
       hours, wa, phone, address, image, mapsUrl,
+      instagramUrl, tiktokUrl, threadsUrl,
+      instagram_url: instagramUrl, tiktok_url: tiktokUrl, threads_url: threadsUrl,
       distance: "1.0 km",
       booths: collectedBooths
     };

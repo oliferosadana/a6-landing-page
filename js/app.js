@@ -300,15 +300,15 @@ function renderOutletLocatorList(filterCity = 'all') {
             <span class="live-dot"></span> Buka • ${out.hours}
           </div>
           <!-- Social Media Pulse Overlay (Follow us: Instagram, TikTok, Threads) -->
-          <div class="outlet-media-socials" onclick="event.stopPropagation()" title="Ikuti Media Sosial Resmi Amanda Brownies">
+          <div class="outlet-media-socials" onclick="event.stopPropagation()" title="Ikuti Media Sosial Amanda Brownies">
             <span class="outlet-social-label">Follow us:</span>
-            <a href="https://www.instagram.com/amandabrownies" target="_blank" rel="noopener noreferrer" class="outlet-social-icon-btn outlet-social-pulse" title="Kunjungi Instagram Resmi @amandabrownies" aria-label="Instagram Amanda Brownies">
+            <a href="${out.instagram_url || out.instagramUrl || 'https://www.instagram.com/amandabrownies'}" target="_blank" rel="noopener noreferrer" class="outlet-social-icon-btn outlet-social-pulse" title="Kunjungi Instagram ${out.name}" aria-label="Instagram ${out.name}">
               <i class="fa-brands fa-instagram"></i>
             </a>
-            <a href="https://www.tiktok.com/@amandabrownies" target="_blank" rel="noopener noreferrer" class="outlet-social-icon-btn outlet-social-pulse" title="Kunjungi TikTok Resmi @amandabrownies" aria-label="TikTok Amanda Brownies">
+            <a href="${out.tiktok_url || out.tiktokUrl || 'https://www.tiktok.com/@amandabrownies'}" target="_blank" rel="noopener noreferrer" class="outlet-social-icon-btn outlet-social-pulse" title="Kunjungi TikTok ${out.name}" aria-label="TikTok ${out.name}">
               <i class="fa-brands fa-tiktok"></i>
             </a>
-            <a href="https://www.threads.net/@amandabrownies" target="_blank" rel="noopener noreferrer" class="outlet-social-icon-btn outlet-social-pulse" title="Kunjungi Threads Resmi @amandabrownies" aria-label="Threads Amanda Brownies">
+            <a href="${out.threads_url || out.threadsUrl || 'https://www.threads.net/@amandabrownies'}" target="_blank" rel="noopener noreferrer" class="outlet-social-icon-btn outlet-social-pulse" title="Kunjungi Threads ${out.name}" aria-label="Threads ${out.name}">
               <i class="fa-brands fa-threads"></i>
             </a>
           </div>
@@ -1097,6 +1097,216 @@ document.addEventListener('keydown', (e) => {
     }
   }
 });
+
+// ===================================================================
+// FLOATING YOUTUBE BACKGROUND AUDIO CONTROLLER
+// Amanda Brownies Balikpapan
+// ===================================================================
+let ytAudioPlayer = null;
+let ytAudioIsReady = false;
+let ytAudioIsPlaying = false;
+let ytAudioVolume = 40;
+let ytAudioIsMuted = false;
+const YT_BG_VIDEO_ID = 'y9F9wkQ_LLg';
+
+function initYouTubeAudio() {
+  if (window.YT && window.YT.Player) {
+    createYtAudioPlayer();
+  } else {
+    const existing = document.querySelector('script[src*="youtube.com/iframe_api"]');
+    if (!existing) {
+      const tag = document.createElement('script');
+      tag.src = 'https://www.youtube.com/iframe_api';
+      const firstScriptTag = document.getElementsByTagName('script')[0];
+      if (firstScriptTag && firstScriptTag.parentNode) {
+        firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+      } else {
+        document.head.appendChild(tag);
+      }
+    }
+    const prevCallback = window.onYouTubeIframeAPIReady;
+    window.onYouTubeIframeAPIReady = function () {
+      if (typeof prevCallback === 'function') prevCallback();
+      createYtAudioPlayer();
+    };
+  }
+}
+
+function createYtAudioPlayer() {
+  const container = document.getElementById('yt-bg-audio-player');
+  if (!container || ytAudioPlayer) return;
+
+  try {
+    ytAudioPlayer = new window.YT.Player('yt-bg-audio-player', {
+      height: '1',
+      width: '1',
+      videoId: YT_BG_VIDEO_ID,
+      playerVars: {
+        autoplay: 0,
+        controls: 0,
+        disablekb: 1,
+        fs: 0,
+        modestbranding: 1,
+        rel: 0,
+        playsinline: 1,
+        loop: 1,
+        playlist: YT_BG_VIDEO_ID,
+        origin: window.location.origin
+      },
+      events: {
+        onReady: function (event) {
+          ytAudioIsReady = true;
+          try {
+            event.target.setVolume(ytAudioVolume);
+          } catch (e) {}
+          const widget = document.getElementById('floating-music-widget');
+          if (widget) {
+            widget.classList.remove('is-loading');
+            widget.classList.add('is-ready');
+          }
+        },
+        onStateChange: function (event) {
+          const widget = document.getElementById('floating-music-widget');
+          const btn = document.getElementById('floating-music-btn');
+          const pillText = document.getElementById('music-pill-text');
+          const pulseRing = document.getElementById('music-pulse-ring');
+
+          if (event.data === window.YT.PlayerState.PLAYING) {
+            ytAudioIsPlaying = true;
+            if (widget) {
+              widget.classList.remove('is-paused');
+              widget.classList.add('is-playing');
+            }
+            if (btn) {
+              btn.innerHTML = `
+                <div class="music-equalizer" aria-hidden="true">
+                  <span class="eq-bar eq-bar-1"></span>
+                  <span class="eq-bar eq-bar-2"></span>
+                  <span class="eq-bar eq-bar-3"></span>
+                  <span class="eq-bar eq-bar-4"></span>
+                </div>
+              `;
+            }
+            if (pillText) pillText.textContent = 'Musik Santai Aktif';
+            if (pulseRing) pulseRing.style.display = 'none';
+          } else if (event.data === window.YT.PlayerState.PAUSED) {
+            ytAudioIsPlaying = false;
+            if (widget) {
+              widget.classList.remove('is-playing');
+              widget.classList.add('is-paused');
+            }
+            if (btn) {
+              btn.innerHTML = '<i class="fa-solid fa-play music-icon-play"></i>';
+            }
+            if (pillText) pillText.textContent = 'Putar Musik';
+          } else if (event.data === window.YT.PlayerState.ENDED) {
+            try {
+              event.target.playVideo();
+            } catch (e) {}
+          } else if (event.data === window.YT.PlayerState.BUFFERING) {
+            if (pillText) pillText.textContent = 'Memuat Lagu...';
+          }
+        }
+      }
+    });
+  } catch (err) {
+    console.warn('Error creating YT Audio Player:', err);
+  }
+}
+
+function toggleMusicPlayback() {
+  if (!ytAudioPlayer || !ytAudioIsReady) {
+    if (!ytAudioPlayer) initYouTubeAudio();
+    return;
+  }
+  try {
+    if (ytAudioIsPlaying) {
+      ytAudioPlayer.pauseVideo();
+    } else {
+      ytAudioPlayer.playVideo();
+    }
+  } catch (e) {
+    console.warn('Playback error:', e);
+  }
+}
+
+function toggleMusicVolumePanel() {
+  const panel = document.getElementById('music-volume-panel');
+  if (!panel) return;
+  panel.style.display = panel.style.display === 'none' ? 'flex' : 'none';
+}
+
+function toggleMusicMute() {
+  if (!ytAudioPlayer || !ytAudioIsReady) return;
+  const muteBtn = document.getElementById('music-mute-btn');
+  const quickIcon = document.getElementById('music-quick-vol-icon');
+  const slider = document.getElementById('music-volume-slider');
+  const label = document.getElementById('music-volume-label');
+
+  if (ytAudioIsMuted) {
+    ytAudioPlayer.unMute();
+    ytAudioPlayer.setVolume(ytAudioVolume);
+    ytAudioIsMuted = false;
+    if (muteBtn) muteBtn.textContent = 'Mute';
+    if (quickIcon) quickIcon.className = 'fa-solid fa-sliders';
+    if (slider) slider.value = ytAudioVolume;
+    if (label) label.innerHTML = `<i class="fa-solid fa-volume-low"></i> Volume Musik (${ytAudioVolume}%)`;
+  } else {
+    ytAudioPlayer.mute();
+    ytAudioIsMuted = true;
+    if (muteBtn) muteBtn.textContent = 'Unmute';
+    if (quickIcon) quickIcon.className = 'fa-solid fa-volume-xmark';
+    if (slider) slider.value = 0;
+    if (label) label.innerHTML = '<i class="fa-solid fa-volume-xmark"></i> Volume Musik (Mute)';
+  }
+}
+
+function changeMusicVolume(val) {
+  const newVol = parseInt(val, 10);
+  ytAudioVolume = newVol;
+  const label = document.getElementById('music-volume-label');
+  const quickIcon = document.getElementById('music-quick-vol-icon');
+  const muteBtn = document.getElementById('music-mute-btn');
+
+  if (ytAudioPlayer && ytAudioIsReady) {
+    try {
+      ytAudioPlayer.setVolume(newVol);
+      if (newVol > 0 && ytAudioIsMuted) {
+        ytAudioPlayer.unMute();
+        ytAudioIsMuted = false;
+        if (muteBtn) muteBtn.textContent = 'Mute';
+      }
+    } catch (e) {}
+  }
+
+  if (label) {
+    const iconClass = newVol === 0 ? 'fa-volume-xmark' : newVol < 50 ? 'fa-volume-low' : 'fa-volume-high';
+    label.innerHTML = `<i class="fa-solid ${iconClass}"></i> Volume Musik (${newVol}%)`;
+  }
+  if (quickIcon) {
+    quickIcon.className = newVol === 0 ? 'fa-solid fa-volume-xmark' : 'fa-solid fa-sliders';
+  }
+}
+
+// Auto init on DOM ready
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', () => {
+    initYouTubeAudio();
+  });
+} else {
+  initYouTubeAudio();
+}
+
+// Close volume panel on outside click
+document.addEventListener('click', (e) => {
+  const panel = document.getElementById('music-volume-panel');
+  const quickBtn = document.querySelector('.music-quick-vol-btn');
+  if (!panel || panel.style.display === 'none') return;
+  if (!panel.contains(e.target) && (!quickBtn || !quickBtn.contains(e.target))) {
+    panel.style.display = 'none';
+  }
+});
+
 
 
 

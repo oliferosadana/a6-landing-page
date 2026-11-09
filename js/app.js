@@ -331,14 +331,14 @@ function renderOutletLocatorList(filterCity = 'all') {
 
           <!-- Actions -->
           <div class="outlet-network-actions">
-            <a href="https://wa.me/${out.wa}?text=${encodeURIComponent('Halo ' + out.name + ', saya ingin pesan brownies Amanda. Mohon info varian yang ready saat ini.')}" target="_blank" class="btn-network-wa">
-              <i class="fa-brands fa-whatsapp"></i> Hubungi Outlet
+            <a href="https://wa.me/${out.wa}?text=${encodeURIComponent('Halo ' + out.name + ', saya ingin pesan brownies Amanda. Mohon info varian yang ready saat ini.')}" target="_blank" class="btn-network-wa" title="Chat WhatsApp: ${out.name}">
+              <i class="fa-brands fa-whatsapp"></i> <span>Chat WA</span>
             </a>
-            ${Boolean(out.grabUrl && out.grabUrl.trim()) ? `<a href="${out.grabUrl.trim()}" target="_blank" class="btn-network-grab" title="Pesan via GrabFood"><i class="fa-solid fa-motorcycle"></i> Grab</a>` : ''}
-            ${Boolean(out.gofoodUrl && out.gofoodUrl.trim()) ? `<a href="${out.gofoodUrl.trim()}" target="_blank" class="btn-network-gofood" title="Pesan via GoFood"><i class="fa-solid fa-bowl-food"></i> GoFood</a>` : ''}
-            ${Boolean(out.shopeefoodUrl && out.shopeefoodUrl.trim()) ? `<a href="${out.shopeefoodUrl.trim()}" target="_blank" class="btn-network-shopee" title="Pesan via ShopeeFood"><i class="fa-solid fa-bag-shopping"></i> Shopee</a>` : ''}
-            <a href="${out.mapsUrl || `https://maps.google.com/?q=${encodeURIComponent(out.name + ' ' + out.city)}`}" target="_blank" class="btn-network-maps" title="Buka Rute Google Maps">
-              <i class="fa-solid fa-diamond-turn-right"></i> Rute Maps
+            ${Boolean(out.grabUrl && out.grabUrl.trim()) ? `<a href="${out.grabUrl.trim()}" target="_blank" class="btn-network-grab" title="Pesan via GrabFood: ${out.name}"><i class="fa-solid fa-motorcycle"></i> <span>Grab</span></a>` : ''}
+            ${Boolean(out.gofoodUrl && out.gofoodUrl.trim()) ? `<a href="${out.gofoodUrl.trim()}" target="_blank" class="btn-network-gofood" title="Pesan via GoFood: ${out.name}"><i class="fa-solid fa-bowl-food"></i> <span>GoFood</span></a>` : ''}
+            ${Boolean(out.shopeefoodUrl && out.shopeefoodUrl.trim()) ? `<a href="${out.shopeefoodUrl.trim()}" target="_blank" class="btn-network-shopee" title="Pesan via ShopeeFood: ${out.name}"><i class="fa-solid fa-bag-shopping"></i> <span>Shopee</span></a>` : ''}
+            <a href="${out.mapsUrl || `https://maps.google.com/?q=${encodeURIComponent(out.name + ' ' + out.city)}`}" target="_blank" class="btn-network-maps" title="Petunjuk Rute Google Maps: ${out.name}">
+              <i class="fa-solid fa-location-dot"></i> <span>Lokasi</span>
             </a>
           </div>
         </div>

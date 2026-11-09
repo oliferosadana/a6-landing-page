@@ -1,22 +1,22 @@
 /**
  * BORNEOLINK WAAS - DEDICATED TENANT SUSPENSION ENFORCER
- * Independent client connecting to Master WAAS Database (https://zomkdefqivvbtxqzavpz.supabase.co).
+ * Independent client connecting to Master WAAS Database.
  * Handles multi-table subscription lifecycle monitoring and realtime suspension overlay.
  */
 
 (function initWaasStatusEnforcer() {
-  const WAAS_CONFIG_KEY = 'amanda_waas_config';
+  const WAAS_CONFIG_KEY = 'tenant_waas_config';
 
   const DEFAULT_WAAS_CONFIG = {
     waasUrl: 'https://zomkdefqivvbtxqzavpz.supabase.co',
     waasKey: 'sb_publishable_xG2a15CPnDELITqWHdodiQ__PnNZX8-',
-    tenantId: 'tenant_amanda',
-    subdomain: 'amanda'
+    tenantId: 'tenant_amanda', // Ganti dengan ID Tenant terdaftar di WAAS
+    subdomain: 'amanda'        // Ganti dengan Subdomain terdaftar di WAAS
   };
 
   function getWaasConfig() {
     try {
-      const raw = localStorage.getItem(WAAS_CONFIG_KEY);
+      const raw = localStorage.getItem(WAAS_CONFIG_KEY) || localStorage.getItem('amanda_waas_config');
       if (raw) {
         const parsed = JSON.parse(raw);
         return {
@@ -27,7 +27,7 @@
         };
       }
     } catch (e) {
-      console.warn('Gagal membaca amanda_waas_config:', e);
+      console.warn('Gagal membaca tenant_waas_config:', e);
     }
     return DEFAULT_WAAS_CONFIG;
   }
@@ -49,7 +49,7 @@
         waasClient._currentUrl = config.waasUrl;
         waasClient._currentKey = config.waasKey;
       } catch (e) {
-        console.warn('WAAS client initialization error:', e);
+        console.warn('WAAS client init error:', e);
         waasClient = null;
       }
     }
@@ -183,10 +183,10 @@
   async function checkWaasStatus() {
     const client = getWaasClient();
     if (!client) return;
+
     const config = getWaasConfig();
 
     try {
-      // Fetch live status from Master WAAS database
       const [
         { data: tenantData },
         { data: websiteDataList },
@@ -197,10 +197,10 @@
         client.from('subscriptions').select('status, current_period_end').eq('tenant_id', config.tenantId).maybeSingle()
       ]);
 
-      const isTenantSuspended = tenantData && (tenantData.status === 'SUSPENDED' || tenantData.status === 'suspended');
-      const isWebsiteSuspended = websiteDataList && websiteDataList.some(w => w.status === 'SUSPENDED' || w.status === 'suspended');
-      const isSubscriptionSuspended = subData && (subData.status === 'SUSPENDED' || subData.status === 'suspended' || subData.status === 'CANCELLED');
-      const isSubscriptionExpired = subData && subData.current_period_end && (new Date(subData.current_period_end).getTime() < Date.now()) && subData.status !== 'ACTIVE' && subData.status !== 'active';
+      const isTenantSuspended = tenantData && String(tenantData.status).toUpperCase() === 'SUSPENDED';
+      const isWebsiteSuspended = websiteDataList && websiteDataList.some(w => String(w.status).toUpperCase() === 'SUSPENDED');
+      const isSubscriptionSuspended = subData && (String(subData.status).toUpperCase() === 'SUSPENDED' || String(subData.status).toUpperCase() === 'CANCELLED');
+      const isSubscriptionExpired = subData && subData.current_period_end && (new Date(subData.current_period_end).getTime() < Date.now()) && String(subData.status).toUpperCase() !== 'ACTIVE';
 
       if (isTenantSuspended || isWebsiteSuspended || isSubscriptionSuspended || isSubscriptionExpired) {
         let reason = 'Website ini sedang dinonaktifkan sementara oleh administrator atau masa aktif paket langganan telah berakhir.';
@@ -209,17 +209,17 @@
         } else if (isWebsiteSuspended) {
           reason = 'Website engine dinonaktifkan oleh administrator platform BorneoLink WAAS.';
         } else if (isSubscriptionSuspended || isSubscriptionExpired) {
-          reason = 'Masa sewa langganan telah habis atau ditangguhkan. Silakan lakukan perpanjangan sewa pada dashboard platform.';
+          reason = 'Masa sewa langganan telah habis atau ditangguhkan. Silakan perpanjang sewa melalui dashboard customer.';
         }
         createSuspensionOverlay(reason);
       } else {
         removeSuspensionOverlay();
       }
 
-      // Attach Realtime listener
+      // Realtime subscription setup
       if (!activeChannel) {
         activeChannel = client
-          .channel('waas-live-status-enforcer')
+          .channel('waas-live-status-enforcer-' + config.tenantId)
           .on('postgres_changes', { event: '*', schema: 'public', table: 'websites' }, () => checkWaasStatus())
           .on('postgres_changes', { event: '*', schema: 'public', table: 'tenants' }, () => checkWaasStatus())
           .on('postgres_changes', { event: '*', schema: 'public', table: 'subscriptions' }, () => checkWaasStatus())
@@ -230,20 +230,16 @@
     }
   }
 
-  // Fallback Polling every 10 seconds
   setInterval(checkWaasStatus, 10000);
 
-  // Global trigger for CMS updates
-  window.refreshWaasStatusEnforcer = function() {
-    waasClient = null;
-    checkWaasStatus();
-  };
-
-  // Run on load
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', checkWaasStatus);
   } else {
     checkWaasStatus();
   }
-})();
 
+  window.refreshWaasStatusEnforcer = function() {
+    waasClient = null;
+    checkWaasStatus();
+  };
+})();
